@@ -20,7 +20,7 @@ export const createStockTransactionSchema = z.object({
   ]).optional(),
   description: z.string().min(3).max(500).optional(),
   date: z.coerce.date().optional(),
-  createdBy: objectIdSchema,
+  createdBy: objectIdSchema.optional(),
 })
   .refine(
     (data) => {

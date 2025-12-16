@@ -115,7 +115,7 @@ const StockTransactionSchema = new Schema<IStockTransaction>({
   createdBy: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
     index: true
   }
 }, {

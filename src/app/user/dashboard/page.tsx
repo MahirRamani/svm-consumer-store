@@ -57,7 +57,7 @@ export default function Dashboard() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error.message}</AlertDescription>
-          <Button onClick={() => window.location.reload()} className="mt-4" size="sm">
+          <Button onClick={() => window.location.reload()} className="mt-4" size="default">
             Retry
           </Button>
         </Alert>

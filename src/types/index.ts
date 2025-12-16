@@ -359,9 +359,10 @@ export type CurrentUserResponse = ApiSuccessResponse<User>
 
 export interface TransactionItem {
   categoryId?: string
-  productId?: string
+  productId?: string  
   subProductId?: string
   stockTransactionId?: string
+  name: string
   quantity: number
   price: number
   totalPrice: number
@@ -369,7 +370,7 @@ export interface TransactionItem {
 
 export interface Transaction extends BaseEntity {
   student: Student
-  studentId: string
+  // studentId: string
   userId?: string
   items?: TransactionItem[]
   totalAmount: number
@@ -377,14 +378,6 @@ export interface Transaction extends BaseEntity {
   transactionType: 'Purchase' | 'Topup' | 'Deduction'
   reason?: string
   performedBy?: string
-}
-
-export interface TransactionWithDetails extends Transaction {
-  student?: {
-    id: string
-    name: string
-    rollNumber: string
-  }
 }
 
 export interface CreateTransactionDto {

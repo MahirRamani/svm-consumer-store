@@ -1,159 +1,666 @@
-import React from 'react'
+// import React from 'react'
 
-function transactions() {
-  return (
-    <div>transactions-tab</div>
-  )
+// function transactions() {
+//   return (
+//     <div>transactions-tab</div>
+//   )
+// }
+
+// export default transactions
+// components/dashboard/tabs/transactions-tab.tsx
+"use client";
+
+import { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Search,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Loader2,
+  Calendar,
+} from "lucide-react";
+import { toast } from "sonner";
+import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata } from "@/types";
+
+type DateRangeType = "today" | "week" | "month" | "custom" | "all";
+type StatusType = "all" | "Completed" | "Pending" | "Cancelled";
+
+interface FilterState {
+  searchTerm: string;
+  statusFilter: StatusType;
+  dateRange: DateRangeType;
+  startDate: string;
+  endDate: string;
+  currentPage: number;
+  pageSize: number;
 }
 
-export default transactions
-// // components/dashboard/tabs/transactions-tab.tsx
-// "use client";
+export default function TransactionsTab() {
+  const [filters, setFilters] = useState<FilterState>({
+    searchTerm: "",
+    statusFilter: "all",
+    dateRange: "today",
+    startDate: "",
+    endDate: "",
+    currentPage: 1,
+    pageSize: 10,
+  });
 
-// import { useState, useMemo, useCallback } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import {
-//   Search,
-//   Download,
-//   ChevronLeft,
-//   ChevronRight,
-//   ChevronsLeft,
-//   ChevronsRight,
-//   Loader2,
-//   Calendar,
-// } from "lucide-react";
-// import { toast } from "sonner";
-// import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata } from "@/types";
+  const [isExporting, setIsExporting] = useState(false);
 
-// type DateRangeType = "today" | "week" | "month" | "custom" | "all";
-// type StatusType = "all" | "Completed" | "Pending" | "Cancelled";
+  const { data: response, isLoading } = useQuery<TransactionsResponse>({
+    queryKey: [
+      "transactions",
+      filters.searchTerm,
+      filters.statusFilter,
+      filters.dateRange,
+      filters.startDate,
+      filters.endDate,
+      filters.currentPage,
+      filters.pageSize,
+    ],
+    queryFn: async (): Promise<TransactionsResponse> => {
+      const params = new URLSearchParams();
 
-// interface FilterState {
-//   searchTerm: string;
-//   statusFilter: StatusType;
-//   dateRange: DateRangeType;
-//   startDate: string;
-//   endDate: string;
-//   currentPage: number;
-//   pageSize: number;
+      if (filters.searchTerm) params.append("search", filters.searchTerm);
+      if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
+      if (filters.dateRange !== "all") params.append("dateRange", filters.dateRange);
+      if (filters.dateRange === "custom" && filters.startDate) params.append("startDate", filters.startDate);
+      if (filters.dateRange === "custom" && filters.endDate) params.append("endDate", filters.endDate);
+      params.append("page", filters.currentPage.toString());
+      params.append("limit", filters.pageSize.toString());
+
+      const response = await fetch(`/api/transactions?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch transactions");
+      return response.json();
+    },
+    staleTime: 30 * 1000, // 30 seconds
+  });
+
+  const transactions = response?.data || [];
+  const pagination = response?.pagination;
+
+  const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
+    }));
+  }, []);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setFilters((prev) => ({ ...prev, currentPage: newPage }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const handlePageSizeChange = useCallback((newSize: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      pageSize: parseInt(newSize),
+      currentPage: 1,
+    }));
+  }, []);
+
+  const parseTransactionItems = useCallback((itemsJson: string): TransactionItem[] => {
+    try {
+      return JSON.parse(itemsJson || "[]");
+    } catch (error) {
+      console.error("Failed to parse transaction items:", error);
+      return [];
+    }
+  }, []);
+
+  const getStatusBadgeVariant = useCallback(
+    (status: string): "default" | "secondary" | "destructive" => {
+      switch (status.toLowerCase()) {
+        case "completed":
+          return "default";
+        case "pending":
+          return "secondary";
+        case "cancelled":
+          return "destructive";
+        default:
+          return "secondary";
+      }
+    },
+    []
+  );
+
+  const formatDate = useCallback((dateString: string | Date): string => {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }, []);
+
+  const formatTime = useCallback((dateString: string | Date): string => {
+    return new Date(dateString).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, []);
+
+  const handleExport = useCallback(() => {
+    try {
+      setIsExporting(true);
+
+      const headers = [
+        "Transaction ID",
+        "Student Name",
+        "Roll Number",
+        "Item Name",
+        "Quantity",
+        "Unit Price",
+        "Item Total",
+        "Transaction Total",
+        "Status",
+        "Type",
+        "Date",
+        "Time",
+      ];
+
+      const rows: string[] = [];
+
+      transactions.forEach((transaction) => {
+        // const items = parseTransactionItems(
+        //   typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
+        // );
+
+        const items = transaction.items || [];
+        const transactionDate = new Date(transaction.createdAt);
+        const dateStr = transactionDate.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+        const timeStr = transactionDate.toLocaleTimeString();
+
+        const txnId = `TXN${transaction.id.toString().padStart(6, "0")}`;
+        const studentName = transaction.student?.name || "Unknown";
+        const rollNumber = transaction.student?.rollNumber || "N/A";
+        const totalAmount = Number(transaction.totalAmount).toFixed(2);
+        const status = transaction.status;
+        const type = transaction.transactionType || "N/A";
+
+        if (items.length === 0) {
+          rows.push(
+            [txnId, studentName, rollNumber, "No items", "0", "0", "0", totalAmount, status, type, dateStr, timeStr]
+              .map((cell) => `"${cell}"`)
+              .join(",")
+          );
+        } else {
+          items.forEach((item, index) => {
+            const itemTotal = (item.quantity * Number(item.price)).toFixed(2);
+            rows.push(
+              [
+                txnId,
+                studentName,
+                rollNumber,
+                item.name || "Unknown Item",
+                item.quantity.toString(),
+                Number(item.price).toFixed(2),
+                itemTotal,
+                index === 0 ? totalAmount : "",
+                index === 0 ? status : "",
+                index === 0 ? type : "",
+                index === 0 ? dateStr : "",
+                index === 0 ? timeStr : "",
+              ]
+                .map((cell) => `"${cell}"`)
+                .join(",")
+            );
+          });
+        }
+      });
+
+      const csvContent = [headers.join(","), ...rows].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `transactions-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Transactions exported successfully!");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export transactions");
+    } finally {
+      setIsExporting(false);
+    }
+  }, [transactions, parseTransactionItems]);
+
+  const PaginationControls = useCallback(() => {
+    if (!pagination) return null;
+
+    const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
+
+    const getPageNumbers = (): number[] => {
+      const maxVisible = 5;
+      const pages: number[] = [];
+
+      if (totalPages <= maxVisible) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage <= 3) {
+        for (let i = 1; i <= maxVisible; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+
+      return pages;
+    };
+
+    return (
+      <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">
+            Showing {startIndex} to {endIndex} of {totalCount} results
+          </span>
+          <Select value={filters.pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-gray-700">per page</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(1)} disabled={!hasPreviousPage}>
+            <ChevronsLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={!hasPreviousPage}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+
+          <div className="flex items-center space-x-1">
+            {getPageNumbers().map((pageNumber) => (
+              <Button
+                key={pageNumber}
+                variant={currentPage === pageNumber ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(pageNumber)}
+                className="w-8 h-8"
+              >
+                {pageNumber}
+              </Button>
+            ))}
+          </div>
+
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(totalPages)} disabled={!hasNextPage}>
+            <ChevronsRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }, [pagination, filters.pageSize, handlePageChange, handlePageSizeChange]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <span className="ml-2 text-gray-600">Loading transactions...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
+        <Button onClick={handleExport} variant="outline" disabled={isExporting || transactions.length === 0}>
+          {isExporting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Student name or transaction ID..."
+                  value={filters.searchTerm}
+                  onChange={(e) => updateFilter("searchTerm", e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">Status</Label>
+              <Select value={filters.statusFilter} onValueChange={(value: StatusType) => updateFilter("statusFilter", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">Date Range</Label>
+              <Select value={filters.dateRange} onValueChange={(value: DateRangeType) => updateFilter("dateRange", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {filters.dateRange === "custom" && (
+              <div className="md:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Start Date
+                    </Label>
+                    <Input
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => updateFilter("startDate", e.target.value)}
+                      max={filters.endDate || undefined}
+                    />
+                  </div>
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      End Date
+                    </Label>
+                    <Input
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => updateFilter("endDate", e.target.value)}
+                      min={filters.startDate || undefined}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Transactions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Recent Transactions
+            {pagination && (
+              <span className="ml-2 text-sm font-normal text-gray-500">({pagination.totalCount} total)</span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Details</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                      No transactions found for the selected criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.map((transaction) => {
+                    const items = parseTransactionItems(
+                      typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
+                    );
+
+                    if (items.length === 0) {
+                      return (
+                        <tr key={transaction.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
+                              <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">No items</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">-</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">-</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right">
+                            ₹{Number(transaction.totalAmount).toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div>
+                              <p>{formatDate(transaction.createdAt)}</p>
+                              <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
+                              {transaction.status}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <Badge variant="outline">{transaction.transactionType || "N/A"}</Badge>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return items.map((item, index) => (
+                      <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50">
+                        {/* Student Name - Show only on first row */}
+                        {index === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
+                              <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
+                            </div>
+                          </td>
+                        )}
+
+                        {/* Item Name */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name || "Unknown Item"}</td>
+
+                        {/* Quantity */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
+
+                        {/* Unit Price */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                          ₹{Number(item.price).toFixed(2)}
+                        </td>
+
+                        {/* Total Amount - Show only on first row */}
+                        {index === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
+                            ₹{Number(transaction.totalAmount).toFixed(2)}
+                          </td>
+                        )}
+
+                        {/* Date - Show only on first row */}
+                        {index === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
+                            <div>
+                              <p>{formatDate(transaction.createdAt)}</p>
+                              <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
+                            </div>
+                          </td>
+                        )}
+
+                        {/* Status - Show only on first row */}
+                        {index === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+                            <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
+                              {transaction.status}
+                            </Badge>
+                          </td>
+                        )}
+
+                        {/* Type - Show only on first row */}
+                        {index === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+                            <Badge variant="outline">{transaction.transactionType || "N/A"}</Badge>
+                          </td>
+                        )}
+                      </tr>
+                    ));
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          <PaginationControls />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+
+
+
+// "use client"
+
+// import { useState } from "react"
+// import { useQuery } from "@tanstack/react-query"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Badge } from "@/components/ui/badge"
+// import { Button } from "@/components/ui/button"
+// import { Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+
+// interface PaginationInfo {
+//   currentPage: number
+//   totalPages: number
+//   totalCount: number
+//   limit: number
+//   hasNextPage: boolean
+//   hasPreviousPage: boolean
+//   startIndex: number
+//   endIndex: number
+// }
+
+// interface TransactionsResponse {
+//   data: any[]
+//   pagination: PaginationInfo
 // }
 
 // export default function TransactionsTab() {
-//   const [filters, setFilters] = useState<FilterState>({
-//     searchTerm: "",
-//     statusFilter: "all",
-//     dateRange: "today",
-//     startDate: "",
-//     endDate: "",
-//     currentPage: 1,
-//     pageSize: 10,
-//   });
-
-//   const [isExporting, setIsExporting] = useState(false);
+//   const [searchTerm, setSearchTerm] = useState("")
+//   const [statusFilter, setStatusFilter] = useState<string>("all")
+//   const [dateRange, setDateRange] = useState<string>("today")
+//   const [startDate, setStartDate] = useState("")
+//   const [endDate, setEndDate] = useState("")
+//   const [currentPage, setCurrentPage] = useState(1)
+//   const [pageSize, setPageSize] = useState(10)
+//   const [isExporting, setIsExporting] = useState(false)
 
 //   const { data: response, isLoading } = useQuery<TransactionsResponse>({
-//     queryKey: [
-//       "transactions",
-//       filters.searchTerm,
-//       filters.statusFilter,
-//       filters.dateRange,
-//       filters.startDate,
-//       filters.endDate,
-//       filters.currentPage,
-//       filters.pageSize,
-//     ],
-//     queryFn: async (): Promise<TransactionsResponse> => {
-//       const params = new URLSearchParams();
+//     queryKey: ["transactions", searchTerm, statusFilter, dateRange, startDate, endDate, currentPage, pageSize],
+//     queryFn: async () => {
+//       const params = new URLSearchParams()
+//       if (searchTerm) params.append("search", searchTerm)
+//       if (statusFilter !== "all") params.append("status", statusFilter)
+//       if (dateRange !== "all") params.append("dateRange", dateRange)
+//       if (dateRange === "custom" && startDate) params.append("startDate", startDate)
+//       if (dateRange === "custom" && endDate) params.append("endDate", endDate)
+//       params.append("page", currentPage.toString())
+//       params.append("limit", pageSize.toString())
 
-//       if (filters.searchTerm) params.append("search", filters.searchTerm);
-//       if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
-//       if (filters.dateRange !== "all") params.append("dateRange", filters.dateRange);
-//       if (filters.dateRange === "custom" && filters.startDate) params.append("startDate", filters.startDate);
-//       if (filters.dateRange === "custom" && filters.endDate) params.append("endDate", filters.endDate);
-//       params.append("page", filters.currentPage.toString());
-//       params.append("limit", filters.pageSize.toString());
-
-//       const response = await fetch(`/api/transactions?${params}`);
-//       if (!response.ok) throw new Error("Failed to fetch transactions");
-//       return response.json();
+//       const response = await fetch(`/api/transactions?${params}`)
+//       if (!response.ok) throw new Error("Failed to fetch transactions")
+//       return response.json()
 //     },
-//     staleTime: 30 * 1000, // 30 seconds
-//   });
+//   })
 
-//   const transactions = response?.data || [];
-//   const pagination = response?.pagination;
+//   const transactions = response?.data || []
+//   const pagination = response?.pagination
 
-//   const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-//     setFilters((prev) => ({
-//       ...prev,
-//       [key]: value,
-//       ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
-//     }));
-//   }, []);
+//   const handleFilterChange = (callback: () => void) => {
+//     callback()
+//     setCurrentPage(1)
+//   }
 
-//   const handlePageChange = useCallback((newPage: number) => {
-//     setFilters((prev) => ({ ...prev, currentPage: newPage }));
-//     window.scrollTo({ top: 0, behavior: "smooth" });
-//   }, []);
+//   const handlePageChange = (newPage: number) => {
+//     setCurrentPage(newPage)
+//   }
 
-//   const handlePageSizeChange = useCallback((newSize: string) => {
-//     setFilters((prev) => ({
-//       ...prev,
-//       pageSize: parseInt(newSize),
-//       currentPage: 1,
-//     }));
-//   }, []);
+//   const handlePageSizeChange = (newSize: string) => {
+//     setPageSize(parseInt(newSize))
+//     setCurrentPage(1)
+//   }
 
-//   const parseTransactionItems = useCallback((itemsJson: string): TransactionItem[] => {
+//   const handleExport = () => {
 //     try {
-//       return JSON.parse(itemsJson || "[]");
-//     } catch (error) {
-//       console.error("Failed to parse transaction items:", error);
-//       return [];
-//     }
-//   }, []);
-
-//   const getStatusBadgeVariant = useCallback(
-//     (status: string): "default" | "secondary" | "destructive" => {
-//       switch (status.toLowerCase()) {
-//         case "completed":
-//           return "default";
-//         case "pending":
-//           return "secondary";
-//         case "cancelled":
-//           return "destructive";
-//         default:
-//           return "secondary";
-//       }
-//     },
-//     []
-//   );
-
-//   const formatDate = useCallback((dateString: string | Date): string => {
-//     return new Date(dateString).toLocaleDateString("en-GB", {
-//       day: "2-digit",
-//       month: "short",
-//       year: "numeric",
-//     });
-//   }, []);
-
-//   const formatTime = useCallback((dateString: string | Date): string => {
-//     return new Date(dateString).toLocaleTimeString("en-GB", {
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     });
-//   }, []);
-
-//   const handleExport = useCallback(() => {
-//     try {
-//       setIsExporting(true);
-
+//       setIsExporting(true)
+      
 //       const headers = [
 //         "Transaction ID",
 //         "Student Name",
@@ -164,113 +671,82 @@ export default transactions
 //         "Item Total",
 //         "Transaction Total",
 //         "Status",
-//         "Type",
 //         "Date",
-//         "Time",
-//       ];
-
-//       const rows: string[] = [];
-
-//       transactions.forEach((transaction) => {
-//         const items = parseTransactionItems(
-//           typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
-//         );
-//         const transactionDate = new Date(transaction.createdAt);
-//         const dateStr = transactionDate.toLocaleDateString("en-GB", {
-//           day: "2-digit",
-//           month: "2-digit",
-//           year: "numeric",
-//         });
-//         const timeStr = transactionDate.toLocaleTimeString();
-
-//         const txnId = `TXN${transaction.id.toString().padStart(6, "0")}`;
-//         const studentName = transaction.student?.name || "Unknown";
-//         const rollNumber = transaction.student?.rollNumber || "N/A";
-//         const totalAmount = Number(transaction.totalAmount).toFixed(2);
-//         const status = transaction.status;
-//         const type = transaction.transactionType || "N/A";
-
+//         "Time"
+//       ]
+      
+//       const rows: string[][] = []
+      
+//       transactions.forEach((transaction: any) => {
+//         const items = JSON.parse(transaction.items || "[]")
+//         const transactionDate = new Date(transaction.createdAt)
+//         const dateStr = transactionDate.toLocaleDateString('en-GB', {
+//           day: '2-digit',
+//           month: '2-digit',
+//           year: 'numeric'
+//         })
+//         const timeStr = transactionDate.toLocaleTimeString()
+        
 //         if (items.length === 0) {
-//           rows.push(
-//             [txnId, studentName, rollNumber, "No items", "0", "0", "0", totalAmount, status, type, dateStr, timeStr]
-//               .map((cell) => `"${cell}"`)
-//               .join(",")
-//           );
+//           rows.push([
+//             `TXN${transaction.id.toString().padStart(6, "0")}`,
+//             transaction.student?.name || "Unknown",
+//             transaction.student?.rollNumber || "N/A",
+//             "No items",
+//             "0",
+//             "0",
+//             "0",
+//             transaction.totalAmount,
+//             transaction.status,
+//             dateStr,
+//             timeStr
+//           ])
 //         } else {
-//           items.forEach((item, index) => {
-//             const itemTotal = (item.quantity * Number(item.price)).toFixed(2);
-//             rows.push(
-//               [
-//                 txnId,
-//                 studentName,
-//                 rollNumber,
-//                 item.name || "Unknown Item",
-//                 item.quantity.toString(),
-//                 Number(item.price).toFixed(2),
-//                 itemTotal,
-//                 index === 0 ? totalAmount : "",
-//                 index === 0 ? status : "",
-//                 index === 0 ? type : "",
-//                 index === 0 ? dateStr : "",
-//                 index === 0 ? timeStr : "",
-//               ]
-//                 .map((cell) => `"${cell}"`)
-//                 .join(",")
-//             );
-//           });
+//           items.forEach((item: any, index: number) => {
+//             const itemTotal = (item.quantity * Number.parseFloat(item.price)).toFixed(2)
+//             rows.push([
+//               `TXN${transaction.id.toString().padStart(6, "0")}`,
+//               transaction.student?.name || "Unknown",
+//               transaction.student?.rollNumber || "N/A",
+//               item.name,
+//               item.quantity.toString(),
+//               Number.parseFloat(item.price).toFixed(2),
+//               itemTotal,
+//               index === 0 ? transaction.totalAmount : "",
+//               index === 0 ? transaction.status : "",
+//               index === 0 ? dateStr : "",
+//               index === 0 ? timeStr : ""
+//             ])
+//           })
 //         }
-//       });
-
-//       const csvContent = [headers.join(","), ...rows].join("\n");
-
-//       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-//       const url = window.URL.createObjectURL(blob);
-//       const link = document.createElement("a");
-//       link.href = url;
-//       link.download = `transactions-${new Date().toISOString().split("T")[0]}.csv`;
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-//       window.URL.revokeObjectURL(url);
-
-//       toast.success("Transactions exported successfully!");
+//       })
+      
+//       const csvContent = [
+//         headers.join(","),
+//         ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+//       ].join("\n")
+      
+//       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+//       const url = window.URL.createObjectURL(blob)
+//       const a = document.createElement("a")
+//       a.href = url
+//       a.download = `transactions-${new Date().toISOString().split("T")[0]}.csv`
+//       document.body.appendChild(a)
+//       a.click()
+//       window.URL.revokeObjectURL(url)
+//       document.body.removeChild(a)
 //     } catch (error) {
-//       console.error("Export error:", error);
-//       toast.error("Failed to export transactions");
+//       console.error("Error exporting transactions:", error)
+//       alert("Failed to export transactions. Please try again.")
 //     } finally {
-//       setIsExporting(false);
+//       setIsExporting(false)
 //     }
-//   }, [transactions, parseTransactionItems]);
+//   }
 
-//   const PaginationControls = useCallback(() => {
-//     if (!pagination) return null;
+//   const PaginationControls = () => {
+//     if (!pagination) return null
 
-//     const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
-
-//     const getPageNumbers = (): number[] => {
-//       const maxVisible = 5;
-//       const pages: number[] = [];
-
-//       if (totalPages <= maxVisible) {
-//         for (let i = 1; i <= totalPages; i++) {
-//           pages.push(i);
-//         }
-//       } else if (currentPage <= 3) {
-//         for (let i = 1; i <= maxVisible; i++) {
-//           pages.push(i);
-//         }
-//       } else if (currentPage >= totalPages - 2) {
-//         for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) {
-//           pages.push(i);
-//         }
-//       } else {
-//         for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-//           pages.push(i);
-//         }
-//       }
-
-//       return pages;
-//     };
+//     const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination
 
 //     return (
 //       <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
@@ -278,7 +754,7 @@ export default transactions
 //           <span className="text-sm text-gray-700">
 //             Showing {startIndex} to {endIndex} of {totalCount} results
 //           </span>
-//           <Select value={filters.pageSize.toString()} onValueChange={handlePageSizeChange}>
+//           <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
 //             <SelectTrigger className="w-20">
 //               <SelectValue />
 //             </SelectTrigger>
@@ -293,7 +769,12 @@ export default transactions
 //         </div>
 
 //         <div className="flex items-center space-x-2">
-//           <Button variant="outline" size="sm" onClick={() => handlePageChange(1)} disabled={!hasPreviousPage}>
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={() => handlePageChange(1)}
+//             disabled={!hasPreviousPage}
+//           >
 //             <ChevronsLeft className="w-4 h-4" />
 //           </Button>
 //           <Button
@@ -306,55 +787,68 @@ export default transactions
 //           </Button>
 
 //           <div className="flex items-center space-x-1">
-//             {getPageNumbers().map((pageNumber) => (
-//               <Button
-//                 key={pageNumber}
-//                 variant={currentPage === pageNumber ? "default" : "outline"}
-//                 size="sm"
-//                 onClick={() => handlePageChange(pageNumber)}
-//                 className="w-8 h-8"
-//               >
-//                 {pageNumber}
-//               </Button>
-//             ))}
+//             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+//               let pageNumber
+//               if (totalPages <= 5) {
+//                 pageNumber = i + 1
+//               } else if (currentPage <= 3) {
+//                 pageNumber = i + 1
+//               } else if (currentPage >= totalPages - 2) {
+//                 pageNumber = totalPages - 4 + i
+//               } else {
+//                 pageNumber = currentPage - 2 + i
+//               }
+
+//               return (
+//                 <Button
+//                   key={pageNumber}
+//                   variant={currentPage === pageNumber ? "default" : "outline"}
+//                   size="sm"
+//                   onClick={() => handlePageChange(pageNumber)}
+//                   className="w-8 h-8"
+//                 >
+//                   {pageNumber}
+//                 </Button>
+//               )
+//             })}
 //           </div>
 
-//           <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage}>
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={() => handlePageChange(currentPage + 1)}
+//             disabled={!hasNextPage}
+//           >
 //             <ChevronRight className="w-4 h-4" />
 //           </Button>
-//           <Button variant="outline" size="sm" onClick={() => handlePageChange(totalPages)} disabled={!hasNextPage}>
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={() => handlePageChange(totalPages)}
+//             disabled={!hasNextPage}
+//           >
 //             <ChevronsRight className="w-4 h-4" />
 //           </Button>
 //         </div>
 //       </div>
-//     );
-//   }, [pagination, filters.pageSize, handlePageChange, handlePageSizeChange]);
+//     )
+//   }
 
 //   if (isLoading) {
-//     return (
-//       <div className="flex items-center justify-center py-12">
-//         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-//         <span className="ml-2 text-gray-600">Loading transactions...</span>
-//       </div>
-//     );
+//     return <div className="text-center py-8">Loading transactions...</div>
 //   }
 
 //   return (
 //     <div className="space-y-6">
 //       <div className="flex justify-between items-center">
 //         <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
-//         <Button onClick={handleExport} variant="outline" disabled={isExporting || transactions.length === 0}>
-//           {isExporting ? (
-//             <>
-//               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-//               Exporting...
-//             </>
-//           ) : (
-//             <>
-//               <Download className="w-4 h-4 mr-2" />
-//               Export Data
-//             </>
-//           )}
+//         <Button
+//           onClick={handleExport}
+//           variant="outline"
+//           disabled={isExporting}
+//         >
+//           <Download className="w-4 h-4 mr-2" />
+//           {isExporting ? "Exporting..." : "Export Data"}
 //         </Button>
 //       </div>
 
@@ -368,29 +862,29 @@ export default transactions
 //                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 //                 <Input
 //                   placeholder="Student name or transaction ID..."
-//                   value={filters.searchTerm}
-//                   onChange={(e) => updateFilter("searchTerm", e.target.value)}
+//                   value={searchTerm}
+//                   onChange={(e) => handleFilterChange(() => setSearchTerm(e.target.value))}
 //                   className="pl-10"
 //                 />
 //               </div>
 //             </div>
 //             <div>
 //               <Label className="block text-sm font-medium text-gray-700 mb-2">Status</Label>
-//               <Select value={filters.statusFilter} onValueChange={(value: StatusType) => updateFilter("statusFilter", value)}>
+//               <Select value={statusFilter} onValueChange={(value) => handleFilterChange(() => setStatusFilter(value))}>
 //                 <SelectTrigger>
 //                   <SelectValue placeholder="All Status" />
 //                 </SelectTrigger>
 //                 <SelectContent>
 //                   <SelectItem value="all">All Status</SelectItem>
-//                   <SelectItem value="Completed">Completed</SelectItem>
-//                   <SelectItem value="Pending">Pending</SelectItem>
-//                   <SelectItem value="Cancelled">Cancelled</SelectItem>
+//                   <SelectItem value="completed">Completed</SelectItem>
+//                   <SelectItem value="failed">Failed</SelectItem>
+//                   <SelectItem value="refunded">Refunded</SelectItem>
 //                 </SelectContent>
 //               </Select>
 //             </div>
 //             <div>
 //               <Label className="block text-sm font-medium text-gray-700 mb-2">Date Range</Label>
-//               <Select value={filters.dateRange} onValueChange={(value: DateRangeType) => updateFilter("dateRange", value)}>
+//               <Select value={dateRange} onValueChange={(value) => handleFilterChange(() => setDateRange(value))}>
 //                 <SelectTrigger>
 //                   <SelectValue placeholder="Select range" />
 //                 </SelectTrigger>
@@ -403,31 +897,23 @@ export default transactions
 //                 </SelectContent>
 //               </Select>
 //             </div>
-//             {filters.dateRange === "custom" && (
+//             {dateRange === "custom" && (
 //               <div className="md:col-span-3">
 //                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                   <div>
-//                     <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-//                       <Calendar className="w-4 h-4" />
-//                       Start Date
-//                     </Label>
+//                     <Label className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
 //                     <Input
 //                       type="date"
-//                       value={filters.startDate}
-//                       onChange={(e) => updateFilter("startDate", e.target.value)}
-//                       max={filters.endDate || undefined}
+//                       value={startDate}
+//                       onChange={(e) => handleFilterChange(() => setStartDate(e.target.value))}
 //                     />
 //                   </div>
 //                   <div>
-//                     <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-//                       <Calendar className="w-4 h-4" />
-//                       End Date
-//                     </Label>
+//                     <Label className="block text-sm font-medium text-gray-700 mb-2">End Date</Label>
 //                     <Input
 //                       type="date"
-//                       value={filters.endDate}
-//                       onChange={(e) => updateFilter("endDate", e.target.value)}
-//                       min={filters.startDate || undefined}
+//                       value={endDate}
+//                       onChange={(e) => handleFilterChange(() => setEndDate(e.target.value))}
 //                     />
 //                   </div>
 //                 </div>
@@ -443,7 +929,9 @@ export default transactions
 //           <CardTitle className="text-lg font-semibold text-gray-900">
 //             Recent Transactions
 //             {pagination && (
-//               <span className="ml-2 text-sm font-normal text-gray-500">({pagination.totalCount} total)</span>
+//               <span className="ml-2 text-sm font-normal text-gray-500">
+//                 ({pagination.totalCount} total)
+//               </span>
 //             )}
 //           </CardTitle>
 //         </CardHeader>
@@ -452,591 +940,105 @@ export default transactions
 //             <table className="w-full">
 //               <thead className="bg-gray-50">
 //                 <tr>
-//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Details</th>
-//                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-//                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-//                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-//                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-//                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Student
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Item Details
+//                   </th>
+//                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Quantity
+//                   </th>
+//                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Unit Price
+//                   </th>
+//                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Total Amount
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Date
+//                   </th>
+//                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Status
+//                   </th>
 //                 </tr>
 //               </thead>
 //               <tbody className="bg-white divide-y divide-gray-200">
-//                 {transactions.length === 0 ? (
-//                   <tr>
-//                     <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-//                       No transactions found for the selected criteria.
-//                     </td>
-//                   </tr>
-//                 ) : (
-//                   transactions.map((transaction) => {
-//                     const items = parseTransactionItems(
-//                       typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
-//                     );
-
-//                     if (items.length === 0) {
-//                       return (
-//                         <tr key={transaction.id} className="hover:bg-gray-50">
-//                           <td className="px-6 py-4 whitespace-nowrap">
-//                             <div>
-//                               <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
-//                               <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
-//                             </div>
-//                           </td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">No items</td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">-</td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">-</td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right">
-//                             ₹{Number(transaction.totalAmount).toFixed(2)}
-//                           </td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-//                             <div>
-//                               <p>{formatDate(transaction.createdAt)}</p>
-//                               <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
-//                             </div>
-//                           </td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-center">
-//                             <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
-//                               {transaction.status}
-//                             </Badge>
-//                           </td>
-//                           <td className="px-6 py-4 whitespace-nowrap text-center">
-//                             <Badge variant="outline">{transaction.transactionType || "N/A"}</Badge>
-//                           </td>
-//                         </tr>
-//                       );
-//                     }
-
-//                     return items.map((item, index) => (
-//                       <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50">
-//                         {/* Student Name - Show only on first row */}
-//                         {index === 0 && (
-//                           <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>
-//                             <div>
-//                               <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
-//                               <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
-//                             </div>
-//                           </td>
-//                         )}
-
-//                         {/* Item Name */}
-//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name || "Unknown Item"}</td>
-
-//                         {/* Quantity */}
-//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
-
-//                         {/* Unit Price */}
-//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
-//                           ₹{Number(item.price).toFixed(2)}
+//                 {transactions.map((transaction: any) => {
+//                   const items = JSON.parse(transaction.items || "[]")
+                  
+//                   return items.map((item: any, index: number) => (
+//                     <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50">
+//                       {/* Student Name - Show only on first row */}
+//                       {index === 0 && (
+//                         <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>
+//                           <div>
+//                             <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
+//                             <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
+//                           </div>
 //                         </td>
-
-//                         {/* Total Amount - Show only on first row */}
-//                         {index === 0 && (
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
-//                             ₹{Number(transaction.totalAmount).toFixed(2)}
-//                           </td>
-//                         )}
-
-//                         {/* Date - Show only on first row */}
-//                         {index === 0 && (
-//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
-//                             <div>
-//                               <p>{formatDate(transaction.createdAt)}</p>
-//                               <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
-//                             </div>
-//                           </td>
-//                         )}
-
-//                         {/* Status - Show only on first row */}
-//                         {index === 0 && (
-//                           <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
-//                             <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
-//                               {transaction.status}
-//                             </Badge>
-//                           </td>
-//                         )}
-
-//                         {/* Type - Show only on first row */}
-//                         {index === 0 && (
-//                           <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
-//                             <Badge variant="outline">{transaction.transactionType || "N/A"}</Badge>
-//                           </td>
-//                         )}
-//                       </tr>
-//                     ));
-//                   })
-//                 )}
+//                       )}
+                      
+//                       {/* Item Name */}
+//                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+//                         {item.name}
+//                       </td>
+                      
+//                       {/* Quantity */}
+//                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+//                         {item.quantity}
+//                       </td>
+                      
+//                       {/* Unit Price */}
+//                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+//                         ₹{Number.parseFloat(item.price).toFixed(2)}
+//                       </td>
+                      
+//                       {/* Total Amount - Show only on first row */}
+//                       {index === 0 && (
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
+//                           ₹{Number.parseFloat(transaction.totalAmount).toFixed(2)}
+//                         </td>
+//                       )}
+                      
+//                       {/* Date - Show only on first row */}
+//                       {index === 0 && (
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
+//                           <div>
+//                             <p>{new Date(transaction.createdAt).toLocaleDateString('en-GB', {
+//                               day: '2-digit',
+//                               month: 'short',
+//                               year: 'numeric'
+//                             })}</p>
+//                           </div>
+//                         </td>
+//                       )}
+                      
+//                       {/* Status - Show only on first row */}
+//                       {index === 0 && (
+//                         <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+//                           <Badge
+//                             variant={transaction.status === "completed" ? "default" : "destructive"}
+//                             className={transaction.status === "completed" ? "bg-green-500" : ""}
+//                           >
+//                             {transaction.status}
+//                           </Badge>
+//                         </td>
+//                       )}
+//                     </tr>
+//                   ))
+//                 })}
 //               </tbody>
 //             </table>
 //           </div>
+//           {transactions.length === 0 && (
+//             <div className="text-center py-8 text-gray-500">No transactions found for the selected criteria.</div>
+//           )}
 
 //           {/* Pagination Controls */}
 //           <PaginationControls />
 //         </CardContent>
 //       </Card>
 //     </div>
-//   );
+//   )
 // }
-
-
-
-
-// // "use client"
-
-// // import { useState } from "react"
-// // import { useQuery } from "@tanstack/react-query"
-// // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// // import { Input } from "@/components/ui/input"
-// // import { Label } from "@/components/ui/label"
-// // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// // import { Badge } from "@/components/ui/badge"
-// // import { Button } from "@/components/ui/button"
-// // import { Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-
-// // interface PaginationInfo {
-// //   currentPage: number
-// //   totalPages: number
-// //   totalCount: number
-// //   limit: number
-// //   hasNextPage: boolean
-// //   hasPreviousPage: boolean
-// //   startIndex: number
-// //   endIndex: number
-// // }
-
-// // interface TransactionsResponse {
-// //   data: any[]
-// //   pagination: PaginationInfo
-// // }
-
-// // export default function TransactionsTab() {
-// //   const [searchTerm, setSearchTerm] = useState("")
-// //   const [statusFilter, setStatusFilter] = useState<string>("all")
-// //   const [dateRange, setDateRange] = useState<string>("today")
-// //   const [startDate, setStartDate] = useState("")
-// //   const [endDate, setEndDate] = useState("")
-// //   const [currentPage, setCurrentPage] = useState(1)
-// //   const [pageSize, setPageSize] = useState(10)
-// //   const [isExporting, setIsExporting] = useState(false)
-
-// //   const { data: response, isLoading } = useQuery<TransactionsResponse>({
-// //     queryKey: ["transactions", searchTerm, statusFilter, dateRange, startDate, endDate, currentPage, pageSize],
-// //     queryFn: async () => {
-// //       const params = new URLSearchParams()
-// //       if (searchTerm) params.append("search", searchTerm)
-// //       if (statusFilter !== "all") params.append("status", statusFilter)
-// //       if (dateRange !== "all") params.append("dateRange", dateRange)
-// //       if (dateRange === "custom" && startDate) params.append("startDate", startDate)
-// //       if (dateRange === "custom" && endDate) params.append("endDate", endDate)
-// //       params.append("page", currentPage.toString())
-// //       params.append("limit", pageSize.toString())
-
-// //       const response = await fetch(`/api/transactions?${params}`)
-// //       if (!response.ok) throw new Error("Failed to fetch transactions")
-// //       return response.json()
-// //     },
-// //   })
-
-// //   const transactions = response?.data || []
-// //   const pagination = response?.pagination
-
-// //   const handleFilterChange = (callback: () => void) => {
-// //     callback()
-// //     setCurrentPage(1)
-// //   }
-
-// //   const handlePageChange = (newPage: number) => {
-// //     setCurrentPage(newPage)
-// //   }
-
-// //   const handlePageSizeChange = (newSize: string) => {
-// //     setPageSize(parseInt(newSize))
-// //     setCurrentPage(1)
-// //   }
-
-// //   const handleExport = () => {
-// //     try {
-// //       setIsExporting(true)
-      
-// //       const headers = [
-// //         "Transaction ID",
-// //         "Student Name",
-// //         "Roll Number",
-// //         "Item Name",
-// //         "Quantity",
-// //         "Unit Price",
-// //         "Item Total",
-// //         "Transaction Total",
-// //         "Status",
-// //         "Date",
-// //         "Time"
-// //       ]
-      
-// //       const rows: string[][] = []
-      
-// //       transactions.forEach((transaction: any) => {
-// //         const items = JSON.parse(transaction.items || "[]")
-// //         const transactionDate = new Date(transaction.createdAt)
-// //         const dateStr = transactionDate.toLocaleDateString('en-GB', {
-// //           day: '2-digit',
-// //           month: '2-digit',
-// //           year: 'numeric'
-// //         })
-// //         const timeStr = transactionDate.toLocaleTimeString()
-        
-// //         if (items.length === 0) {
-// //           rows.push([
-// //             `TXN${transaction.id.toString().padStart(6, "0")}`,
-// //             transaction.student?.name || "Unknown",
-// //             transaction.student?.rollNumber || "N/A",
-// //             "No items",
-// //             "0",
-// //             "0",
-// //             "0",
-// //             transaction.totalAmount,
-// //             transaction.status,
-// //             dateStr,
-// //             timeStr
-// //           ])
-// //         } else {
-// //           items.forEach((item: any, index: number) => {
-// //             const itemTotal = (item.quantity * Number.parseFloat(item.price)).toFixed(2)
-// //             rows.push([
-// //               `TXN${transaction.id.toString().padStart(6, "0")}`,
-// //               transaction.student?.name || "Unknown",
-// //               transaction.student?.rollNumber || "N/A",
-// //               item.name,
-// //               item.quantity.toString(),
-// //               Number.parseFloat(item.price).toFixed(2),
-// //               itemTotal,
-// //               index === 0 ? transaction.totalAmount : "",
-// //               index === 0 ? transaction.status : "",
-// //               index === 0 ? dateStr : "",
-// //               index === 0 ? timeStr : ""
-// //             ])
-// //           })
-// //         }
-// //       })
-      
-// //       const csvContent = [
-// //         headers.join(","),
-// //         ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
-// //       ].join("\n")
-      
-// //       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-// //       const url = window.URL.createObjectURL(blob)
-// //       const a = document.createElement("a")
-// //       a.href = url
-// //       a.download = `transactions-${new Date().toISOString().split("T")[0]}.csv`
-// //       document.body.appendChild(a)
-// //       a.click()
-// //       window.URL.revokeObjectURL(url)
-// //       document.body.removeChild(a)
-// //     } catch (error) {
-// //       console.error("Error exporting transactions:", error)
-// //       alert("Failed to export transactions. Please try again.")
-// //     } finally {
-// //       setIsExporting(false)
-// //     }
-// //   }
-
-// //   const PaginationControls = () => {
-// //     if (!pagination) return null
-
-// //     const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination
-
-// //     return (
-// //       <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
-// //         <div className="flex items-center space-x-2">
-// //           <span className="text-sm text-gray-700">
-// //             Showing {startIndex} to {endIndex} of {totalCount} results
-// //           </span>
-// //           <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-// //             <SelectTrigger className="w-20">
-// //               <SelectValue />
-// //             </SelectTrigger>
-// //             <SelectContent>
-// //               <SelectItem value="5">5</SelectItem>
-// //               <SelectItem value="10">10</SelectItem>
-// //               <SelectItem value="20">20</SelectItem>
-// //               <SelectItem value="50">50</SelectItem>
-// //             </SelectContent>
-// //           </Select>
-// //           <span className="text-sm text-gray-700">per page</span>
-// //         </div>
-
-// //         <div className="flex items-center space-x-2">
-// //           <Button
-// //             variant="outline"
-// //             size="sm"
-// //             onClick={() => handlePageChange(1)}
-// //             disabled={!hasPreviousPage}
-// //           >
-// //             <ChevronsLeft className="w-4 h-4" />
-// //           </Button>
-// //           <Button
-// //             variant="outline"
-// //             size="sm"
-// //             onClick={() => handlePageChange(currentPage - 1)}
-// //             disabled={!hasPreviousPage}
-// //           >
-// //             <ChevronLeft className="w-4 h-4" />
-// //           </Button>
-
-// //           <div className="flex items-center space-x-1">
-// //             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-// //               let pageNumber
-// //               if (totalPages <= 5) {
-// //                 pageNumber = i + 1
-// //               } else if (currentPage <= 3) {
-// //                 pageNumber = i + 1
-// //               } else if (currentPage >= totalPages - 2) {
-// //                 pageNumber = totalPages - 4 + i
-// //               } else {
-// //                 pageNumber = currentPage - 2 + i
-// //               }
-
-// //               return (
-// //                 <Button
-// //                   key={pageNumber}
-// //                   variant={currentPage === pageNumber ? "default" : "outline"}
-// //                   size="sm"
-// //                   onClick={() => handlePageChange(pageNumber)}
-// //                   className="w-8 h-8"
-// //                 >
-// //                   {pageNumber}
-// //                 </Button>
-// //               )
-// //             })}
-// //           </div>
-
-// //           <Button
-// //             variant="outline"
-// //             size="sm"
-// //             onClick={() => handlePageChange(currentPage + 1)}
-// //             disabled={!hasNextPage}
-// //           >
-// //             <ChevronRight className="w-4 h-4" />
-// //           </Button>
-// //           <Button
-// //             variant="outline"
-// //             size="sm"
-// //             onClick={() => handlePageChange(totalPages)}
-// //             disabled={!hasNextPage}
-// //           >
-// //             <ChevronsRight className="w-4 h-4" />
-// //           </Button>
-// //         </div>
-// //       </div>
-// //     )
-// //   }
-
-// //   if (isLoading) {
-// //     return <div className="text-center py-8">Loading transactions...</div>
-// //   }
-
-// //   return (
-// //     <div className="space-y-6">
-// //       <div className="flex justify-between items-center">
-// //         <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
-// //         <Button
-// //           onClick={handleExport}
-// //           variant="outline"
-// //           disabled={isExporting}
-// //         >
-// //           <Download className="w-4 h-4 mr-2" />
-// //           {isExporting ? "Exporting..." : "Export Data"}
-// //         </Button>
-// //       </div>
-
-// //       {/* Filters */}
-// //       <Card>
-// //         <CardContent className="p-6">
-// //           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-// //             <div>
-// //               <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
-// //               <div className="relative">
-// //                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-// //                 <Input
-// //                   placeholder="Student name or transaction ID..."
-// //                   value={searchTerm}
-// //                   onChange={(e) => handleFilterChange(() => setSearchTerm(e.target.value))}
-// //                   className="pl-10"
-// //                 />
-// //               </div>
-// //             </div>
-// //             <div>
-// //               <Label className="block text-sm font-medium text-gray-700 mb-2">Status</Label>
-// //               <Select value={statusFilter} onValueChange={(value) => handleFilterChange(() => setStatusFilter(value))}>
-// //                 <SelectTrigger>
-// //                   <SelectValue placeholder="All Status" />
-// //                 </SelectTrigger>
-// //                 <SelectContent>
-// //                   <SelectItem value="all">All Status</SelectItem>
-// //                   <SelectItem value="completed">Completed</SelectItem>
-// //                   <SelectItem value="failed">Failed</SelectItem>
-// //                   <SelectItem value="refunded">Refunded</SelectItem>
-// //                 </SelectContent>
-// //               </Select>
-// //             </div>
-// //             <div>
-// //               <Label className="block text-sm font-medium text-gray-700 mb-2">Date Range</Label>
-// //               <Select value={dateRange} onValueChange={(value) => handleFilterChange(() => setDateRange(value))}>
-// //                 <SelectTrigger>
-// //                   <SelectValue placeholder="Select range" />
-// //                 </SelectTrigger>
-// //                 <SelectContent>
-// //                   <SelectItem value="today">Today</SelectItem>
-// //                   <SelectItem value="week">This Week</SelectItem>
-// //                   <SelectItem value="month">This Month</SelectItem>
-// //                   <SelectItem value="custom">Custom Range</SelectItem>
-// //                   <SelectItem value="all">All Time</SelectItem>
-// //                 </SelectContent>
-// //               </Select>
-// //             </div>
-// //             {dateRange === "custom" && (
-// //               <div className="md:col-span-3">
-// //                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                   <div>
-// //                     <Label className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
-// //                     <Input
-// //                       type="date"
-// //                       value={startDate}
-// //                       onChange={(e) => handleFilterChange(() => setStartDate(e.target.value))}
-// //                     />
-// //                   </div>
-// //                   <div>
-// //                     <Label className="block text-sm font-medium text-gray-700 mb-2">End Date</Label>
-// //                     <Input
-// //                       type="date"
-// //                       value={endDate}
-// //                       onChange={(e) => handleFilterChange(() => setEndDate(e.target.value))}
-// //                     />
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             )}
-// //           </div>
-// //         </CardContent>
-// //       </Card>
-
-// //       {/* Transactions Table */}
-// //       <Card>
-// //         <CardHeader>
-// //           <CardTitle className="text-lg font-semibold text-gray-900">
-// //             Recent Transactions
-// //             {pagination && (
-// //               <span className="ml-2 text-sm font-normal text-gray-500">
-// //                 ({pagination.totalCount} total)
-// //               </span>
-// //             )}
-// //           </CardTitle>
-// //         </CardHeader>
-// //         <CardContent className="p-0">
-// //           <div className="overflow-x-auto">
-// //             <table className="w-full">
-// //               <thead className="bg-gray-50">
-// //                 <tr>
-// //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Student
-// //                   </th>
-// //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Item Details
-// //                   </th>
-// //                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Quantity
-// //                   </th>
-// //                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Unit Price
-// //                   </th>
-// //                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Total Amount
-// //                   </th>
-// //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Date
-// //                   </th>
-// //                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-// //                     Status
-// //                   </th>
-// //                 </tr>
-// //               </thead>
-// //               <tbody className="bg-white divide-y divide-gray-200">
-// //                 {transactions.map((transaction: any) => {
-// //                   const items = JSON.parse(transaction.items || "[]")
-                  
-// //                   return items.map((item: any, index: number) => (
-// //                     <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50">
-// //                       {/* Student Name - Show only on first row */}
-// //                       {index === 0 && (
-// //                         <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>
-// //                           <div>
-// //                             <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
-// //                             <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
-// //                           </div>
-// //                         </td>
-// //                       )}
-                      
-// //                       {/* Item Name */}
-// //                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-// //                         {item.name}
-// //                       </td>
-                      
-// //                       {/* Quantity */}
-// //                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-// //                         {item.quantity}
-// //                       </td>
-                      
-// //                       {/* Unit Price */}
-// //                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
-// //                         ₹{Number.parseFloat(item.price).toFixed(2)}
-// //                       </td>
-                      
-// //                       {/* Total Amount - Show only on first row */}
-// //                       {index === 0 && (
-// //                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
-// //                           ₹{Number.parseFloat(transaction.totalAmount).toFixed(2)}
-// //                         </td>
-// //                       )}
-                      
-// //                       {/* Date - Show only on first row */}
-// //                       {index === 0 && (
-// //                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
-// //                           <div>
-// //                             <p>{new Date(transaction.createdAt).toLocaleDateString('en-GB', {
-// //                               day: '2-digit',
-// //                               month: 'short',
-// //                               year: 'numeric'
-// //                             })}</p>
-// //                           </div>
-// //                         </td>
-// //                       )}
-                      
-// //                       {/* Status - Show only on first row */}
-// //                       {index === 0 && (
-// //                         <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
-// //                           <Badge
-// //                             variant={transaction.status === "completed" ? "default" : "destructive"}
-// //                             className={transaction.status === "completed" ? "bg-green-500" : ""}
-// //                           >
-// //                             {transaction.status}
-// //                           </Badge>
-// //                         </td>
-// //                       )}
-// //                     </tr>
-// //                   ))
-// //                 })}
-// //               </tbody>
-// //             </table>
-// //           </div>
-// //           {transactions.length === 0 && (
-// //             <div className="text-center py-8 text-gray-500">No transactions found for the selected criteria.</div>
-// //           )}
-
-// //           {/* Pagination Controls */}
-// //           <PaginationControls />
-// //         </CardContent>
-// //       </Card>
-// //     </div>
-// //   )
-// // }
