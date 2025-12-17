@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import UserCreateForm from "@/components/forms/UserCreateForm";
 import UserList from "@/components/table/UserList";
-import { User } from "@/types";
+import { User } from "@/types/user";
 
 export default function UsersTab() {
   const [users, setUsers] = useState<User[]>([]);

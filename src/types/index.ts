@@ -33,7 +33,7 @@ export interface ApiErrorResponse {
 // =============================================
 
 export interface BaseEntity {
-  id: string
+  _id: string
   createdAt: Date
   updatedAt: Date
 }
@@ -752,25 +752,25 @@ export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclu
 //   password: string;
 // }
 
-// export interface CreateStudentInput {
-//   name: string;
-//   rollNumber: string;
-//   standard: string;
-//   year: number;
-//   balance?: number;
-//   mobileNo?: string;
-// }
+export interface CreateStudentInput {
+  name: string;
+  rollNumber: string;
+  standard: string;
+  year: number;
+  balance?: number;
+  mobileNo?: string;
+}
 
-// export interface UpdateStudentInput extends Partial<CreateStudentInput> {
-//   id: string;
-//   isActive?: boolean;
-// }
+export interface UpdateStudentInput extends Partial<CreateStudentInput> {
+  _id: string;
+  isActive?: boolean;
+}
 
-// export interface BalanceUpdateInput {
-//   studentId: string;
-//   amount: number;
-//   reason?: string;
-// }
+export interface BalanceUpdateInput {
+  studentId: string;
+  amount: number;
+  reason?: string;
+}
 
 
 

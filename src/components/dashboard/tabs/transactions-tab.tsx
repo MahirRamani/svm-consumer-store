@@ -185,7 +185,7 @@ export default function TransactionsTab() {
         });
         const timeStr = transactionDate.toLocaleTimeString();
 
-        const txnId = `TXN${transaction.id.toString().padStart(6, "0")}`;
+        const txnId = `TXN${transaction._id.toString().padStart(6, "0")}`;
         const studentName = transaction.student?.name || "Unknown";
         const rollNumber = transaction.student?.rollNumber || "N/A";
         const totalAmount = Number(transaction.totalAmount).toFixed(2);
@@ -479,7 +479,7 @@ export default function TransactionsTab() {
 
                     if (items.length === 0) {
                       return (
-                        <tr key={transaction.id} className="hover:bg-gray-50">
+                        <tr key={transaction._id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
@@ -511,7 +511,7 @@ export default function TransactionsTab() {
                     }
 
                     return items.map((item, index) => (
-                      <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50">
+                      <tr key={`${transaction._id}-${index}`} className="hover:bg-gray-50">
                         {/* Student Name - Show only on first row */}
                         {index === 0 && (
                           <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>

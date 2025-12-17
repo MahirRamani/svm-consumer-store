@@ -186,7 +186,7 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!student?.id) return;
+      if (!student?._id) return;
 
       // Mark all fields as touched
       setTouched({
