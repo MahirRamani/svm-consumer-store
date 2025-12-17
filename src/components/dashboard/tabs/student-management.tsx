@@ -80,7 +80,7 @@ export default function StudentManagement() {
   const handleToggleActive = useCallback(
     (studentId: string, currentStatus: boolean) => {
       toggleStatusMutation.mutate({
-        id: studentId,
+        _id: studentId,
         isActive: !currentStatus,
       });
     },
@@ -238,7 +238,7 @@ export default function StudentManagement() {
                     const initials = getInitials(student.name);
 
                     return (
-                      <tr key={student.id} className={!student.isActive ? "bg-gray-50 opacity-75" : ""}>
+                      <tr key={student._id} className={!student.isActive ? "bg-gray-50 opacity-75" : ""}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
@@ -271,7 +271,7 @@ export default function StudentManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleToggleActive(student.id, student.isActive)}
+                              onClick={() => handleToggleActive(student._id, student.isActive)}
                               disabled={toggleStatusMutation.isPending}
                               className={student.isActive ? "text-orange-500 hover:text-orange-600" : "text-green-500 hover:text-green-600"}
                               title={student.isActive ? "Deactivate Student" : "Activate Student"}
@@ -281,7 +281,7 @@ export default function StudentManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleTopUp(student.id)}
+                              onClick={() => handleTopUp(student._id)}
                               className="text-green-500 hover:text-green-600"
                               title="Add Balance"
                             >
@@ -290,7 +290,7 @@ export default function StudentManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeduct(student.id)}
+                              onClick={() => handleDeduct(student._id)}
                               className="text-red-500 hover:text-red-600"
                               title="Deduct Balance"
                             >
@@ -311,7 +311,7 @@ export default function StudentManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteStudent(student.id, student.name)}
+                              onClick={() => handleDeleteStudent(student._id, student.name)}
                               disabled={deleteMutation.isPending}
                               className="text-red-500 hover:text-red-600"
                               title="Delete Student"

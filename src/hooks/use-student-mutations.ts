@@ -32,7 +32,7 @@ export function useDeleteStudent() {
 }
 
 export function useToggleStudentStatus() {
-  return useUpdate<Student, { id: string; isActive: boolean }>(ENDPOINT, {
+  return useUpdate<Student, { _id: string; isActive: boolean }>(ENDPOINT, {
     queryKey: QUERY_KEY,
     successMessage: "Student status updated successfully",
     errorMessage: "Failed to update student status",
