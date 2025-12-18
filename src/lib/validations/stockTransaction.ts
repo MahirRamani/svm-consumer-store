@@ -11,7 +11,6 @@ export const createStockTransactionSchema = z.object({
   quantityLeft: z.coerce.number().int().min(0).optional(),
   reason: z.enum([
     'purchase',
-    'sale',
     'return',
     'damage',
     'expired',

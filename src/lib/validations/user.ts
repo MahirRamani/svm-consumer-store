@@ -9,9 +9,8 @@ export const createUserSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(50, 'Username cannot exceed 50 characters')
-    .toLowerCase()
     .trim()
-    .regex(/^[a-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'),
+    .regex(/^[A-Za-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.string().refine(isValidRole, { message: 'Invalid role' }),
   allowedTabs: z
@@ -27,9 +26,8 @@ export const updateUserSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(50, 'Username cannot exceed 50 characters')
-    .toLowerCase()
     .trim()
-    .regex(/^[a-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores')
+    .regex(/^[A-Za-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores')
     .optional(),
   password: z.string().min(6, 'Password must be at least 6 characters').optional(),
   role: z.string().refine(isValidRole, { message: 'Invalid role' }).optional(),

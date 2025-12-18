@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClientProvider_ } from "@/context/queryClientProvider";
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
+import { SessionProvider } from 'next-auth/react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,11 +35,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        
-        <QueryClientProvider_>
-          <Toaster richColors position="top-right" />
-          {children}
-        </QueryClientProvider_>
+        <SessionProvider>
+          <QueryClientProvider_>
+            <Toaster richColors position="top-right" />
+            {children}
+          </QueryClientProvider_>
+        </SessionProvider>
 
       </body>
     </html>

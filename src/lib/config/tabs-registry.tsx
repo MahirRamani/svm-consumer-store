@@ -73,6 +73,21 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
+  students: {
+    label: 'Student',
+    icon: Package,
+    component: dynamic(() => import('@/components/dashboard/tabs/student-management'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
+  users: {
+    label: 'Users',
+    icon: Package,
+    component: dynamic(() => import('@/components/dashboard/tabs/users-tab'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
+
 } as const;
 
 // ============================================================================

@@ -1,6 +1,6 @@
 export const ROLES = {
   ADMIN: { id: "admin", name: "Admin" },
-  SELLER: { id: "seller", name: "Seller" },
+  SELLER: { id: "Seller", name: "Seller" },
   ACCOUNTANT: { id: "accountant", name: "Accountant" },
   SUPERUSER: { id: "superuser", name: "Superuser" },
 } as const;
