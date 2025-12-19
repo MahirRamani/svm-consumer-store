@@ -7,7 +7,6 @@ export type { ApiResponse };
 /** SubProduct Entity (as returned from API) - NO PRICE FIELD */
 export interface SubProduct {
   _id: string;
-  productId: string;
   name: string;
   description?: string;
   size?: string;
@@ -21,10 +20,10 @@ export interface SubProduct {
   createdAt: Date | string;
   updatedAt: Date | string;
   // Populated fields
-  parentProduct?: {
+  parentProduct: {
     _id: string;
     name: string;
-    category?: {
+    category: {
       _id: string;
       name: string;
     };

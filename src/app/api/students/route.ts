@@ -70,4 +70,4 @@ const createStudentHandler = async (req: Request, authContext: AuthContext) => {
 // Export Routes
 // =============================================
 export const GET = withErrorHandler(getStudentsHandler);
-export const POST = withErrorHandler(withRole(['ADMIN', 'ACCOUNTANT'])(createStudentHandler));
+export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'ACCOUNTANT'])(createStudentHandler));

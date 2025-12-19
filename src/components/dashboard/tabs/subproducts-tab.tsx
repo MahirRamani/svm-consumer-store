@@ -190,7 +190,7 @@ export default function SubProductsTab() {
         subProduct.description?.toLowerCase().includes(searchTerm);
 
       const matchesProduct =
-        filterState.selectedProduct === "all" || subProduct.productId === filterState.selectedProduct;
+        filterState.selectedProduct === "all" || subProduct.parentProduct?._id === filterState.selectedProduct;
 
       return matchesSearch && matchesProduct;
     });
@@ -251,7 +251,7 @@ export default function SubProductsTab() {
       ];
 
       const rows = filteredSubProducts.map((subProduct: SubProduct) => {
-        const productName = subProduct.parentProduct?.name || getProductName(subProduct.productId);
+        const productName = subProduct.parentProduct?.name || getProductName(subProduct.parentProduct._id);
         const categoryName = subProduct.parentProduct?.category?.name || "N/A";
         const createdDate = new Date(subProduct.createdAt).toLocaleDateString("en-GB", {
           day: "2-digit",
@@ -478,7 +478,7 @@ export default function SubProductsTab() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {subProduct.parentProduct?.name || getProductName(subProduct.productId)}
+                        {subProduct.parentProduct?.name || getProductName(subProduct.parentProduct._id)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {subProduct.parentProduct?.category?.name || "N/A"}

@@ -64,12 +64,13 @@ const createUserHandler = async (req: Request, authContext: AuthContext) => {
   await connectDB();
 
   const data = await validateBody(req, createUserSchema);
+  
 
-  // Check if username already exists
-  const existingUser = await User.findOne({ username: data.username });
-  if (existingUser) {
-    throw new ApiError('Username already exists', 409);
-  }
+  // // Check if username already exists
+  // const existingUser = await User.findOne({ username: data.username });
+  // if (existingUser) {
+  //   throw new ApiError('Username already exists', 409);
+  // }
 
   // Hash password
   const hashedPassword = await bcrypt.hash(data.password, 12);

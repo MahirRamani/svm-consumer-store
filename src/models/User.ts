@@ -28,6 +28,7 @@ const UserSchema = new Schema<IUser>(
       required: [true, 'Username is required'],
       minlength: [3, 'Username must be at least 3 characters long'],
       maxlength: [50, 'Username cannot exceed 50 characters'],
+      match: [/^[A-Za-z0-9._-]+$/, 'Username can only contain letters, numbers, dots, hyphens, and underscores'],
       unique: true,
       trim: true,
     },
@@ -46,7 +47,6 @@ const UserSchema = new Schema<IUser>(
     allowedTabs: {
       type: [String],
       enum: ALL_TAB_IDS,
-      default: ['overview'],
       validate: {
         validator: function (tabs: string[]) {
           return tabs.length > 0;

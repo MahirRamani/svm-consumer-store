@@ -3,6 +3,8 @@ import mongoose, { Model, Schema, Types } from "mongoose"
 // TODO: only Buy
 export interface IStockTransaction extends Document {
   subProductId: Types.ObjectId
+  productId: Types.ObjectId
+  categoryId: Types.ObjectId
   transactionType: "Buy" | "Sell" | "Adjustment"
   buyingPrice: number
   sellingPrice: number
@@ -12,12 +14,25 @@ export interface IStockTransaction extends Document {
   description?: string
   date: Date
   createdBy: Types.ObjectId
+  endedAt?: Date
 }
 
 const StockTransactionSchema = new Schema<IStockTransaction>({
   subProductId: {
     type: Schema.Types.ObjectId,
     ref: "SubProduct",
+    required: true,
+    index: true, // For better query performance
+  },
+  productId: {
+    type: Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+    index: true, // For better query performance
+  },
+  categoryId: {
+    type: Schema.Types.ObjectId,
+    ref: "Category",
     required: true,
     index: true, // For better query performance
   },
@@ -117,6 +132,11 @@ const StockTransactionSchema = new Schema<IStockTransaction>({
     ref: "User",
     required: false,
     index: true
+  },
+  endedAt: {
+    type: Date,
+    default: null,
+    index: true, // For date-based queries
   }
 }, {
   timestamps: true, // Automatically adds createdAt and updatedAt

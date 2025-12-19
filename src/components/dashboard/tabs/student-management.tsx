@@ -17,10 +17,17 @@ import EditStudentModal from "@/components/modals/edit-student-modal";
 import { useDeleteStudent, useToggleStudentStatus } from "@/hooks/use-student-mutations";
 import type { Student } from "@/types";
 
+// interface StudentApiResponse {
+//   success?: boolean;
+//   // students?: Student[];
+//   data?: Student[];
+// }
+
 interface StudentApiResponse {
-  success?: boolean;
-  students?: Student[];
-  data?: Student[];
+  success: boolean;
+  data: {
+    students: Student[];
+  };
 }
 
 export default function StudentManagement() {
@@ -39,7 +46,8 @@ export default function StudentManagement() {
   const deleteMutation = useDeleteStudent();
   const toggleStatusMutation = useToggleStudentStatus();
 
-  const { data: studentsData, isLoading } = useQuery<Student[]>({
+  // const { data: studentsData, isLoading } = useQuery<Student[]>({
+  const { data: studentsData, isLoading } = useQuery({
     queryKey: ["students", showInactive],
     queryFn: async (): Promise<Student[]> => {
       const params = new URLSearchParams();
@@ -51,16 +59,22 @@ export default function StudentManagement() {
       if (!response.ok) throw new Error("Failed to fetch students");
       const data: StudentApiResponse = await response.json();
 
-      // Handle different response formats
-      if (data.success && data.data) return data.data;
-      if (data.students) return data.students;
-      if (Array.isArray(data)) return data;
+      // // Handle different response formats
+      // // if (data.success && data.data) return data.data;
+      // if (data.success && data.data && data.data.students) return data.data.students;
+      // // if (data.students) return data.students;
+      // if (Array.isArray(data)) return data;
 
-      return [];
+      // Return students array from the correct path
+      return data.success && data.data?.students ? data.data.students : [];
+
+      // return [];
     },
   });
 
-  const students = studentsData || [];
+  // const students = studentsData || [];
+  // const students: Student[] = Array.isArray(studentsData) ? studentsData : [];
+  const students: Student[] = Array.isArray(studentsData) ? studentsData : [];
 
   const handleTopUp = useCallback((studentId: string) => {
     setSelectedStudentId(studentId);
@@ -97,12 +111,14 @@ export default function StudentManagement() {
   );
 
   const filteredStudents = useMemo(() => {
+    if (!Array.isArray(students)) return [];
+    
     return students.filter((student: Student) => {
       const matchesSearch =
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStandard = selectedStandard === "all" || student.standard === selectedStandard;
-      const matchesYear = selectedYear === "all" || student.year.toString() === selectedYear;
+      const matchesYear = selectedYear === "all" || student.year?.toString() === selectedYear;
 
       return matchesSearch && matchesStandard && matchesYear;
     });

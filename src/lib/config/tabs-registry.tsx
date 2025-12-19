@@ -1,5 +1,5 @@
 // lib/config/tabs-registry.tsx
-'use client';
+// 'use client';
 
 import dynamic from 'next/dynamic';
 import { BarChart3, Package, Warehouse, Receipt, Tag, ShoppingCart, Layers } from 'lucide-react';
@@ -59,7 +59,7 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
-  selling: {
+  Selling: {
     label: 'Selling',
     icon: ShoppingCart,
     component: dynamic(() => import('@/components/dashboard/tabs/selling-tab'), {

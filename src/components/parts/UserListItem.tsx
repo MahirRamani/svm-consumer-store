@@ -26,11 +26,20 @@ export default function UserListItem({ user, onDelete, onEdit }: UserListItemPro
             </div>
             <div className="flex flex-wrap items-center gap-1">
               <p className="text-sm text-muted-foreground mr-2">Permissions:</p>
-              {user.allowedTabs.map((tabId) => (
+              {/* {user.allowedTabs.map((tabId) => (
                 <Badge key={tabId} variant="secondary" className="capitalize">
                   {TABS_REGISTRY[tabId as keyof typeof TABS_REGISTRY]?.label || tabId}
                 </Badge>
-              ))}
+              ))} */}
+              {user.allowedTabs && user.allowedTabs.length > 0 ? (
+                user.allowedTabs.map((tabId) => (
+                  <Badge key={tabId} variant="secondary" className="capitalize">
+                    {TABS_REGISTRY[tabId as keyof typeof TABS_REGISTRY]?.label || tabId}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground">No permissions</span>
+              )}
             </div>
           </div>
           <div className="flex space-x-2">
