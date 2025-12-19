@@ -283,10 +283,10 @@ export interface Student extends BaseEntity {
   _id: string
   rollNumber: string
   name: string
-  mobileNo?: string
   standard: string
   year: number
   balance: number
+  mobileNo?: string
   isActive: boolean
 }
 

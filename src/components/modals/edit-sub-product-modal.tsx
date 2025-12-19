@@ -76,7 +76,7 @@ export default function EditSubProductModal({
   useEffect(() => {
     if (subProduct && open) {
       setFormData({
-        productId: subProduct.productId || "",
+        productId: subProduct.parentProduct._id || "",
         name: subProduct.name || "",
         size: subProduct.size || "",
         weight: subProduct.weight || "",
