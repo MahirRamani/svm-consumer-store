@@ -217,20 +217,11 @@ export default function ProductVariantsModal({
               <Package className="h-5 w-5 text-blue-600" />
               {product.name} - Variants
             </DialogTitle>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2"> */}
               <Badge variant="outline" className="text-sm">
                 {variantsWithStock.length} of {totalActiveVariants} in stock
               </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0"
-                aria-label="Close modal"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* </div> */}
           </div>
           {product.description && (
             <p className="text-sm text-muted-foreground mt-2">

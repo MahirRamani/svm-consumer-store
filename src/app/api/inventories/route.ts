@@ -43,7 +43,7 @@ const getProductsWithVariantsSchema = z.object({
     .transform((val) => (val === undefined ? undefined : val === 'true')),
   search: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
+  limit: z.coerce.number().int().min(1).max(100).default(500),
 });
 
 type GetProductsWithVariantsQuery = z.infer<typeof getProductsWithVariantsSchema>;

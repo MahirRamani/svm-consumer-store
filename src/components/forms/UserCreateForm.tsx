@@ -9,7 +9,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { User } from "@/types/user";
 import { CreateUserSchema, CreateUserValues } from "@/schemas/user";
 import { ROLES } from "@/lib/config/rolesConfig";
-import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
+import { TabId, TABS_REGISTRY } from "@/lib/config/tabs-registry";
 
 // Shadcn UI and Form imports
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
         defaultValues: {
             username: "",
             password: "",
-            role: "employee",
+            role: "",
             allowedTabs: [],
         },
     });
@@ -79,7 +79,7 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
                             <FormField control={form.control} name="username" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Username</FormLabel>
-                                    <FormControl><Input placeholder="john.doe" {...field} /></FormControl>
+                                    <FormControl><Input placeholder="Name" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -98,7 +98,7 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         {Object.values(ROLES).map(role => (
-                                            <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                                            <SelectItem key={role.id} value={role.name}>{role.name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -117,7 +117,7 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
                                             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                                 <FormControl>
                                                     <Checkbox
-                                                        checked={field.value?.includes(tabId as any)}
+                                                        checked={field.value?.includes(tabId as TabId)}
                                                         onCheckedChange={(checked) => {
                                                             return checked
                                                                 ? field.onChange([...field.value, tabId])

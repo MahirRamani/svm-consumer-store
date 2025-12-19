@@ -27,13 +27,13 @@ const StockTransactionSchema = new Schema<IStockTransaction>({
   productId: {
     type: Schema.Types.ObjectId,
     ref: "Product",
-    required: true,
+    required: false,
     index: true, // For better query performance
   },
   categoryId: {
     type: Schema.Types.ObjectId,
     ref: "Category",
-    required: true,
+    required: false,
     index: true, // For better query performance
   },
   transactionType: {
