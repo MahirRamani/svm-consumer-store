@@ -39,7 +39,7 @@ const StockTransactionSchema = new Schema<IStockTransaction>({
   transactionType: {
     type: String,
     required: true,
-    enum: ["Buy", "Sell", "Adjustment"],
+    enum: ["Buy"],
     index: true,
   },
   buyingPrice: {

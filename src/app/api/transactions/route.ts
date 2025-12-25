@@ -1194,6 +1194,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Build filter query
     const filter: TransactionFilter = {
       transactionType: "Purchase"
+      // transactionType: "Topup",
     };
 
     // Status filter

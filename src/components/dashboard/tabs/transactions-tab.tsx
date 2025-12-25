@@ -185,7 +185,7 @@ export default function TransactionsTab() {
         });
         const timeStr = transactionDate.toLocaleTimeString();
 
-        const txnId = `TXN${transaction._id.toString().padStart(6, "0")}`;
+        const txnId = `TXN${transaction.id.toString().padStart(6, "0")}`;
         const studentName = transaction.student?.name || "Unknown";
         const rollNumber = transaction.student?.rollNumber || "N/A";
         const totalAmount = Number(transaction.totalAmount).toFixed(2);

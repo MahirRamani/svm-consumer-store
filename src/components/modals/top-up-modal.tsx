@@ -158,7 +158,7 @@ export default function TopUpModal({ open, onOpenChange, studentId }: TopUpModal
     }
   }, [updateBalanceMutation.isPending, onOpenChange]);
 
-  const canSubmit = formData.amount.trim() && !errors.amount && !errors.reason && !updateBalanceMutation.isPending;
+  const canSubmit = formData.amount.trim() && formData.reason.trim() && !errors.amount && !errors.reason && !updateBalanceMutation.isPending;
 
   // Quick amount buttons
   const quickAmounts = [100, 500, 1000, 2000, 5000];
@@ -211,7 +211,9 @@ export default function TopUpModal({ open, onOpenChange, studentId }: TopUpModal
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Label htmlFor="reason">
+              Reason <span className="text-destructive">*</span>
+            </Label>
             <Textarea
               id="reason"
               value={formData.reason}
@@ -226,7 +228,7 @@ export default function TopUpModal({ open, onOpenChange, studentId }: TopUpModal
             <p className="text-xs text-muted-foreground">{formData.reason.length}/200 characters</p>
           </div>
 
-          {formData.amount && !errors.amount && (
+          {formData.amount  && !errors.amount && formData.reason && !errors.reason && (
             <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-700 dark:text-green-300">
                 <strong>₹{Number(formData.amount).toFixed(2)}</strong> will be added to student's account

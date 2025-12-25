@@ -17,7 +17,6 @@ export interface ITransactionItem {
 
 export interface ITransaction extends Document {
   studentId: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
   items?: ITransactionItem[];
   totalAmount: number;
   status: "Pending" | "Completed" | "Cancelled";
@@ -77,11 +76,6 @@ const TransactionSchema = new Schema<ITransaction>(
       type: Schema.Types.ObjectId,
       ref: "Student",
       required: true,
-      index: true,
-    },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
       index: true,
     },
     items: {

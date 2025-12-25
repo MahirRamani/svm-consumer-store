@@ -23,8 +23,8 @@ export const updateProductSchema = createProductSchema.partial();
 export const getProductsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(100),
-  sortBy: z.enum(['name', 'priority', 'createdAt']).default('priority'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  sortBy: z.enum(['name', 'priority', 'createdAt']).default('name'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
   search: z.string().trim().optional(),
   categoryId: objectIdSchema.optional(),
   includeInactive: z.coerce.boolean().default(false),

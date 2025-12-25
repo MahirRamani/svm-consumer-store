@@ -21,6 +21,8 @@ export interface StockTransaction {
 /** Create Stock Transaction Input */
 export interface CreateStockTransactionInput {
   subProductId: string;
+  productId: string, // Add this
+  categoryId: string, // Add this
   buyingPrice: number;
   sellingPrice: number;
   initialQuantity: number;

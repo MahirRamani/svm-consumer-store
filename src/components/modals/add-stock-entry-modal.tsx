@@ -24,6 +24,8 @@ interface AddStockEntryModalProps {
   onOpenChange: (open: boolean) => void;
   subProductId: string;
   subProductName: string;
+  productId: string; // Add this
+  categoryId: string; // Add this
 }
 
 interface ProfitCalculation {
@@ -37,6 +39,8 @@ export default function AddStockEntryModal({
   onOpenChange,
   subProductId,
   subProductName,
+  productId, // Add this
+  categoryId, // Add this
 }: AddStockEntryModalProps) {
   const createMutation = useCreateStockTransaction();
   const queryClient = useQueryClient();
@@ -193,6 +197,8 @@ export default function AddStockEntryModal({
     createMutation.mutate(
       {
         subProductId,
+        productId, // Add this
+        categoryId, // Add this
         buyingPrice: Number(formData.buyingPrice),
         sellingPrice: Number(formData.sellingPrice),
         initialQuantity: Number(formData.initialQuantity),

@@ -369,6 +369,7 @@ export interface TransactionItem {
 }
 
 export interface Transaction extends BaseEntity {
+  id: string
   student: Student
   // studentId: string
   userId?: string

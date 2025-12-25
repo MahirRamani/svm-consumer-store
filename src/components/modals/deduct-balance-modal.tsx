@@ -214,7 +214,7 @@ export default function DeductBalanceModal({ open, onOpenChange, studentId }: De
               value={formData.reason}
               onChange={(e) => handleReasonChange(e.target.value)}
               onBlur={handleReasonBlur}
-              placeholder="e.g., Lost ID card penalty, Damaged book fine"
+              placeholder="e.g., Other"
               disabled={updateBalanceMutation.isPending}
               rows={3}
               className={`resize-none ${errors.reason && touched.reason ? "border-destructive" : ""}`}
