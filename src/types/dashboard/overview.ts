@@ -100,3 +100,73 @@ export interface CustomTooltipProps {
   payload?: TooltipPayload[];
   label?: string;
 }
+
+
+
+// types/dashboard.ts
+// ADD THESE NEW TYPES TO YOUR EXISTING FILE
+
+/** Low Balance Student Data */
+export interface LowBalanceStudent {
+  id: string;
+  name: string;
+  rollNumber: string;
+  standard: string;
+  balance: number;
+  mobileNo?: string;
+}
+
+/** Highest Purchased Student Data */
+export interface HighestPurchasedStudent {
+  id: string;
+  name: string;
+  rollNumber: string;
+  standard: string;
+  totalPurchase: number;
+  transactionCount: number;
+}
+
+/** Admin Dashboard Statistics (Full access) */
+export interface AdminDashboardStats {
+  // Common stats (available to all roles)
+  lowStockCount: number;
+  lowStockProducts: LowStockProduct[];
+  lowBalanceCount: number;
+  lowBalanceStudents: LowBalanceStudent[];
+  topSoldProduct: TopSoldProduct | null;
+  highestPurchasedStudent: HighestPurchasedStudent | null;
+  
+  // Admin-only stats
+  totalSales: number;
+  totalSalesChange: number;
+  todaysSoldProducts: TodaysSoldProduct[];
+  todaysProfit: number;
+  todaysProfitMargin: number;
+  yesterdayProfit: number;
+}
+
+/** Seller Dashboard Statistics (Limited access) */
+export interface SellerDashboardStats {
+  lowStockCount: number;
+  lowStockProducts: LowStockProduct[];
+  lowBalanceCount: number;
+  lowBalanceStudents: LowBalanceStudent[];
+  topSoldProduct: TopSoldProduct | null;
+  highestPurchasedStudent: HighestPurchasedStudent | null;
+}
+
+/** 
+ * Combined Dashboard Stats Type 
+ * The API returns different structures based on user role
+ */
+export type DashboardStatsResponse = AdminDashboardStats | SellerDashboardStats;
+
+/**
+ * Type guard to check if stats are admin stats
+ */
+export function isAdminStats(stats: DashboardStatsResponse): stats is AdminDashboardStats {
+  return 'totalSales' in stats && 'todaysProfit' in stats;
+}
+
+// NOTE: Your existing DashboardStats interface can be kept for backward compatibility
+// or you can replace it with DashboardStatsResponse based on your needs

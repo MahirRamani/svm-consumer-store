@@ -59,7 +59,7 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
-  selling: {
+  Selling: {
     label: 'Selling',
     icon: ShoppingCart,
     component: dynamic(() => import('@/components/dashboard/tabs/selling-tab'), {

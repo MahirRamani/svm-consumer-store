@@ -37,7 +37,7 @@ interface FormErrors {
 
 type FormField = keyof FormData;
 
-const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
 const YEARS = [2024, 2023, 2022, 2021, 2020, 2019];
 
 export default function AddStudentModal({ open, onOpenChange }: AddStudentModalProps) {

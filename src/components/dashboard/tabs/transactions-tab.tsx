@@ -171,12 +171,20 @@ export default function TransactionsTab() {
 
       const rows: string[] = [];
 
-      transactions.forEach((transaction) => {
-        // const items = parseTransactionItems(
-        //   typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
-        // );
+      // transactions.forEach((transaction) => {
+      //   // const items = parseTransactionItems(
+      //   //   typeof transaction.items === "string" ? transaction.items : JSON.stringify(transaction.items)
+      //   // );
 
-        const items = transaction.items || [];
+      //   const items = transaction.items || [];
+      transactions.forEach((transaction) => {
+        const items = Array.isArray(transaction.items) 
+          ? transaction.items 
+          : parseTransactionItems(
+              typeof transaction.items === "string" 
+                ? transaction.items 
+                : JSON.stringify(transaction.items || [])
+            );
         const transactionDate = new Date(transaction.createdAt);
         const dateStr = transactionDate.toLocaleDateString("en-GB", {
           day: "2-digit",

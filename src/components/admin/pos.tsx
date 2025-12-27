@@ -1,23 +1,14 @@
-// app/pos/page.tsx
 "use client";
 
 import { useState, useCallback } from "react";
-import ProductGrid from "@/components/modals/product-grid";
-import ShoppingCart from "@/components/modals/shopping-cart";
-import StudentLookup from "@/components/modals/student-lookup";
+import ProductNavigation from "@/components/admin/pos/product-navigation";
+import ShoppingCart from "@/components/admin/pos/shopping-cart";
+import StudentLookup from "@/components/admin/pos/student-lookup";
 import type { CartItem, Student } from "@/types/pos";
 
 export default function PosPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-
-  const getCartItemId = useCallback((item: CartItem): string => {
-    if (!item.subProductId) {
-      console.error("CartItem missing subProductId:", item);
-      throw new Error("All cart items must have a subProductId");
-    }
-    return item.subProductId;
-  }, []);
 
   const handleAddToCart = useCallback((newItem: CartItem) => {
     if (!newItem.subProductId) {
@@ -25,19 +16,21 @@ export default function PosPage() {
       return;
     }
 
-    setCartItems(prevItems => {
+    setCartItems((prevItems) => {
       const itemId = newItem.subProductId;
-      const existingItemIndex = prevItems.findIndex(item => item.subProductId === itemId);
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.subProductId === itemId
+      );
 
       if (existingItemIndex >= 0) {
         const updatedItems = [...prevItems];
         const existingItem = updatedItems[existingItemIndex];
         const newQuantity = existingItem.quantity + newItem.quantity;
-        
+
         if (newQuantity <= existingItem.stock) {
           updatedItems[existingItemIndex] = {
             ...existingItem,
-            quantity: newQuantity
+            quantity: newQuantity,
           };
           return updatedItems;
         } else {
@@ -50,31 +43,34 @@ export default function PosPage() {
     });
   }, []);
 
-  const handleUpdateQuantity = useCallback((itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      handleRemoveItem(itemId);
-      return;
-    }
+  const handleUpdateQuantity = useCallback(
+    (itemId: string, newQuantity: number) => {
+      if (newQuantity <= 0) {
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item.subProductId !== itemId)
+        );
+        return;
+      }
 
-    setCartItems(prevItems => {
-      return prevItems.map(item => {
-        if (item.subProductId === itemId) {
-          if (newQuantity <= item.stock) {
-            return { ...item, quantity: newQuantity };
-          } else {
-            console.warn("Cannot update quantity - exceeds stock limit");
+      setCartItems((prevItems) =>
+        prevItems.map((item) => {
+          if (item.subProductId === itemId) {
+            if (newQuantity <= item.stock) {
+              return { ...item, quantity: newQuantity };
+            }
             return item;
           }
-        }
-        return item;
-      });
-    });
-  }, []);
+          return item;
+        })
+      );
+    },
+    []
+  );
 
   const handleRemoveItem = useCallback((itemId: string) => {
-    setCartItems(prevItems => {
-      return prevItems.filter(item => item.subProductId !== itemId);
-    });
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.subProductId !== itemId)
+    );
   }, []);
 
   const handleClearCart = useCallback(() => {
@@ -87,16 +83,21 @@ export default function PosPage() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 p-0">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
+      {/* Left Side - Product Navigation (3 columns) */}
       <div className="lg:col-span-3">
-        <StudentLookup 
-          selectedStudent={selectedStudent} 
-          onStudentSelect={setSelectedStudent} 
-        />
-        <ProductGrid onAddToCart={handleAddToCart} />
+        <ProductNavigation onAddToCart={handleAddToCart} cartItems={cartItems} />
       </div>
 
-      <div className="lg:col-span-1">
+      {/* Right Side - Student Lookup & Cart (1 column) */}
+      <div className="lg:col-span-1 space-y-4">
+        {/* Student Lookup - Now above cart */}
+        <StudentLookup
+          selectedStudent={selectedStudent}
+          onStudentSelect={setSelectedStudent}
+        />
+
+        {/* Shopping Cart */}
         <ShoppingCart
           selectedStudent={selectedStudent}
           cartItems={cartItems}

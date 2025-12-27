@@ -10,7 +10,9 @@ export default function UsersTab() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // In a real app, you would fetch users from your API here
+    fetch("/api/users")
+      .then(res => res.json())
+      .then(data => setUsers(data.data.users));
   }, []);
 
   const handleUserCreated = (newUser: User) => {
