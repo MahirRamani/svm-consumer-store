@@ -15,7 +15,7 @@ export const createUserSchema = z.object({
   role: z.string().refine(isValidRole, { message: 'Invalid role' }),
   allowedTabs: z
     .array(z.string().refine(isValidTab, { message: 'Invalid tab' }))
-    .min(1, 'User must have at least one allowed tab'),
+    .min(0).optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -31,7 +31,7 @@ export const updateUserSchema = z.object({
   role: z.string().refine(isValidRole, { message: 'Invalid role' }),
   allowedTabs: z
     .array(z.string().refine(isValidTab, { message: 'Invalid tab' }))
-    .min(1, 'User must have at least one allowed tab')    ,
+    .min(0).optional(),
   isActive: z.boolean(),
 });
 

@@ -6,10 +6,10 @@ export const ROLES = {
 } as const;
 
 // Auto-generated type from roles
-export type AppRole = (typeof ROLES)[keyof typeof ROLES]['id'];
+export type AppRole = Uppercase<(typeof ROLES)[keyof typeof ROLES]['id']>;
 
 // Auto-generated array of all role IDs
-export const ALL_ROLE_IDS = Object.values(ROLES).map((role) => role.id);
+export const ALL_ROLE_IDS = Object.values(ROLES).map((role) => role.id.toUpperCase());
 
 // Helper to validate role at runtime
 export function isValidRole(role: string): role is AppRole {

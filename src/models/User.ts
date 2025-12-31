@@ -47,12 +47,6 @@ const UserSchema = new Schema<IUser>(
     allowedTabs: {
       type: [String],
       enum: ALL_TAB_IDS,
-      validate: {
-        validator: function (tabs: string[]) {
-          return tabs.length > 0;
-        },
-        message: 'User must have at least one allowed tab',
-      },
     },
     isActive: {
       type: Boolean,
