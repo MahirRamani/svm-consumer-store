@@ -61,6 +61,7 @@ interface NavigationState {
 interface ProductNavigationProps {
   onAddToCart: (item: CartItem) => void;
   cartItems: CartItem[];
+  resetTrigger?: number;
 }
 
 interface TopSellingProduct {
@@ -160,6 +161,7 @@ function highlightMatch(text: string, query: string): JSX.Element {
 export default function ProductNavigation({
   onAddToCart,
   cartItems,
+  resetTrigger = 0,
 }: ProductNavigationProps): JSX.Element {
   const queryClient = useQueryClient();
 
@@ -182,6 +184,18 @@ export default function ProductNavigation({
   // Track if we're in search mode
   const isSearchMode = debouncedSearchTerm.trim().length >= 2;
 
+  useEffect(() => {
+    if (resetTrigger > 0) {
+      // Reset navigation to categories view
+      setNavigation({ view: "categories", selectedCategory: null });
+      // Clear all selection states
+      setSelectedProductIds({});
+      setQuantities({});
+      setSearchTerm("");
+      setEditingProductId(null);
+      setEditingValue("");
+    }
+  }, [resetTrigger]);
   // =============================================
   // Data Fetching
   // =============================================

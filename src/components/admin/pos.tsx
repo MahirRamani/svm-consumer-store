@@ -9,6 +9,7 @@ import type { CartItem, Student } from "@/types/pos";
 export default function PosPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [navigationResetTrigger, setNavigationResetTrigger] = useState(0);
 
   const handleAddToCart = useCallback((newItem: CartItem) => {
     if (!newItem.productId) {
@@ -80,6 +81,7 @@ export default function PosPage() {
   const handleTransactionComplete = useCallback(() => {
     setCartItems([]);
     setSelectedStudent(null);
+    setNavigationResetTrigger(prev => prev + 1);
   }, []);
 
   return (
@@ -88,7 +90,7 @@ export default function PosPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 h-full">
         {/* Left Side - Add flex, h-full, overflow-hidden */}
         <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
-          <ProductNavigation onAddToCart={handleAddToCart} cartItems={cartItems} />
+          <ProductNavigation onAddToCart={handleAddToCart} cartItems={cartItems} resetTrigger={navigationResetTrigger}/>
         </div>
 
         {/* Right Side - Add flex, h-full, overflow-hidden */}
