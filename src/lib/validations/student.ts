@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 export const createStudentSchema = z.object({
-  rollNumber: z.string().trim().min(1, 'Roll number is required'),
+  rollNumber: z.string().trim().min(0, 'Roll number is required'),
   name: z.string().trim().min(1, 'Name is required'),
   mobileNo: z.string().trim().optional(),
   standard: z.string().trim().min(1, 'Standard is required'),

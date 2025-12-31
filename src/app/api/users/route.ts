@@ -90,5 +90,5 @@ const createUserHandler = async (req: Request, authContext: AuthContext) => {
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(getUsersHandler));
-export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(createUserHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER'])(getUsersHandler));
+export const POST = withErrorHandler(withRole(['SUPERUSER'])(createUserHandler));

@@ -12,15 +12,19 @@ import {
   AlertTriangle, 
   ShoppingCart,
   TrendingDown,
-  BarChart3
+  BarChart3,
+  Users,
+  Wallet
 } from "lucide-react"
 import ProfitLossChart from "@/components/charts/profit-loss-chart"
 import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart"
 import LowStockModal from "@/components/modals/low-stock-modal"
 import TodaysSalesModal from "@/components/modals/todays-sales-modal"
+import LowBalanceModal from "@/components/modals/low-balance-students-modal"
 import type { 
   ApiResponse, 
-  DashboardStats, 
+  DashboardStatsResponse,
+  AdminDashboardStats,
   Category, 
   Product,
   AnalyticsView 
@@ -29,12 +33,13 @@ import type {
 export default function OverviewTab() {
   const [showLowStockModal, setShowLowStockModal] = useState(false)
   const [showTodaysSalesModal, setShowTodaysSalesModal] = useState(false)
+  const [showLowBalanceModal, setShowLowBalanceModal] = useState(false)
   const [analyticsView, setAnalyticsView] = useState<AnalyticsView>("category")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedProduct, setSelectedProduct] = useState<string>("all")
 
   // Fetch dashboard statistics
-  const { data: statsResponse, isLoading: statsLoading } = useQuery<ApiResponse<DashboardStats>>({
+  const { data: statsResponse, isLoading: statsLoading } = useQuery<ApiResponse<DashboardStatsResponse>>({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       const response = await fetch("/api/dashboard/stats")
@@ -45,6 +50,7 @@ export default function OverviewTab() {
   })
 
   const stats = statsResponse?.data
+  const isAdmin = stats && 'totalSales' in stats
 
   // Fetch categories for dropdown
   const { data: categoriesResponse } = useQuery<ApiResponse<{ categories: Category[] }>>({
@@ -69,7 +75,7 @@ export default function OverviewTab() {
       if (!response.ok) throw new Error("Failed to fetch products")
       return response.json()
     },
-    enabled: analyticsView === "product" || analyticsView === "subproduct",
+    enabled: analyticsView === "product",
   })
 
   const products = productsResponse?.data?.products || []
@@ -85,41 +91,53 @@ export default function OverviewTab() {
     )
   }
 
-  const profitChangePercent = stats?.yesterdayProfit 
-    ? ((stats.todaysProfit - stats.yesterdayProfit) / stats.yesterdayProfit * 100).toFixed(1)
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-gray-600">Failed to load dashboard data</p>
+      </div>
+    )
+  }
+
+  const adminStats = isAdmin ? (stats as AdminDashboardStats) : null
+  
+  const profitChangePercent = adminStats?.yesterdayProfit 
+    ? ((adminStats.todaysProfit - adminStats.yesterdayProfit) / adminStats.yesterdayProfit * 100).toFixed(1)
     : "0"
 
   return (
     <div className="space-y-6">
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Sales Card */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                <p className="text-2xl font-bold text-gray-900">₹{stats?.totalSales?.toLocaleString('en-IN') || "0"}</p>
-                <div className="flex items-center text-xs mt-2">
-                  {stats?.totalSalesChange && stats.totalSalesChange > 0 ? (
-                    <>
-                      <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-                      <span className="text-green-600">+{stats.totalSalesChange}% from last month</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-                      <span className="text-red-600">{stats?.totalSalesChange}% from last month</span>
-                    </>
-                  )}
+        {/* Total Sales Card (Admin Only) */}
+        {isAdmin && adminStats && (
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Sales</p>
+                  <p className="text-2xl font-bold text-gray-900">₹{adminStats.totalSales?.toLocaleString('en-IN') || "0"}</p>
+                  <div className="flex items-center text-xs mt-2">
+                    {adminStats.totalSalesChange && adminStats.totalSalesChange > 0 ? (
+                      <>
+                        <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
+                        <span className="text-green-600">+{adminStats.totalSalesChange}% from last month</span>
+                      </>
+                    ) : (
+                      <>
+                        <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
+                        <span className="text-red-600">{adminStats.totalSalesChange}% from last month</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <IndianRupee className="w-6 h-6 text-green-600" />
                 </div>
               </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <IndianRupee className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Low Stock Subproducts Card */}
         <Card 
@@ -130,7 +148,7 @@ export default function OverviewTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.lowStockCount || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.lowStockCount || 0}</p>
                 <p className="text-xs text-red-600 mt-2 flex items-center">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   Needs immediate attention
@@ -143,6 +161,28 @@ export default function OverviewTab() {
           </CardContent>
         </Card>
 
+        {/* Low Balance Students Card */}
+        <Card 
+          className="hover:shadow-lg transition-shadow cursor-pointer"
+          onClick={() => setShowLowBalanceModal(true)}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Low Balance Students</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.lowBalanceCount || 0}</p>
+                <p className="text-xs text-orange-600 mt-2 flex items-center">
+                  <Wallet className="w-3 h-3 mr-1" />
+                  Balance below ₹500
+                </p>
+              </div>
+              <div className="bg-orange-100 p-3 rounded-lg">
+                <Users className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Top Sold Subproduct Card */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
@@ -150,11 +190,11 @@ export default function OverviewTab() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Top Selling Product</p>
                 <p className="text-lg font-bold text-gray-900 truncate max-w-[150px]">
-                  {stats?.topSoldProduct?.name || "N/A"}
+                  {stats.topSoldProduct?.name || "N/A"}
                 </p>
                 <div className="flex items-center text-xs text-purple-600 mt-2">
                   <BarChart3 className="w-3 h-3 mr-1" />
-                  {stats?.topSoldProduct?.quantitySold || 0} units sold
+                  {stats.topSoldProduct?.quantitySold || 0} units sold
                 </div>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">
@@ -164,267 +204,338 @@ export default function OverviewTab() {
           </CardContent>
         </Card>
 
-        {/* Today's Sold Products Card */}
-        <Card 
-          className="hover:shadow-lg transition-shadow cursor-pointer"
-          onClick={() => setShowTodaysSalesModal(true)}
-        >
+        {/* Today's Sold Products Card (Admin Only) */}
+        {isAdmin && adminStats && (
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => setShowTodaysSalesModal(true)}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Today's Sales</p>
+                  <p className="text-2xl font-bold text-gray-900">{adminStats.todaysSoldProducts?.length || 0}</p>
+                  <p className="text-xs text-blue-600 mt-2">
+                    Products sold today
+                  </p>
+                </div>
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <ShoppingCart className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Highest Purchased Student Card */}
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Today's Sales</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.todaysSoldProducts?.length || 0}</p>
-                <p className="text-xs text-blue-600 mt-2">
-                  Products sold today
+                <p className="text-sm font-medium text-gray-600">Top Customer Today</p>
+                <p className="text-lg font-bold text-gray-900 truncate max-w-[150px]">
+                  {stats.highestPurchasedStudent?.name || "N/A"}
                 </p>
+                <div className="flex items-center text-xs text-indigo-600 mt-2">
+                  <IndianRupee className="w-3 h-3 mr-1" />
+                  ₹{stats.highestPurchasedStudent?.totalPurchase?.toLocaleString('en-IN') || 0}
+                </div>
               </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <ShoppingCart className="w-6 h-6 text-blue-600" />
+              <div className="bg-indigo-100 p-3 rounded-lg">
+                <Users className="w-6 h-6 text-indigo-600" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profit/Loss Chart with Today's Profit Tile */}
-        <div className="flex gap-4">
-          {/* Today's Profit Square Tile */}
-          <Card className="w-40 h-40 flex-shrink-0">
-            <CardContent className="p-4 h-full flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">Today's Profit</p>
-                <p className="text-xl font-bold text-gray-900 mt-1">
-                  ₹{stats?.todaysProfit?.toLocaleString('en-IN') || "0"}
-                </p>
-              </div>
-              <div>
-                <div className="flex items-center text-xs">
-                  {Number(profitChangePercent) > 0 ? (
-                    <>
-                      <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-                      <span className="text-green-600">+{profitChangePercent}%</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-                      <span className="text-red-600">{profitChangePercent}%</span>
-                    </>
+      {/* Charts Section (Admin Only) */}
+      {isAdmin && adminStats && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Profit/Loss Chart with Today's Profit Tile */}
+          <div className="flex gap-4">
+            {/* Today's Profit Square Tile */}
+            <Card className="w-40 h-40 flex-shrink-0">
+              <CardContent className="p-4 h-full flex flex-col justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-600">Today's Profit</p>
+                  <p className="text-xl font-bold text-gray-900 mt-1">
+                    ₹{adminStats.todaysProfit?.toLocaleString('en-IN') || "0"}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center text-xs">
+                    {Number(profitChangePercent) > 0 ? (
+                      <>
+                        <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
+                        <span className="text-green-600">+{profitChangePercent}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
+                        <span className="text-red-600">{profitChangePercent}%</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Margin: {adminStats.todaysProfitMargin?.toFixed(1) || "0"}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Profit/Loss Chart */}
+            <Card className="flex-1">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Buying vs Selling Price</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[120px]">
+                <ProfitLossChart />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Analytics Chart with Dropdowns */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold">Sales Analytics</CardTitle>
+                <div className="flex gap-2">
+                  <Select value={analyticsView} onValueChange={(value) => setAnalyticsView(value as AnalyticsView)}>
+                    <SelectTrigger className="w-[120px] h-8 text-xs">
+                      <SelectValue placeholder="View by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="category">Category</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {analyticsView === "product" && (
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-[120px] h-8 text-xs">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat._id} value={cat._id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Margin: {stats?.todaysProfitMargin?.toFixed(1) || "0"}%
-                </p>
               </div>
-            </CardContent>
-          </Card>
-          
-          {/* Profit/Loss Chart */}
-          <Card className="flex-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Buying vs Selling Price</CardTitle>
             </CardHeader>
-            <CardContent className="h-[120px]">
-              <ProfitLossChart />
+            <CardContent className="h-[140px]">
+              <CategoryAnalyticsChart 
+                view={analyticsView}
+                categoryId={selectedCategory}
+                productId={selectedProduct}
+              />
             </CardContent>
           </Card>
         </div>
-
-        {/* Analytics Chart with Dropdowns */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Sales Analytics</CardTitle>
-              <div className="flex gap-2">
-                <Select value={analyticsView} onValueChange={(value) => setAnalyticsView(value as AnalyticsView)}>
-                  <SelectTrigger className="w-[120px] h-8 text-xs">
-                    <SelectValue placeholder="View by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="category">Category</SelectItem>
-                    <SelectItem value="product">Product</SelectItem>
-                    <SelectItem value="subproduct">Subproduct</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {analyticsView !== "category" && (
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[120px] h-8 text-xs">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat._id} value={cat._id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {analyticsView === "subproduct" && (
-                  <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                    <SelectTrigger className="w-[120px] h-8 text-xs">
-                      <SelectValue placeholder="Product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Products</SelectItem>
-                      {products.map((product) => (
-                        <SelectItem key={product._id} value={product._id}>
-                          {product.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="h-[140px]">
-            <CategoryAnalyticsChart 
-              view={analyticsView}
-              categoryId={selectedCategory}
-              productId={selectedProduct}
-            />
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
       {/* Modals */}
       <LowStockModal 
         open={showLowStockModal} 
         onOpenChange={setShowLowStockModal} 
-        products={stats?.lowStockProducts || []} 
+        products={stats.lowStockProducts || []} 
       />
       
-      <TodaysSalesModal
-        open={showTodaysSalesModal}
-        onOpenChange={setShowTodaysSalesModal}
-        products={stats?.todaysSoldProducts || []}
+      <LowBalanceModal
+        open={showLowBalanceModal}
+        onOpenChange={setShowLowBalanceModal}
+        students={stats.lowBalanceStudents || []}
       />
+
+      {isAdmin && adminStats && (
+        <TodaysSalesModal
+          open={showTodaysSalesModal}
+          onOpenChange={setShowTodaysSalesModal}
+          products={adminStats.todaysSoldProducts || []}
+        />
+      )}
     </div>
   )
 }
 
-// // components/dashboard/tabs/overview-tab.tsx
-// "use client";
 
-// import { useState } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import {
-//   Package,
-//   IndianRupee,
-//   TrendingUp,
-//   AlertTriangle,
-//   ShoppingCart,
+
+
+
+// // app/admin/dashboard/overview-tab.tsx
+// "use client"
+
+// import { useState } from "react"
+// import { useQuery } from "@tanstack/react-query"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { 
+//   Package, 
+//   IndianRupee, 
+//   TrendingUp, 
+//   AlertTriangle, 
+//   Users,
 //   TrendingDown,
-//   BarChart3,
-// } from "lucide-react";
-// import ProfitLossChart from "@/components/charts/profit-loss-chart";
-// import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart";
-// import LowStockModal from "@/components/modals/low-stock-modal";
-// import TodaysSalesModal from "@/components/modals/todays-sales-modal";
-// import type { DashboardStats, Category, Product } from "@/types";
-
-// type AnalyticsView = "category" | "product" | "subproduct";
+//   Award,
+//   Wallet
+// } from "lucide-react"
+// import ProfitLossChart from "@/components/charts/profit-loss-chart"
+// import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart"
+// import LowStockModal from "@/components/modals/low-stock-modal"
+// import LowBalanceStudentsModal from "@/components/modals/low-balance-students-modal"
+// import HighestPurchasedStudentModal from "@/components/modals/highest-purchased-student-modal"
+// import { useUserPermissions } from '@/hooks/use-user-permissions'
+// import { 
+//   type ApiResponse, 
+//   type DashboardStatsResponse,
+//   type AdminDashboardStats,
+//   type Category, 
+//   type Product,
+//   type AnalyticsView,
+//   isAdminStats,
+//   // isAdminStats
+// } from "@/types/dashboard/overview"
 
 // export default function OverviewTab() {
-//   const [showLowStockModal, setShowLowStockModal] = useState(false);
-//   const [showTodaysSalesModal, setShowTodaysSalesModal] = useState(false);
-//   const [analyticsView, setAnalyticsView] = useState<AnalyticsView>("category");
-//   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-//   const [selectedProduct, setSelectedProduct] = useState<string>("all");
+//   const [showLowStockModal, setShowLowStockModal] = useState(false)
+//   const [showLowBalanceModal, setShowLowBalanceModal] = useState(false)
+//   const [showHighestPurchasedModal, setShowHighestPurchasedModal] = useState(false)
+//   const [analyticsView, setAnalyticsView] = useState<AnalyticsView>("category")
+//   const [selectedCategory, setSelectedCategory] = useState<string>("all")
+//   const [selectedProduct, setSelectedProduct] = useState<string>("all")
+
+//   // Get user role from permissions hook
+//   const { userRole, loading: permissionsLoading } = useUserPermissions()
+//   const isAdmin = userRole === "SUPERUSER" || userRole === "ADMIN"
 
 //   // Fetch dashboard statistics
-//   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+//   const { data: statsResponse, isLoading: statsLoading } = useQuery<ApiResponse<DashboardStatsResponse>>({
 //     queryKey: ["dashboard-stats"],
-//     queryFn: async (): Promise<DashboardStats> => {
-//       const response = await fetch("/api/dashboard/stats");
-//       if (!response.ok) throw new Error("Failed to fetch stats");
-//       return response.json();
+//     queryFn: async () => {
+//       const response = await fetch("/api/dashboard/stats")
+//       if (!response.ok) throw new Error("Failed to fetch stats")
+//       return response.json()
 //     },
 //     refetchInterval: 30000,
-//   });
+//     enabled: !permissionsLoading, // Don't fetch until we know the user role
+//   })
 
-//   // Fetch categories for dropdown
-//   const { data: categoriesData } = useQuery<{ categories: Category[] }>({
+//   const stats = statsResponse?.data
+
+//   // Type-safe check for admin stats
+//   const adminStats: AdminDashboardStats | undefined = stats && isAdminStats(stats) ? stats : undefined
+
+//   // Fetch categories for dropdown (only if admin)
+//   const { data: categoriesResponse } = useQuery<ApiResponse<{ categories: Category[] }>>({
 //     queryKey: ["categories"],
 //     queryFn: async () => {
-//       const response = await fetch("/api/categories");
-//       if (!response.ok) throw new Error("Failed to fetch categories");
-//       return response.json();
+//       const response = await fetch("/api/categories")
+//       if (!response.ok) throw new Error("Failed to fetch categories")
+//       return response.json()
 //     },
-//   });
+//     enabled: isAdmin,
+//   })
 
-//   const categories = categoriesData?.categories || [];
+//   const categories = categoriesResponse?.data?.categories || []
 
-//   // Fetch products for dropdown
-//   const { data: productsData } = useQuery<{ products: Product[] }>({
+//   // Fetch products for dropdown (only if admin)
+//   const { data: productsResponse } = useQuery<ApiResponse<{ products: Product[] }>>({
 //     queryKey: ["products", selectedCategory],
 //     queryFn: async () => {
-//       const url = selectedCategory === "all" ? "/api/products" : `/api/products?category=${selectedCategory}`;
-//       const response = await fetch(url);
-//       if (!response.ok) throw new Error("Failed to fetch products");
-//       return response.json();
+//       const url = selectedCategory === "all" 
+//         ? "/api/products" 
+//         : `/api/products?categoryId=${selectedCategory}`
+//       const response = await fetch(url)
+//       if (!response.ok) throw new Error("Failed to fetch products")
+//       return response.json()
 //     },
-//     enabled: analyticsView === "product" || analyticsView === "subproduct",
-//   });
+//     enabled: isAdmin && (analyticsView === "product" || analyticsView === "subproduct"),
+//   })
 
-//   const products = productsData?.products || [];
+//   const products = productsResponse?.data?.products || []
 
-//   if (statsLoading) {
+//   if (statsLoading || permissionsLoading) {
 //     return (
 //       <div className="flex items-center justify-center h-96">
 //         <div className="text-center">
 //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-//           <p className="mt-4 text-gray-600">Loading dashboard...</p>
+//           <p className="mt-4 text-gray-600">Loading overview...</p>
 //         </div>
 //       </div>
-//     );
+//     )
 //   }
 
-//   const profitChangePercent = stats?.yesterdayProfit
-//     ? ((stats.todaysProfit - stats.yesterdayProfit) / stats.yesterdayProfit * 100).toFixed(1)
-//     : "0";
+//   const profitChangePercent = adminStats?.yesterdayProfit 
+//     ? ((adminStats.todaysProfit - adminStats.yesterdayProfit) / adminStats.yesterdayProfit * 100).toFixed(1)
+//     : "0"
 
 //   return (
 //     <div className="space-y-6">
 //       {/* Stats Cards Grid */}
 //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-//         {/* Total Sales Card */}
-//         <Card className="hover:shadow-lg transition-shadow">
+//         {/* ADMIN: Total Sales Card */}
+//         {isAdmin && adminStats && (
+//           <Card className="hover:shadow-lg transition-shadow">
+//             <CardContent className="p-6">
+//               <div className="flex items-center justify-between">
+//                 <div>
+//                   <p className="text-sm font-medium text-gray-600">Total Sales</p>
+//                   <p className="text-2xl font-bold text-gray-900">₹{adminStats.totalSales.toLocaleString('en-IN')}</p>
+//                   <div className="flex items-center text-xs mt-2">
+//                     {adminStats.totalSalesChange > 0 ? (
+//                       <>
+//                         <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
+//                         <span className="text-green-600">+{adminStats.totalSalesChange}% from last month</span>
+//                       </>
+//                     ) : (
+//                       <>
+//                         <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
+//                         <span className="text-red-600">{adminStats.totalSalesChange}% from last month</span>
+//                       </>
+//                     )}
+//                   </div>
+//                 </div>
+//                 <div className="bg-green-100 p-3 rounded-lg">
+//                   <IndianRupee className="w-6 h-6 text-green-600" />
+//                 </div>
+//               </div>
+//             </CardContent>
+//           </Card>
+//         )}
+
+//         {/* Low Balance Students Card */}
+//         <Card 
+//           className="hover:shadow-lg transition-shadow cursor-pointer"
+//           onClick={() => setShowLowBalanceModal(true)}
+//         >
 //           <CardContent className="p-6">
 //             <div className="flex items-center justify-between">
 //               <div>
-//                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
-//                 <p className="text-2xl font-bold text-gray-900">₹{stats?.totalSales?.toLocaleString("en-IN") || "0"}</p>
-//                 <div className="flex items-center text-xs mt-2">
-//                   {stats?.totalSalesChange && stats.totalSalesChange > 0 ? (
-//                     <>
-//                       <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-//                       <span className="text-green-600">+{stats.totalSalesChange}% from last month</span>
-//                     </>
-//                   ) : (
-//                     <>
-//                       <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-//                       <span className="text-red-600">{stats?.totalSalesChange}% from last month</span>
-//                     </>
-//                   )}
-//                 </div>
+//                 <p className="text-sm font-medium text-gray-600">Low Balance Students</p>
+//                 <p className="text-2xl font-bold text-gray-900">{stats?.lowBalanceCount || 0}</p>
+//                 <p className="text-xs text-orange-600 mt-2 flex items-center">
+//                   <Wallet className="w-3 h-3 mr-1" />
+//                   Balance below ₹500
+//                 </p>
 //               </div>
-//               <div className="bg-green-100 p-3 rounded-lg">
-//                 <IndianRupee className="w-6 h-6 text-green-600" />
+//               <div className="bg-orange-100 p-3 rounded-lg">
+//                 <Users className="w-6 h-6 text-orange-600" />
 //               </div>
 //             </div>
 //           </CardContent>
 //         </Card>
 
 //         {/* Low Stock Subproducts Card */}
-//         <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowLowStockModal(true)}>
+//         <Card 
+//           className="hover:shadow-lg transition-shadow cursor-pointer"
+//           onClick={() => setShowLowStockModal(true)}
+//         >
 //           <CardContent className="p-6">
 //             <div className="flex items-center justify-between">
 //               <div>
@@ -452,7 +563,7 @@ export default function OverviewTab() {
 //                   {stats?.topSoldProduct?.name || "N/A"}
 //                 </p>
 //                 <div className="flex items-center text-xs text-purple-600 mt-2">
-//                   <BarChart3 className="w-3 h-3 mr-1" />
+//                   <TrendingUp className="w-3 h-3 mr-1" />
 //                   {stats?.topSoldProduct?.quantitySold || 0} units sold
 //                 </div>
 //               </div>
@@ -463,481 +574,157 @@ export default function OverviewTab() {
 //           </CardContent>
 //         </Card>
 
-//         {/* Today's Sold Products Card */}
-//         <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowTodaysSalesModal(true)}>
+//         {/* Highest Purchased Student Card */}
+//         <Card 
+//           className="hover:shadow-lg transition-shadow cursor-pointer"
+//           onClick={() => setShowHighestPurchasedModal(true)}
+//         >
 //           <CardContent className="p-6">
 //             <div className="flex items-center justify-between">
 //               <div>
-//                 <p className="text-sm font-medium text-gray-600">Today's Sales</p>
-//                 <p className="text-2xl font-bold text-gray-900">{stats?.todaysSoldProducts?.length || 0}</p>
-//                 <p className="text-xs text-blue-600 mt-2">Products sold today</p>
+//                 <p className="text-sm font-medium text-gray-600">Top Customer Today</p>
+//                 <p className="text-lg font-bold text-gray-900 truncate max-w-[150px]">
+//                   {stats?.highestPurchasedStudent?.name || "N/A"}
+//                 </p>
+//                 <div className="flex items-center text-xs text-blue-600 mt-2">
+//                   <Award className="w-3 h-3 mr-1" />
+//                   ₹{stats?.highestPurchasedStudent?.totalPurchase?.toLocaleString('en-IN') || 0}
+//                 </div>
 //               </div>
 //               <div className="bg-blue-100 p-3 rounded-lg">
-//                 <ShoppingCart className="w-6 h-6 text-blue-600" />
+//                 <Award className="w-6 h-6 text-blue-600" />
 //               </div>
 //             </div>
 //           </CardContent>
 //         </Card>
 //       </div>
 
-//       {/* Charts Section */}
-//       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-//         {/* Profit/Loss Chart with Today's Profit Tile */}
-//         <div className="flex gap-4">
-//           {/* Today's Profit Square Tile */}
-//           <Card className="w-40 h-40 flex-shrink-0">
-//             <CardContent className="p-4 h-full flex flex-col justify-between">
-//               <div>
-//                 <p className="text-xs font-medium text-gray-600">Today's Profit</p>
-//                 <p className="text-xl font-bold text-gray-900 mt-1">₹{stats?.todaysProfit?.toLocaleString("en-IN") || "0"}</p>
-//               </div>
-//               <div>
-//                 <div className="flex items-center text-xs">
-//                   {Number(profitChangePercent) > 0 ? (
-//                     <>
-//                       <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-//                       <span className="text-green-600">+{profitChangePercent}%</span>
-//                     </>
-//                   ) : (
-//                     <>
-//                       <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-//                       <span className="text-red-600">{profitChangePercent}%</span>
-//                     </>
+//       {/* ADMIN ONLY: Charts Section */}
+//       {isAdmin && adminStats && (
+//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//           {/* Profit/Loss Chart with Today's Profit Tile */}
+//           <div className="flex gap-4">
+//             {/* Today's Profit Square Tile */}
+//             <Card className="w-40 h-40 flex-shrink-0">
+//               <CardContent className="p-4 h-full flex flex-col justify-between">
+//                 <div>
+//                   <p className="text-xs font-medium text-gray-600">Today's Profit</p>
+//                   <p className="text-xl font-bold text-gray-900 mt-1">
+//                     ₹{adminStats.todaysProfit.toLocaleString('en-IN')}
+//                   </p>
+//                 </div>
+//                 <div>
+//                   <div className="flex items-center text-xs">
+//                     {Number(profitChangePercent) > 0 ? (
+//                       <>
+//                         <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
+//                         <span className="text-green-600">+{profitChangePercent}%</span>
+//                       </>
+//                     ) : (
+//                       <>
+//                         <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
+//                         <span className="text-red-600">{profitChangePercent}%</span>
+//                       </>
+//                     )}
+//                   </div>
+//                   <p className="text-xs text-gray-500 mt-1">
+//                     Margin: {adminStats.todaysProfitMargin.toFixed(1)}%
+//                   </p>
+//                 </div>
+//               </CardContent>
+//             </Card>
+            
+//             {/* Profit/Loss Chart */}
+//             <Card className="flex-1">
+//               <CardHeader className="pb-3">
+//                 <CardTitle className="text-base font-semibold">Buying vs Selling Price</CardTitle>
+//               </CardHeader>
+//               <CardContent className="h-[120px]">
+//                 <ProfitLossChart />
+//               </CardContent>
+//             </Card>
+//           </div>
+
+//           {/* Analytics Chart with Dropdowns */}
+//           <Card>
+//             <CardHeader className="pb-3">
+//               <div className="flex items-center justify-between">
+//                 <CardTitle className="text-base font-semibold">Sales Analytics</CardTitle>
+//                 <div className="flex gap-2">
+//                   <Select value={analyticsView} onValueChange={(value) => setAnalyticsView(value as AnalyticsView)}>
+//                     <SelectTrigger className="w-[120px] h-8 text-xs">
+//                       <SelectValue placeholder="View by" />
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       <SelectItem value="category">Category</SelectItem>
+//                       <SelectItem value="product">Product</SelectItem>
+//                       <SelectItem value="subproduct">Subproduct</SelectItem>
+//                     </SelectContent>
+//                   </Select>
+
+//                   {analyticsView !== "category" && (
+//                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+//                       <SelectTrigger className="w-[120px] h-8 text-xs">
+//                         <SelectValue placeholder="Category" />
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         <SelectItem value="all">All Categories</SelectItem>
+//                         {categories.map((cat) => (
+//                           <SelectItem key={cat._id} value={cat._id}>
+//                             {cat.name}
+//                           </SelectItem>
+//                         ))}
+//                       </SelectContent>
+//                     </Select>
+//                   )}
+
+//                   {analyticsView === "subproduct" && (
+//                     <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+//                       <SelectTrigger className="w-[120px] h-8 text-xs">
+//                         <SelectValue placeholder="Product" />
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         <SelectItem value="all">All Products</SelectItem>
+//                         {products.map((product) => (
+//                           <SelectItem key={product._id} value={product._id}>
+//                             {product.name}
+//                           </SelectItem>
+//                         ))}
+//                       </SelectContent>
+//                     </Select>
 //                   )}
 //                 </div>
-//                 <p className="text-xs text-gray-500 mt-1">Margin: {stats?.todaysProfitMargin?.toFixed(1) || "0"}%</p>
 //               </div>
-//             </CardContent>
-//           </Card>
-
-//           {/* Profit/Loss Chart */}
-//           <Card className="flex-1">
-//             <CardHeader className="pb-3">
-//               <CardTitle className="text-base font-semibold">Buying vs Selling Price</CardTitle>
 //             </CardHeader>
-//             <CardContent className="h-[120px]">
-//               <ProfitLossChart />
+//             <CardContent className="h-[140px]">
+//               <CategoryAnalyticsChart 
+//                 view={analyticsView}
+//                 categoryId={selectedCategory}
+//                 productId={selectedProduct}
+//               />
 //             </CardContent>
 //           </Card>
 //         </div>
-
-//         {/* Analytics Chart with Dropdowns */}
-//         <Card>
-//           <CardHeader className="pb-3">
-//             <div className="flex items-center justify-between">
-//               <CardTitle className="text-base font-semibold">Sales Analytics</CardTitle>
-//               <div className="flex gap-2">
-//                 <Select value={analyticsView} onValueChange={(value) => setAnalyticsView(value as AnalyticsView)}>
-//                   <SelectTrigger className="w-[120px] h-8 text-xs">
-//                     <SelectValue placeholder="View by" />
-//                   </SelectTrigger>
-//                   <SelectContent>
-//                     <SelectItem value="category">Category</SelectItem>
-//                     <SelectItem value="product">Product</SelectItem>
-//                     <SelectItem value="subproduct">Subproduct</SelectItem>
-//                   </SelectContent>
-//                 </Select>
-
-//                 {analyticsView !== "category" && (
-//                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-//                     <SelectTrigger className="w-[120px] h-8 text-xs">
-//                       <SelectValue placeholder="Category" />
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                       <SelectItem value="all">All Categories</SelectItem>
-//                       {categories.map((cat) => (
-//                         <SelectItem key={cat.id} value={cat.id}>
-//                           {cat.name}
-//                         </SelectItem>
-//                       ))}
-//                     </SelectContent>
-//                   </Select>
-//                 )}
-
-//                 {analyticsView === "subproduct" && (
-//                   <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-//                     <SelectTrigger className="w-[120px] h-8 text-xs">
-//                       <SelectValue placeholder="Product" />
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                       <SelectItem value="all">All Products</SelectItem>
-//                       {products.map((product) => (
-//                         <SelectItem key={product.id} value={product.id}>
-//                           {product.name}
-//                         </SelectItem>
-//                       ))}
-//                     </SelectContent>
-//                   </Select>
-//                 )}
-//               </div>
-//             </div>
-//           </CardHeader>
-//           <CardContent className="h-[140px]">
-//             <CategoryAnalyticsChart view={analyticsView} categoryId={selectedCategory} productId={selectedProduct} />
-//           </CardContent>
-//         </Card>
-//       </div>
+//       )}
 
 //       {/* Modals */}
-//       <LowStockModal open={showLowStockModal} onOpenChange={setShowLowStockModal} products={stats?.lowStockProducts || []} />
-
-//       <TodaysSalesModal open={showTodaysSalesModal} onOpenChange={setShowTodaysSalesModal} products={stats?.todaysSoldProducts || []} />
-//     </div>
-//   );
-// }
-
-
-
-// // // app/dashboard/overview-tab.tsx
-// // "use client"
-
-// // import { useState } from "react"
-// // import { useQuery } from "@tanstack/react-query"
-// // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// // import { 
-// //   Package, 
-// //   IndianRupee, 
-// //   TrendingUp, 
-// //   AlertTriangle, 
-// //   ShoppingCart,
-// //   TrendingDown, 
-// //   BarChart3
-// // } from "lucide-react"
-// // import ProfitLossChart from "@/components/charts/profit-loss-chart"
-// // import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart"
-// // import LowStockModal from "@/components/modals/low-stock-modal"
-// // import TodaysSalesModal from "@/components/modals/todays-sales-modal"
-
-// // // Types
-// // // interface DashboardStats {
-// // //   totalSales: number
-// // //   totalSalesChange: number
-// // //   lowStockCount: number
-// // //   lowStockProducts: Array<{
-// // //     id: string
-// // //     name: string
-// // //     currentStock: number
-// // //     minStock: number
-// // //   }>
-// // //   topSoldProduct: {
-// // //     id: string
-// // //     name: string
-// // //     quantitySold: number
-// // //     revenue: number
-// // //   }
-// // //   todaysSoldProducts: Array<{
-// // //     id: string
-// // //     name: string
-// // //     quantity: number
-// // //     revenue: number
-// // //   }>
-// // //   todaysProfit: number
-// // //   todaysProfitMargin: number
-// // //   yesterdayProfit: number
-// // // }
-
-// // // Update the types in overview-tab.tsx
-// // interface DashboardStats {
-// //   totalSales: number
-// //   totalSalesChange: number
-// //   lowStockCount: number
-// //   lowStockProducts: Array<{
-// //     id: string
-// //     name: string
-// //     category: string
-// //     price: number
-// //     stock: number
-// //   }>
-// //   topSoldProduct: {
-// //     id: string
-// //     name: string
-// //     quantitySold: number
-// //     revenue: number
-// //   }
-// //   todaysSoldProducts: Array<{
-// //     id: string
-// //     name: string
-// //     quantity: number
-// //     revenue: number
-// //   }>
-// //   todaysProfit: number
-// //   todaysProfitMargin: number
-// //   yesterdayProfit: number
-// // }
-
-// // export default function OverviewTab() {
-// //   const [showLowStockModal, setShowLowStockModal] = useState(false)
-// //   const [showTodaysSalesModal, setShowTodaysSalesModal] = useState(false)
-// //   const [analyticsView, setAnalyticsView] = useState<"category" | "product" | "subproduct">("category")
-// //   const [selectedCategory, setSelectedCategory] = useState<string>("all")
-// //   const [selectedProduct, setSelectedProduct] = useState<string>("all")
-
-// //   // Fetch dashboard statistics
-// //   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-// //     queryKey: ["dashboard-stats"],
-// //     queryFn: async () => {
-// //       const response = await fetch("/api/dashboard/stats")
-// //       if (!response.ok) throw new Error("Failed to fetch stats")
-// //       return response.json()
-// //     },
-// //     refetchInterval: 30000,
-// //   })
-
-// //   // Fetch categories for dropdown
-// //   const { data: categories } = useQuery({
-// //     queryKey: ["categories"],
-// //     queryFn: async () => {
-// //       const response = await fetch("/api/categories")
-// //       if (!response.ok) throw new Error("Failed to fetch categories")
-// //       return response.json()
-// //     },
-// //   })
-
-// //   // Fetch products for dropdown
-// //   const { data: products } = useQuery({
-// //     queryKey: ["products", selectedCategory],
-// //     queryFn: async () => {
-// //       const url = selectedCategory === "all" 
-// //         ? "/api/products" 
-// //         : `/api/products?category=${selectedCategory}`
-// //       const response = await fetch(url)
-// //       if (!response.ok) throw new Error("Failed to fetch products")
-// //       return response.json()
-// //     },
-// //     enabled: analyticsView === "product" || analyticsView === "subproduct",
-// //   })
-
-// //   if (statsLoading) {
-// //     return (
-// //       <div className="flex items-center justify-center h-96">
-// //         <div className="text-center">
-// //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-// //           <p className="mt-4 text-gray-600">Loading dashboard...</p>
-// //         </div>
-// //       </div>
-// //     )
-// //   }
-
-// //   const profitChangePercent = stats?.yesterdayProfit 
-// //     ? ((stats.todaysProfit - stats.yesterdayProfit) / stats.yesterdayProfit * 100).toFixed(1)
-// //     : "0"
-
-// //   return (
-// //     <div className="space-y-6">
-// //       {/* Stats Cards Grid */}
-// //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-// //         {/* Total Sales Card */}
-// //         <Card className="hover:shadow-lg transition-shadow">
-// //           <CardContent className="p-6">
-// //             <div className="flex items-center justify-between">
-// //               <div>
-// //                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
-// //                 <p className="text-2xl font-bold text-gray-900">₹{stats?.totalSales?.toLocaleString('en-IN') || "0"}</p>
-// //                 <div className="flex items-center text-xs mt-2">
-// //                   {stats?.totalSalesChange && stats.totalSalesChange > 0 ? (
-// //                     <>
-// //                       <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-// //                       <span className="text-green-600">+{stats.totalSalesChange}% from last month</span>
-// //                     </>
-// //                   ) : (
-// //                     <>
-// //                       <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-// //                       <span className="text-red-600">{stats?.totalSalesChange}% from last month</span>
-// //                     </>
-// //                   )}
-// //                 </div>
-// //               </div>
-// //               <div className="bg-green-100 p-3 rounded-lg">
-// //                 <IndianRupee className="w-6 h-6 text-green-600" />
-// //               </div>
-// //             </div>
-// //           </CardContent>
-// //         </Card>
-
-// //         {/* Low Stock Subproducts Card */}
-// //         <Card 
-// //           className="hover:shadow-lg transition-shadow cursor-pointer"
-// //           onClick={() => setShowLowStockModal(true)}
-// //         >
-// //           <CardContent className="p-6">
-// //             <div className="flex items-center justify-between">
-// //               <div>
-// //                 <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-// //                 <p className="text-2xl font-bold text-gray-900">{stats?.lowStockCount || 0}</p>
-// //                 <p className="text-xs text-red-600 mt-2 flex items-center">
-// //                   <AlertTriangle className="w-3 h-3 mr-1" />
-// //                   Needs immediate attention
-// //                 </p>
-// //               </div>
-// //               <div className="bg-red-100 p-3 rounded-lg">
-// //                 <Package className="w-6 h-6 text-red-600" />
-// //               </div>
-// //             </div>
-// //           </CardContent>
-// //         </Card>
-
-// //         {/* Top Sold Subproduct Card */}
-// //         <Card className="hover:shadow-lg transition-shadow">
-// //           <CardContent className="p-6">
-// //             <div className="flex items-center justify-between">
-// //               <div>
-// //                 <p className="text-sm font-medium text-gray-600">Top Selling Product</p>
-// //                 <p className="text-lg font-bold text-gray-900 truncate max-w-[150px]">
-// //                   {stats?.topSoldProduct?.name || "N/A"}
-// //                 </p>
-// //                 <div className="flex items-center text-xs text-purple-600 mt-2">
-// //                   <BarChart3 className="w-3 h-3 mr-1" />
-// //                   {stats?.topSoldProduct?.quantitySold || 0} units sold
-// //                 </div>
-// //               </div>
-// //               <div className="bg-purple-100 p-3 rounded-lg">
-// //                 <TrendingUp className="w-6 h-6 text-purple-600" />
-// //               </div>
-// //             </div>
-// //           </CardContent>
-// //         </Card>
-
-// //         {/* Today's Sold Products Card */}
-// //         <Card 
-// //           className="hover:shadow-lg transition-shadow cursor-pointer"
-// //           onClick={() => setShowTodaysSalesModal(true)}
-// //         >
-// //           <CardContent className="p-6">
-// //             <div className="flex items-center justify-between">
-// //               <div>
-// //                 <p className="text-sm font-medium text-gray-600">Today's Sales</p>
-// //                 <p className="text-2xl font-bold text-gray-900">{stats?.todaysSoldProducts?.length || 0}</p>
-// //                 <p className="text-xs text-blue-600 mt-2">
-// //                   Products sold today
-// //                 </p>
-// //               </div>
-// //               <div className="bg-blue-100 p-3 rounded-lg">
-// //                 <ShoppingCart className="w-6 h-6 text-blue-600" />
-// //               </div>
-// //             </div>
-// //           </CardContent>
-// //         </Card>
-// //       </div>
-
-// //       {/* Charts Section */}
-// //       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-// //         {/* Profit/Loss Chart with Today's Profit Tile */}
-// //         <div className="flex gap-4">
-// //           {/* Today's Profit Square Tile */}
-// //           <Card className="w-40 h-40 flex-shrink-0">
-// //             <CardContent className="p-4 h-full flex flex-col justify-between">
-// //               <div>
-// //                 <p className="text-xs font-medium text-gray-600">Today's Profit</p>
-// //                 <p className="text-xl font-bold text-gray-900 mt-1">
-// //                   ₹{stats?.todaysProfit?.toLocaleString('en-IN') || "0"}
-// //                 </p>
-// //               </div>
-// //               <div>
-// //                 <div className="flex items-center text-xs">
-// //                   {Number(profitChangePercent) > 0 ? (
-// //                     <>
-// //                       <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-// //                       <span className="text-green-600">+{profitChangePercent}%</span>
-// //                     </>
-// //                   ) : (
-// //                     <>
-// //                       <TrendingDown className="w-3 h-3 mr-1 text-red-600" />
-// //                       <span className="text-red-600">{profitChangePercent}%</span>
-// //                     </>
-// //                   )}
-// //                 </div>
-// //                 <p className="text-xs text-gray-500 mt-1">
-// //                   Margin: {stats?.todaysProfitMargin?.toFixed(1) || "0"}%
-// //                 </p>
-// //               </div>
-// //             </CardContent>
-// //           </Card>
-          
-// //           {/* Profit/Loss Chart */}
-// //           <Card className="flex-1">
-// //             <CardHeader className="pb-3">
-// //               <CardTitle className="text-base font-semibold">Buying vs Selling Price</CardTitle>
-// //             </CardHeader>
-// //             <CardContent className="h-[120px]">
-// //               <ProfitLossChart />
-// //             </CardContent>
-// //           </Card>
-// //         </div>
-
-// //         {/* Analytics Chart with Dropdowns */}
-// //         <Card>
-// //           <CardHeader className="pb-3">
-// //             <div className="flex items-center justify-between">
-// //               <CardTitle className="text-base font-semibold">Sales Analytics</CardTitle>
-// //               <div className="flex gap-2">
-// //                 <Select value={analyticsView} onValueChange={(value: any) => setAnalyticsView(value)}>
-// //                   <SelectTrigger className="w-[120px] h-8 text-xs">
-// //                     <SelectValue placeholder="View by" />
-// //                   </SelectTrigger>
-// //                   <SelectContent>
-// //                     <SelectItem value="category">Category</SelectItem>
-// //                     <SelectItem value="product">Product</SelectItem>
-// //                     <SelectItem value="subproduct">Subproduct</SelectItem>
-// //                   </SelectContent>
-// //                 </Select>
-
-// //                 {analyticsView !== "category" && (
-// //                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-// //                     <SelectTrigger className="w-[120px] h-8 text-xs">
-// //                       <SelectValue placeholder="Category" />
-// //                     </SelectTrigger>
-// //                     <SelectContent>
-// //                       <SelectItem value="all">All Categories</SelectItem>
-// //                       {categories?.map((cat: any) => (
-// //                         <SelectItem key={cat.id} value={cat.id}>
-// //                           {cat.name}
-// //                         </SelectItem>
-// //                       ))}
-// //                     </SelectContent>
-// //                   </Select>
-// //                 )}
-
-// //                 {analyticsView === "subproduct" && (
-// //                   <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-// //                     <SelectTrigger className="w-[120px] h-8 text-xs">
-// //                       <SelectValue placeholder="Product" />
-// //                     </SelectTrigger>
-// //                     <SelectContent>
-// //                       <SelectItem value="all">All Products</SelectItem>
-// //                       {products?.map((product: any) => (
-// //                         <SelectItem key={product.id} value={product.id}>
-// //                           {product.name}
-// //                         </SelectItem>
-// //                       ))}
-// //                     </SelectContent>
-// //                   </Select>
-// //                 )}
-// //               </div>
-// //             </div>
-// //           </CardHeader>
-// //           <CardContent className="h-[140px]">
-// //             <CategoryAnalyticsChart 
-// //               view={analyticsView}
-// //               categoryId={selectedCategory}
-// //               productId={selectedProduct}
-// //             />
-// //           </CardContent>
-// //         </Card>
-// //       </div>
-
-// //       {/* Modals */}
-// //       <LowStockModal 
-// //         open={showLowStockModal} 
-// //         onOpenChange={setShowLowStockModal} 
-// //         products={stats?.lowStockProducts || []} 
-// //       />
+//       <LowStockModal 
+//         open={showLowStockModal} 
+//         onOpenChange={setShowLowStockModal} 
+//         products={stats?.lowStockProducts || []} 
+//       />
       
-// //       <TodaysSalesModal
-// //         open={showTodaysSalesModal}
-// //         onOpenChange={setShowTodaysSalesModal}
-// //         products={stats?.todaysSoldProducts || []}
-// //       />
-// //     </div>
-// //   )
-// // }
+//       <LowBalanceStudentsModal
+//         open={showLowBalanceModal}
+//         onOpenChange={setShowLowBalanceModal}
+//         students={stats?.lowBalanceStudents || []}
+//       />
+
+//       <HighestPurchasedStudentModal
+//         open={showHighestPurchasedModal}
+//         onOpenChange={setShowHighestPurchasedModal}
+//         student={stats?.highestPurchasedStudent || null}
+//       />
+//     </div>
+//   )
+// }

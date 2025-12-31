@@ -38,13 +38,6 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
-  subproducts: {
-    label: 'Sub-Products',
-    icon: Layers,
-    component: dynamic(() => import('@/components/dashboard/tabs/subproducts-tab'), {
-      loading: () => <LoadingSkeleton />,
-    }),
-  },
   // stocks: {
   //   label: 'Stocks',
   //   icon: Warehouse,
@@ -52,24 +45,10 @@ export const TABS_REGISTRY = {
   //     loading: () => <LoadingSkeleton />,
   //   }),
   // },
-  inventory: {
-    label: 'Inventory',
-    icon: Warehouse,
-    component: dynamic(() => import('@/components/dashboard/tabs/inventory-tab'), {
-      loading: () => <LoadingSkeleton />,
-    }),
-  },
-  selling: {
+  Selling: {
     label: 'Selling',
     icon: ShoppingCart,
     component: dynamic(() => import('@/components/dashboard/tabs/selling-tab'), {
-      loading: () => <LoadingSkeleton />,
-    }),
-  },
-  'school-selling': {
-    label: 'School Selling',
-    icon: ShoppingCart,
-    component: dynamic(() => import('@/components/dashboard/tabs/school-selling-tab'), {
       loading: () => <LoadingSkeleton />,
     }),
   },

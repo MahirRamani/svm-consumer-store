@@ -24,12 +24,8 @@ async function getUserByUsername(username: string) {
       .lean();
 
     if (!user) {
-      console.log('User not foun  d:', username);
       return null;
     }
-
-    console.log("user", user);
-    
 
     return user;
   } catch (error) {
@@ -42,6 +38,7 @@ async function getUserByUsername(username: string) {
 // NextAuth Configuration
 // ============================================================================
 export const { auth, signIn, signOut, handlers } = NextAuth({
+  trustHost: true,
   ...authConfig,
   providers: [
     Credentials({
@@ -62,7 +59,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           .safeParse(credentials);
 
         if (!parsedCredentials.success) {
-          console.log('Invalid credentials format:', parsedCredentials.error);
           return null;
         }
 
@@ -72,7 +68,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         const user = await getUserByUsername(username);
 
         if (!user) {
-          console.log('User not found:', username);
           return null;
         }
 
@@ -80,7 +75,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordsMatch) {
-          console.log('Invalid password for user:', username);
           return null;
         }
 
@@ -168,7 +162,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
   },
   events: {
     async signIn({ user }) {
-      console.log(`✅ User signed in: ${user.username} (${user.id}) at ${new Date().toISOString()}`);
+      console.log(`✅ User signed in: ${user.username}`);
     },
     async signOut(message) {
       if ('token' in message && message.token) {

@@ -21,7 +21,7 @@ interface CloudinaryUploadResult {
 async function uploadToCloudinary(
   buffer: Buffer,
   publicId: string,
-  folder: string = "sub-products"
+  folder: string = "svm-consumer-store"
 ): Promise<CloudinaryUploadResult> {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(

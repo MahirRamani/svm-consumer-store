@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { getAccessibleTabs, hasTabAccess, type TabId } from '@/lib/config/tabs-registry';
+import { signOut } from 'next-auth/react';
 
 export default function Dashboard() {
   const { allowedTabs, loading, error } = useUserPermissions();
@@ -26,8 +27,9 @@ export default function Dashboard() {
 
   // Handle logout
   const handleLogout = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' });
-    router.push('/login');
+    // await fetch('/api/auth/signout', { method: 'POST' });
+    // router.push('/login');
+    signOut({ callbackUrl: '/login' });
   };
 
   // Handle tab change
