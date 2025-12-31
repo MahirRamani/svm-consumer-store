@@ -120,8 +120,8 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
                                                         checked={field.value?.includes(tabId as TabId)}
                                                         onCheckedChange={(checked) => {
                                                             return checked
-                                                                ? field.onChange([...field.value, tabId])
-                                                                : field.onChange(field.value?.filter((id) => id !== tabId));
+                                                                ? field.onChange([...(field.value || []), tabId])
+                                                                : field.onChange((field.value || []).filter((id) => id !== tabId));
                                                         }}
                                                     />
                                                 </FormControl>
