@@ -3,8 +3,8 @@ import React from 'react'
 
 function page() {
   return (
-    <div>
-      <StudentManagement />
+    <div className='p-4'>
+      <StudentManagement/>
     </div>
   )
 }

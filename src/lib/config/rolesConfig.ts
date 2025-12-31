@@ -1,8 +1,8 @@
 export const ROLES = {
-  ADMIN: { id: "admin", name: "Admin" },
-  SELLER: { id: "seller", name: "Seller" },
-  ACCOUNTANT: { id: "accountant", name: "Accountant" },
-  SUPERUSER: { id: "superuser", name: "Superuser" },
+  ADMIN: { id: "admin", name: "ADMIN" },
+  SELLER: { id: "seller", name: "SELLER" },
+  ACCOUNTANT: { id: "accountant", name: "ACCOUNTANT" },
+  SUPERUSER: { id: "superuser", name: "SUPERUSER" },
 } as const;
 
 // Auto-generated type from roles

@@ -98,7 +98,7 @@ export default function UserCreateForm({ onUserCreated }: UserCreateFormProps) {
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         {Object.values(ROLES).map(role => (
-                                            <SelectItem key={role.id} value={role.name}>{role.name}</SelectItem>
+                                            <SelectItem key={role.name} value={role.name}>{role.name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
