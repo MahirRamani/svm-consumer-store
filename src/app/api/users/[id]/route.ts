@@ -105,6 +105,7 @@ const deleteUserHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withAuth(getUserHandler));
-export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateUserHandler));
-export const DELETE = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(deleteUserHandler));
+// export const GET = withErrorHandler(withAuth(getUserHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER'])(getUserHandler));
+export const PATCH = withErrorHandler(withRole(['SUPERUSER'])(updateUserHandler));
+export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteUserHandler));

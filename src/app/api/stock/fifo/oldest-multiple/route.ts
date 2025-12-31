@@ -1,7 +1,8 @@
+// app/api/stock/fifo/bulk/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
 import { StockTransaction } from '@/models/StockTransaction';
-import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
+import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { validateBody, objectIdSchema } from '@/lib/api/validation-helpers';
 import mongoose from 'mongoose';
 
@@ -9,7 +10,7 @@ import mongoose from 'mongoose';
 // Validation Schema
 // =============================================
 const bulkOldestStockSchema = z.object({
-  subProductIds: z.array(objectIdSchema).min(1).max(1000),
+  productIds: z.array(objectIdSchema).min(1).max(1000),
 });
 
 type BulkOldestStockDto = z.infer<typeof bulkOldestStockSchema>;
@@ -32,34 +33,34 @@ const bulkOldestStockHandler = async (req: Request) => {
   await connectDB();
 
   const data = await validateBody(req, bulkOldestStockSchema);
-  const { subProductIds } = data;
+  const { productIds } = data;
 
   // Convert to ObjectIds
-  const validIds = subProductIds.map(id => new mongoose.Types.ObjectId(id));
+  const validIds = productIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  // Fetch oldest stock for each sub-product using aggregation (FIFO)
+  // Fetch oldest stock for each product using aggregation (FIFO)
   const oldestStocks = await StockTransaction.aggregate<OldestStockAggregation>([
     {
       $match: {
-        subProductId: { $in: validIds },
+        productId: { $in: validIds },
         transactionType: { $in: ['Buy', 'Adjustment'] },
         quantityLeft: { $gt: 0 },
       },
     },
     {
       $sort: {
-        subProductId: 1,
-        date: 1,
+        productId: 1,
+        purchaseDate: 1,
         createdAt: 1,
       },
     },
     {
       $group: {
-        _id: '$subProductId',
+        _id: '$productId',
         stockTransactionId: { $first: '$_id' },
         sellingPrice: { $first: '$sellingPrice' },
         quantityLeft: { $first: '$quantityLeft' },
-        stockDate: { $first: '$date' },
+        stockDate: { $first: '$purchaseDate' },
       },
     },
   ]);
@@ -83,7 +84,7 @@ const bulkOldestStockHandler = async (req: Request) => {
     const stockData = stockMap.get(idString);
 
     return {
-      subProductId: idString,
+      productId: idString,
       stock: stockData || null,
     };
   });

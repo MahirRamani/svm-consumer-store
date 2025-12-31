@@ -7,8 +7,6 @@ import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
 import {
   createStockTransactionSchema,
   getStockTransactionsQuerySchema,
-  type CreateStockTransactionDto,
-  type GetStockTransactionsQueryDto,
 } from '@/lib/validations/stockTransaction';
 import type { FilterQuery } from 'mongoose';
 
@@ -19,12 +17,16 @@ const getStockTransactionsHandler = async (req: Request) => {
   await connectDB();
 
   const query = validateQuery(req, getStockTransactionsQuerySchema);
-  const { page, limit, sortBy, sortOrder, subProductId, transactionType } = query;
+  const { page, limit, sortBy, sortOrder, productId, categoryId, transactionType } = query;
 
   // Build filter
   const filter: FilterQuery<IStockTransaction> = {};
-  if (subProductId) {
-    filter.subProductId = subProductId;
+  
+  if (productId) {
+    filter.productId = productId;
+  }
+  if (categoryId) {
+    filter.categoryId = categoryId;
   }
   if (transactionType) {
     filter.transactionType = transactionType;
@@ -41,7 +43,8 @@ const getStockTransactionsHandler = async (req: Request) => {
       .skip(skip)
       .limit(limit)
       .populate('createdBy', 'username')
-      .populate('subProductId', 'name size')
+      .populate('productId', 'name size imageURL')
+      .populate('categoryId', 'name')
       .lean(),
     StockTransaction.countDocuments(filter),
   ]);
@@ -66,7 +69,8 @@ const createStockTransactionHandler = async (req: Request, authContext: AuthCont
   const transaction = await StockTransaction.create(transactionData);
   const populated = await transaction.populate([
     { path: 'createdBy', select: 'username' },
-    { path: 'subProductId', select: 'name size' },
+    { path: 'productId', select: 'name size imageURL' },
+    { path: 'categoryId', select: 'name' },
   ]);
 
   return successResponse(populated.toObject(), 201, 'Stock transaction created successfully');

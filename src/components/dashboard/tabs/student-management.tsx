@@ -9,11 +9,25 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, PlusCircle, Edit, History, Search, Trash2, Minus, Eye, EyeOff } from "lucide-react";
+import { 
+  Plus, 
+  PlusCircle, 
+  Edit, 
+  History, 
+  Search, 
+  Trash2, 
+  Minus, 
+  Eye, 
+  EyeOff,
+  Wallet,
+  Download
+} from "lucide-react";
+import { toast } from "sonner";
 import AddStudentModal from "@/components/modals/add-student-modal";
 import TopUpModal from "@/components/modals/top-up-modal";
 import DeductBalanceModal from "@/components/modals/deduct-balance-modal";
 import EditStudentModal from "@/components/modals/edit-student-modal";
+import BalanceReportModal from "@/components/modals/balance-report-modal";
 import { useDeleteStudent, useToggleStudentStatus } from "@/hooks/use-student-mutations";
 import type { Student } from "@/types";
 
@@ -25,6 +39,9 @@ interface StudentApiResponse {
 }
 
 export default function StudentManagement() {
+  // =============================================
+  // STATE
+  // =============================================
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStandard, setSelectedStandard] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
@@ -35,8 +52,12 @@ export default function StudentManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [showBalanceReportModal, setShowBalanceReportModal] = useState(false);
+  const [balanceReportStudentId, setBalanceReportStudentId] = useState<string | null>(null);
 
-  // Use custom hooks
+  // =============================================
+  // HOOKS
+  // =============================================
   const deleteMutation = useDeleteStudent();
   const toggleStatusMutation = useToggleStudentStatus();
 
@@ -58,6 +79,26 @@ export default function StudentManagement() {
 
   const students: Student[] = Array.isArray(studentsData) ? studentsData : [];
 
+  // =============================================
+  // MEMOIZED VALUES - MUST BE BEFORE CALLBACKS THAT USE THEM
+  // =============================================
+  const filteredStudents = useMemo(() => {
+    if (!Array.isArray(students)) return [];
+    
+    return students.filter((student: Student) => {
+      const matchesSearch =
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStandard = selectedStandard === "all" || student.standard === selectedStandard;
+      const matchesYear = selectedYear === "all" || student.year?.toString() === selectedYear;
+
+      return matchesSearch && matchesStandard && matchesYear;
+    });
+  }, [students, searchTerm, selectedStandard, selectedYear]);
+
+  // =============================================
+  // CALLBACKS - AFTER MEMOIZED VALUES
+  // =============================================
   const handleTopUp = useCallback((studentId: string) => {
     setSelectedStudentId(studentId);
     setShowTopUpModal(true);
@@ -69,8 +110,6 @@ export default function StudentManagement() {
   }, []);
 
   const handleEditStudent = useCallback((student: Student) => {
-    console.log("Opening edit modal with student:", student); // Debug log
-    // Pass the complete student object
     setSelectedStudent(student);
     setShowEditModal(true);
   }, []);
@@ -78,9 +117,13 @@ export default function StudentManagement() {
   const handleEditModalClose = useCallback((open: boolean) => {
     setShowEditModal(open);
     if (!open) {
-      // Clear selected student when modal closes
       setSelectedStudent(null);
     }
+  }, []);
+
+  const handleOpenBalanceReport = useCallback((studentId?: string) => {
+    setBalanceReportStudentId(studentId || null);
+    setShowBalanceReportModal(true);
   }, []);
 
   const handleToggleActive = useCallback(
@@ -102,20 +145,51 @@ export default function StudentManagement() {
     [deleteMutation]
   );
 
-  const filteredStudents = useMemo(() => {
-    if (!Array.isArray(students)) return [];
-    
-    return students.filter((student: Student) => {
-      const matchesSearch =
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStandard = selectedStandard === "all" || student.standard === selectedStandard;
-      const matchesYear = selectedYear === "all" || student.year?.toString() === selectedYear;
+  // NOW THIS CAN USE filteredStudents SINCE IT'S DEFINED ABOVE
+  const handleExportStudents = useCallback(() => {
+    try {
+      const headers = [
+        "Name",
+        "Roll Number",
+        "Standard",
+        "Year",
+        "Balance",
+        "Mobile",
+        "Status",
+      ];
 
-      return matchesSearch && matchesStandard && matchesYear;
-    });
-  }, [students, searchTerm, selectedStandard, selectedYear]);
+      const rows = filteredStudents.map((student) => [
+        `"${student.name}"`,
+        `"${student.rollNumber}"`,
+        `"${student.standard}"`,
+        student.year,
+        student.balance.toFixed(2),
+        `"${student.mobileNo || "N/A"}"`,
+        student.isActive ? "Active" : "Inactive",
+      ].join(","));
 
+      const csvContent = [headers.join(","), ...rows].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `students-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Students exported successfully!");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export students");
+    }
+  }, [filteredStudents]);
+
+  // =============================================
+  // UTILITY FUNCTIONS
+  // =============================================
   const getBalanceStatus = useCallback((balance: number): { label: string; variant: "default" | "destructive" | "secondary" } => {
     if (balance > 100) return { label: "Active", variant: "default" };
     if (balance > 0) return { label: "Low Balance", variant: "secondary" };
@@ -131,18 +205,51 @@ export default function StudentManagement() {
       .toUpperCase();
   }, []);
 
+  // =============================================
+  // LOADING STATE
+  // =============================================
   if (isLoading) {
     return <div className="text-center py-8">Loading students...</div>;
   }
 
+  // =============================================
+  // RENDER
+  // =============================================
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Student Account Management</h2>
-        <Button onClick={() => setShowAddModal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Student
-        </Button>
+        <div className="flex space-x-2">
+          {/* Balance Report Button */}
+          <Button
+            onClick={() => handleOpenBalanceReport()}
+            variant="outline"
+            className="border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            Balance Report
+          </Button>
+
+          {/* Export Students Button */}
+          <Button
+            onClick={handleExportStudents}
+            variant="outline"
+            disabled={filteredStudents.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+
+          {/* Add Student Button */}
+          <Button 
+            onClick={() => setShowAddModal(true)} 
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Student
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -185,7 +292,7 @@ export default function StudentManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
-                  {[2024, 2023, 2022, 2021, 2020, 2019].map((year) => (
+                  {[2025, 2024, 2023, 2022, 2021, 2020, 2019].map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
                     </SelectItem>
@@ -267,61 +374,86 @@ export default function StudentManagement() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge
                             variant={balanceStatus.variant}
-                            className={
-                              balanceStatus.variant === "default" ? "bg-green-500 hover:bg-green-600" : ""
-                            }
+                            className={balanceStatus.variant === "default" ? "bg-green-500 hover:bg-green-600" : ""}
                           >
                             {student.isActive ? balanceStatus.label : "Inactive"}
                           </Badge>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex space-x-2">
+                          <div className="flex space-x-1">
+                            {/* Balance Report */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenBalanceReport(student._id)}
+                              className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                              title="Balance Report"
+                            >
+                              <Wallet className="w-4 h-4" />
+                            </Button>
+
+                            {/* Toggle Active */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleToggleActive(student._id, student.isActive)}
                               disabled={toggleStatusMutation.isPending}
-                              className={student.isActive ? "text-orange-500 hover:text-orange-600" : "text-green-500 hover:text-green-600"}
+                              className={student.isActive ? "text-orange-500 hover:text-orange-600 hover:bg-orange-50" : "text-green-500 hover:text-green-600 hover:bg-green-50"}
                               title={student.isActive ? "Deactivate Student" : "Activate Student"}
                             >
                               {student.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </Button>
+
+                            {/* Add Balance */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleTopUp(student._id)}
-                              className="text-green-500 hover:text-green-600"
+                              className="text-green-500 hover:text-green-600 hover:bg-green-50"
                               title="Add Balance"
                             >
                               <PlusCircle className="w-4 h-4" />
                             </Button>
+
+                            {/* Deduct Balance */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeduct(student._id)}
-                              className="text-red-500 hover:text-red-600"
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50"
                               title="Deduct Balance"
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
+
+                            {/* Edit Student */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditStudent(student)}
-                              className="text-purple-500 hover:text-purple-600"
+                              className="text-purple-500 hover:text-purple-600 hover:bg-purple-50"
                               title="Edit Student"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600" title="View History">
+
+                            {/* View History */}
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-50" 
+                              title="View History"
+                            >
                               <History className="w-4 h-4" />
                             </Button>
+
+                            {/* Delete Student */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteStudent(student._id, student.name)}
                               disabled={deleteMutation.isPending}
-                              className="text-red-500 hover:text-red-600"
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50"
                               title="Delete Student"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -343,6 +475,19 @@ export default function StudentManagement() {
       <TopUpModal open={showTopUpModal} onOpenChange={setShowTopUpModal} studentId={selectedStudentId} />
       <DeductBalanceModal open={showDeductModal} onOpenChange={setShowDeductModal} studentId={selectedStudentId} />
       <EditStudentModal open={showEditModal} onOpenChange={handleEditModalClose} student={selectedStudent} />
+      
+      {/* Balance Report Modal */}
+      <BalanceReportModal
+        open={showBalanceReportModal}
+        onOpenChange={(open) => {
+          setShowBalanceReportModal(open);
+          if (!open) {
+            setBalanceReportStudentId(null);
+          }
+        }}
+        students={students}
+        preSelectedStudentId={balanceReportStudentId}
+      />
     </div>
   );
 }

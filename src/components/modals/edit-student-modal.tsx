@@ -62,13 +62,6 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
   // Populate form when student changes
   useEffect(() => {
     if (student && open) {
-      console.log("Loading student in edit modal:", {
-        student,
-        standard: student.standard,
-        year: student.year,
-        yearType: typeof student.year
-      });
-      
       setFormData({
         name: student.name || "",
         rollNumber: student.rollNumber || "",
@@ -84,11 +77,6 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
         standard: false,
         year: false,
         mobileNo: false,
-      });
-      
-      console.log("Form data set to:", {
-        standard: student.standard,
-        year: student.year.toString()
       });
     }
   }, [student, open]);
@@ -175,7 +163,6 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
 
   const handleChange = useCallback(
     (field: FormField, value: string) => {
-      console.log(`Field ${field} changed to:`, value);
       setFormData((prev) => ({ ...prev, [field]: value }));
 
       // Mark as touched when value changes
@@ -266,14 +253,6 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
     !errors.mobileNo;
 
   const canSubmit = isFormValid && hasChanges() && !updateMutation.isPending;
-
-  console.log("Render state:", {
-    formDataStandard: formData.standard,
-    formDataYear: formData.year,
-    isFormValid,
-    hasChanges: hasChanges(),
-    canSubmit
-  });
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

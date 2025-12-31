@@ -45,7 +45,7 @@ export default function CategoriesTab() {
         params.append("includeInactive", "true");
       }
 
-      const response = await fetch(`/api/categories?${params}`);
+      const response = await fetch(`/api/categories?sortBy=name&sortOrder=asc&${params}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
       }

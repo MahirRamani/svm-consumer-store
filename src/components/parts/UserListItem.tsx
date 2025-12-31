@@ -1,4 +1,3 @@
-// FILE: components/dashboard/users/UserListItem.tsx
 "use client";
 
 import { User } from "@/types/user";

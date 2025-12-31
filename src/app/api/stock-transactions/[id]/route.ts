@@ -24,7 +24,8 @@ const getStockTransactionHandler = async (
   const { id } = validateParams(await routeContext!.params, idParamsSchema);
   const transaction = await StockTransaction.findById(id)
     .populate('createdBy', 'username')
-    .populate('subProductId', 'name size')
+    .populate('productId', 'name size imageURL')
+    .populate('categoryId', 'name')
     .lean();
 
   if (!transaction) {
@@ -52,7 +53,8 @@ const updateStockTransactionHandler = async (
     runValidators: true,
   })
     .populate('createdBy', 'username')
-    .populate('subProductId', 'name size');
+    .populate('productId', 'name size imageURL')
+    .populate('categoryId', 'name');
 
   if (!transaction) {
     throw new ApiError('Stock transaction not found', 404);

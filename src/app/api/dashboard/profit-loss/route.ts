@@ -1,3 +1,4 @@
+// app/api/dashboard/profit-loss/route.ts
 import connectDB from '@/lib/config/db';
 import { Transaction } from '@/models/Transaction';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
@@ -33,7 +34,7 @@ const getProfitLossHandler = async (req: Request, authContext: AuthContext) => {
       { $unwind: '$items' },
       {
         $lookup: {
-          from: 'stocktransactions',
+          from: 'stock_transactions',  // ✅ FIXED: Added underscore
           localField: 'items.stockTransactionId',
           foreignField: '_id',
           as: 'stockTransaction',

@@ -1,19 +1,8 @@
-// // app/api/transactions/route.ts
-// import  connectDB  from '@/lib/config/db';
-// import { Transaction } from '@/models/Transaction';
-// import { Student } from '@/models/Student';
-// import { SubProduct } from '@/models/SubProduct';
-// import { StockTransaction } from '@/models/StockTransaction';
-// import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
-// import { validateBody } from '@/lib/api/validation-helpers';
-// import mongoose from 'mongoose';
-// import { z } from 'zod';
-
 // app/api/transactions/route.ts
 import connectDB from '@/lib/config/db';
 import { Transaction } from '@/models/Transaction';
 import { Student } from '@/models/Student';
-import { SubProduct } from '@/models/SubProduct';
+import { Product } from '@/models/Product';
 import { StockTransaction } from '@/models/StockTransaction';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import mongoose from 'mongoose';
@@ -24,8 +13,7 @@ import { z } from 'zod';
 // =============================================
 const transactionItemSchema = z.object({
   categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  productId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  subProductId: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  productId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   stockTransactionId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   quantity: z.number().int().positive(),
   price: z.number().min(0),
@@ -34,7 +22,7 @@ const transactionItemSchema = z.object({
 const createPurchaseTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).default('157854545845424154544445'),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   transactionType: z.literal('Purchase').optional().default('Purchase'),
   items: z.array(transactionItemSchema).min(1),
 });
@@ -42,7 +30,7 @@ const createPurchaseTransactionSchema = z.object({
 const createTopupTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.enum(['Seller', 'Admin', 'Accountant']).default('Seller'),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   transactionType: z.literal('Topup'),
   totalAmount: z.number().positive(),
   reason: z.string().optional(),
@@ -51,7 +39,7 @@ const createTopupTransactionSchema = z.object({
 const createDeductionTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.enum(['Seller', 'Admin', 'Accountant']).default('Seller'),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   transactionType: z.literal('Deduction'),
   totalAmount: z.number().positive(),
   reason: z.string().min(1),
@@ -124,10 +112,10 @@ async function deductStockByTransactionId(
 }
 
 // =============================================
-// Helper: Deduct Stock FIFO
+// Helper: Deduct Stock FIFO (Updated for Product)
 // =============================================
 async function deductStockFIFO(
-  subProductId: mongoose.Types.ObjectId,
+  productId: mongoose.Types.ObjectId,
   quantityToDeduct: number
 ): Promise<Array<{
   stockTransactionId: mongoose.Types.ObjectId;
@@ -135,10 +123,10 @@ async function deductStockFIFO(
   remainingQuantity: number;
 }>> {
   const availableStock = await StockTransaction.find({
-    subProductId,
+    productId, // Changed from subProductId
     transactionType: 'Buy',
     quantityLeft: { $gt: 0 },
-  }).sort({ date: 1, createdAt: 1 });
+  }).sort({ purchaseDate: 1, createdAt: 1 });
 
   const totalAvailable = availableStock.reduce(
     (sum, stock) => sum + (stock.quantityLeft || 0),
@@ -184,7 +172,9 @@ async function deductStockFIFO(
 // =============================================
 const createPurchaseHandler = async (data: CreatePurchaseDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  const userId = data.userId ? new mongoose.Types.ObjectId(data.userId) : undefined;
+  const performedBy = data.performedBy 
+    ? new mongoose.Types.ObjectId(data.performedBy) 
+    : undefined;
 
   const student = await Student.findById(studentId);
   if (!student) {
@@ -197,11 +187,16 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 
   const processedItems = await Promise.all(
     data.items.map(async (item) => {
-      const subProductId = new mongoose.Types.ObjectId(item.subProductId);
+      const productId = new mongoose.Types.ObjectId(item.productId);
 
-      const subProduct = await SubProduct.findById(subProductId);
-      if (!subProduct) {
-        throw new ApiError(`SubProduct not found: ${item.subProductId}`, 404);
+      // Verify product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+        throw new ApiError(`Product not found: ${item.productId}`, 404);
+      }
+
+      if (!product.isActive) {
+        throw new ApiError(`Product is inactive: ${product.name}`, 400);
       }
 
       const totalPrice = item.quantity * item.price;
@@ -214,17 +209,16 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
         stockDeduction = await deductStockByTransactionId(stockTransactionId, item.quantity);
         primaryStockTransactionId = stockTransactionId;
       } else {
-        const fifoDeductions = await deductStockFIFO(subProductId, item.quantity);
+        const fifoDeductions = await deductStockFIFO(productId, item.quantity);
         stockDeduction = fifoDeductions;
         primaryStockTransactionId = fifoDeductions[0]?.stockTransactionId;
       }
 
       return {
-        categoryId: item.categoryId ? new mongoose.Types.ObjectId(item.categoryId) : undefined,
-        productId: item.productId
-          ? new mongoose.Types.ObjectId(item.productId)
-          : subProduct.productId,
-        subProductId,
+        categoryId: item.categoryId 
+          ? new mongoose.Types.ObjectId(item.categoryId) 
+          : product.categoryId,
+        productId,
         stockTransactionId: primaryStockTransactionId,
         quantity: item.quantity,
         price: item.price,
@@ -256,12 +250,11 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 
   const transaction = await Transaction.create({
     studentId,
-    userId,
     items: transactionItems,
     totalAmount,
     status: 'Completed',
     transactionType: 'Purchase',
-    performedBy: data.performedBy,
+    performedBy,
   });
 
   return successResponse(
@@ -276,7 +269,7 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
         amountDeducted: totalAmount,
       },
       stockDeductions: processedItems.map((item) => ({
-        subProductId: item.subProductId,
+        productId: item.productId,
         stockTransactionId: item.stockTransactionId,
         quantity: item.quantity,
         deductionDetails: item._deduction,
@@ -292,7 +285,9 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 // =============================================
 const createTopupHandler = async (data: CreateTopupDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  const userId = data.userId ? new mongoose.Types.ObjectId(data.userId) : undefined;
+  const performedBy = data.performedBy 
+    ? new mongoose.Types.ObjectId(data.performedBy) 
+    : undefined;
 
   const student = await Student.findById(studentId);
   if (!student) {
@@ -309,12 +304,11 @@ const createTopupHandler = async (data: CreateTopupDto) => {
 
   const transaction = await Transaction.create({
     studentId,
-    userId,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',
     transactionType: 'Topup',
-    performedBy: data.performedBy,
+    performedBy,
     reason: data.reason,
   });
 
@@ -340,7 +334,9 @@ const createTopupHandler = async (data: CreateTopupDto) => {
 // =============================================
 const createDeductionHandler = async (data: CreateDeductionDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  const userId = data.userId ? new mongoose.Types.ObjectId(data.userId) : undefined;
+  const performedBy = data.performedBy 
+    ? new mongoose.Types.ObjectId(data.performedBy) 
+    : undefined;
 
   const student = await Student.findById(studentId);
   if (!student) {
@@ -364,12 +360,11 @@ const createDeductionHandler = async (data: CreateDeductionDto) => {
 
   const transaction = await Transaction.create({
     studentId,
-    userId,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',
     transactionType: 'Deduction',
-    performedBy: data.performedBy,
+    performedBy,
     reason: data.reason,
   });
 
@@ -391,12 +386,11 @@ const createDeductionHandler = async (data: CreateDeductionDto) => {
 };
 
 // =============================================
-// Main POST Handler (FIXED)
+// Main POST Handler
 // =============================================
 const createTransactionHandler = async (req: Request) => {
   await connectDB();
 
-  // Read body ONCE
   let body: unknown;
   try {
     body = await req.json();
@@ -404,15 +398,11 @@ const createTransactionHandler = async (req: Request) => {
     throw new ApiError('Invalid JSON in request body', 400, 'INVALID_JSON');
   }
 
-  // Type guard for body
   if (!body || typeof body !== 'object') {
     throw new ApiError('Request body must be an object', 400);
   }
 
   const bodyObj = body as Record<string, unknown>;
-
-  // Determine transaction type
-  // If items array exists, treat as Purchase (default behavior)
   const transactionType = bodyObj.transactionType || (bodyObj.items ? 'Purchase' : undefined);
 
   if (transactionType === 'Purchase' || bodyObj.items) {
@@ -438,20 +428,11 @@ const createTransactionHandler = async (req: Request) => {
 // =============================================
 export const POST = withErrorHandler(createTransactionHandler);
 
-
-
-
-
-
-// app/api/transactions/route.ts
-import { Product } from "@/models/Product";
+// app/api/transactions/route.ts (add this GET handler)
+// import { Product } from "@/models/Product";
 import { Category } from "@/models/Category";
-// import { Student } from "@/models/Student";
-// import { SubProduct } from "@/models/SubProduct";
-// import { Transaction } from "@/models/Transaction";
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';
-// import mongoose from 'mongoose';
 
 // =============================================
 // Type Definitions
@@ -488,8 +469,7 @@ interface StatusMap {
 
 interface TransactionItem {
   categoryId?: mongoose.Types.ObjectId;
-  productId?: mongoose.Types.ObjectId;
-  subProductId?: mongoose.Types.ObjectId;
+  productId: mongoose.Types.ObjectId;
   stockTransactionId?: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
@@ -510,6 +490,7 @@ interface AggregatedTransaction {
 
 interface ProcessedItem {
   name: string;
+  size?: string;
   quantity: number;
   price: string;
   totalPrice: string;
@@ -547,7 +528,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const searchParams = request.nextUrl.searchParams;
     
-    // Get query parameters
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "all";
     const dateRange = searchParams.get("dateRange") || "all";
@@ -559,7 +539,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Build filter query
     const filter: TransactionFilter = {
       transactionType: "Purchase"
-      // transactionType: "Topup",
     };
 
     // Status filter
@@ -620,6 +599,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       Object.assign(filter, dateFilter);
     }
 
+    // // Search filter
+    // let searchFilter: SearchFilter = {};
+    // if (search) {
+    //   const students = await Student.find({
+    //     $or: [
+    //       { name: { $regex: search, $options: "i" } },
+    //       { rollNumber: { $regex: search, $options: "i" } }
+    //     ]
+    //   }).select("_id");
+
+    //   const studentIds = students.map(s => s._id as mongoose.Types.ObjectId);
+
+    //   searchFilter = {
+    //     $or: [
+    //       { _id: { $regex: search, $options: "i" } },
+    //       { studentId: { $in: studentIds } }
+    //     ]
+    //   };
+    // }
+
     // Search filter
     let searchFilter: SearchFilter = {};
     if (search) {
@@ -632,12 +631,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       const studentIds = students.map(s => s._id as mongoose.Types.ObjectId);
 
-      searchFilter = {
-        $or: [
-          { _id: { $regex: search, $options: "i" } },
-          { studentId: { $in: studentIds } }
-        ]
-      };
+      // Build search conditions array
+      const searchConditions: Array<Record<string, unknown>> = [];
+
+      // Add student search if we found matching students
+      if (studentIds.length > 0) {
+        searchConditions.push({ studentId: { $in: studentIds } });
+      }
+
+      // Only search by _id if it's a valid ObjectId (24 hex characters)
+      if (mongoose.Types.ObjectId.isValid(search) && search.length === 24) {
+        searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+      }
+
+      // Only apply search filter if we have conditions
+      if (searchConditions.length > 0) {
+        searchFilter = { $or: searchConditions };
+      }
     }
 
     // Combine all filters
@@ -669,7 +679,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
       
-      // Process items array to get product details
+      // Process items array
       {
         $addFields: {
           itemsWithDetails: {
@@ -679,7 +689,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
               in: {
                 categoryId: "$$item.categoryId",
                 productId: "$$item.productId",
-                subProductId: "$$item.subProductId",
                 stockTransactionId: "$$item.stockTransactionId",
                 quantity: "$$item.quantity",
                 price: "$$item.price",
@@ -697,18 +706,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const itemsWithNames: ProcessedItem[] = await Promise.all(
           (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
             let name = "Unknown Item";
+            let size: string | undefined;
             
-            // Try to get name from SubProduct first
-            if (item.subProductId) {
-              const subProduct = await SubProduct.findById(item.subProductId).select("name");
-              if (subProduct) {
-                name = subProduct.name;
-              }
-            } else if (item.productId) {
-              // Fallback to Product
-              const product = await Product.findById(item.productId).select("name");
+            // Get name from Product (which is now the base item)
+            if (item.productId) {
+              const product = await Product.findById(item.productId).select("name size");
               if (product) {
                 name = product.name;
+                size = product.size;
               }
             } else if (item.categoryId) {
               // Fallback to Category
@@ -720,6 +725,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
             return {
               name,
+              size,
               quantity: item.quantity,
               price: item.price.toString(),
               totalPrice: item.totalPrice.toString()

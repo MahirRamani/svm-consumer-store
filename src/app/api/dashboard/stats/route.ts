@@ -1,7 +1,7 @@
 // app/api/dashboard/stats/route.ts
 import connectDB from '@/lib/config/db';
 import { Transaction } from '@/models/Transaction';
-import { SubProduct } from '@/models/SubProduct';
+import { Product } from '@/models/Product';
 import { Student } from '@/models/Student';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
@@ -24,16 +24,16 @@ interface StockInfo {
   latestPrice: number;
 }
 
-interface SubProductWithStock {
+interface ProductWithStock {
   _id: unknown;
   name: string;
+  size?: string;
+  imageURL?: string;
   lowStockThreshold: number;
   stockInfo?: StockInfo;
   currentStock: number;
   price: number;
-  product?: {
-    categoryId: unknown;
-  };
+  categoryId?: unknown;
   category?: {
     _id: unknown;
     name: string;
@@ -44,8 +44,9 @@ interface TopSoldAggregateResult {
   _id: unknown;
   quantitySold: number;
   revenue: number;
-  subProduct: {
+  product: {
     name: string;
+    size?: string;
   };
 }
 
@@ -64,8 +65,9 @@ interface TodaysSoldAggregateResult {
   _id: unknown;
   quantity: number;
   revenue: number;
-  subProduct: {
+  product: {
     name: string;
+    size?: string;
   };
 }
 
@@ -82,11 +84,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
   await connectDB();
 
   const userRole = authContext.user.role;
-  console.log("🚀 ~ getDashboardStatsHandler ~ userRole:", userRole)
-  
   const isAdmin = userRole === "SUPERUSER";
-  console.log("🚀 ~ getDashboardStatsHandler ~ isAdmin:", isAdmin)
-  console.log("🚀 ~ getDashboardStatsHandler ~ userRole:", userRole)
 
   // Get today's date range
   const today = new Date();
@@ -105,16 +103,21 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
   // COMMON DATA (Both Admin & Seller)
   // =============================================
 
-  // 1. Low Stock Subproducts
-  const lowStockProductsRaw = await SubProduct.aggregate<SubProductWithStock>([
+  // 1. Low Stock Products (Product is now the base item)
+  const lowStockProductsRaw = await Product.aggregate<ProductWithStock>([
+    {
+      $match: {
+        isActive: true,
+      },
+    },
     {
       $lookup: {
-        from: 'stocktransactions',
-        let: { subProductId: '$_id' },
+        from: 'stock_transactions', // Updated collection name
+        let: { productId: '$_id' },
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ['$subProductId', '$$subProductId'] },
+              $expr: { $eq: ['$productId', '$$productId'] },
             },
           },
           {
@@ -148,17 +151,8 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     },
     {
       $lookup: {
-        from: 'products',
-        localField: 'productId',
-        foreignField: '_id',
-        as: 'product',
-      },
-    },
-    { $unwind: { path: '$product', preserveNullAndEmptyArrays: true } },
-    {
-      $lookup: {
         from: 'categories',
-        localField: 'product.categoryId',
+        localField: 'categoryId',
         foreignField: '_id',
         as: 'category',
       },
@@ -168,23 +162,27 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
       $project: {
         _id: 1,
         name: 1,
+        size: 1,
+        imageURL: 1,
         category: 1,
         price: 1,
         currentStock: 1,
+        lowStockThreshold: 1,
       },
     },
-    // { $limit: 10 },
+    { $sort: { currentStock: 1 } },
   ]);
 
   const lowStockProducts: LowStockProduct[] = lowStockProductsRaw.map(product => ({
     id: String(product._id),
     name: product.name,
+    size: product.size,
     category: product.category?.name || 'Uncategorized',
     price: product.price,
     stock: product.currentStock,
   }));
 
-  // 2. Top Sold Subproduct (today)
+  // 2. Top Sold Product (today) - Updated to use productId
   const topSoldResult = await Transaction.aggregate<TopSoldAggregateResult>([
     {
       $match: {
@@ -196,7 +194,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     { $unwind: '$items' },
     {
       $group: {
-        _id: '$items.subProductId',
+        _id: '$items.productId', // Changed from subProductId
         quantitySold: { $sum: '$items.quantity' },
         revenue: { $sum: '$items.totalPrice' },
       },
@@ -205,19 +203,20 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     { $limit: 1 },
     {
       $lookup: {
-        from: 'subproducts',
+        from: 'products', // Changed from subproducts
         localField: '_id',
         foreignField: '_id',
-        as: 'subProduct',
+        as: 'product',
       },
     },
-    { $unwind: '$subProduct' },
+    { $unwind: '$product' },
   ]);
 
   const topSoldProduct: TopSoldProduct | null = topSoldResult[0]
     ? {
         id: String(topSoldResult[0]._id),
-        name: topSoldResult[0].subProduct.name,
+        name: topSoldResult[0].product.name,
+        size: topSoldResult[0].product.size,
         quantitySold: topSoldResult[0].quantitySold,
         revenue: topSoldResult[0].revenue,
       }
@@ -249,7 +248,6 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
       },
     },
     { $sort: { balance: 1 } },
-    // { $limit: 10 },
   ]);
 
   const lowBalanceStudents: LowBalanceStudent[] = lowBalanceStudentsRaw.map(student => ({
@@ -365,7 +363,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
   const totalSalesChange =
     lastMonthSales > 0 ? ((totalSales - lastMonthSales) / lastMonthSales) * 100 : 0;
 
-  // 2. Today's Sold Products
+  // 2. Today's Sold Products - Updated to use productId
   const todaysSoldResult = await Transaction.aggregate<TodaysSoldAggregateResult>([
     {
       $match: {
@@ -377,25 +375,27 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     { $unwind: '$items' },
     {
       $group: {
-        _id: '$items.subProductId',
+        _id: '$items.productId', // Changed from subProductId
         quantity: { $sum: '$items.quantity' },
         revenue: { $sum: '$items.totalPrice' },
       },
     },
     {
       $lookup: {
-        from: 'subproducts',
+        from: 'products', // Changed from subproducts
         localField: '_id',
         foreignField: '_id',
-        as: 'subProduct',
+        as: 'product',
       },
     },
-    { $unwind: '$subProduct' },
+    { $unwind: '$product' },
+    { $sort: { quantity: -1 } },
   ]);
 
   const todaysSoldProducts: TodaysSoldProduct[] = todaysSoldResult.map(item => ({
     id: String(item._id),
-    name: item.subProduct.name,
+    name: item.product.name,
+    size: item.product.size,
     quantity: item.quantity,
     revenue: item.revenue,
   }));
@@ -412,7 +412,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     { $unwind: '$items' },
     {
       $lookup: {
-        from: 'stocktransactions',
+        from: 'stock_transactions', // Updated collection name
         localField: 'items.stockTransactionId',
         foreignField: '_id',
         as: 'stockTransaction',
@@ -453,7 +453,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     { $unwind: '$items' },
     {
       $lookup: {
-        from: 'stocktransactions',
+        from: 'stock_transactions', // Updated collection name
         localField: 'items.stockTransactionId',
         foreignField: '_id',
         as: 'stockTransaction',

@@ -11,7 +11,7 @@ interface TransactionData {
   student: string;
   amount: number;
   remainingBalance: number;
-  id: string;
+  _id: string;
   items: Array<{
     name: string;
     quantity: number;
@@ -53,7 +53,7 @@ export default function SuccessModal({ open, onOpenChange, transactionData, onCl
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Receipt - ${transactionData.id}</title>
+            <title>Receipt - ${transactionData._id}</title>
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body { 
@@ -151,7 +151,7 @@ export default function SuccessModal({ open, onOpenChange, transactionData, onCl
               <div class="section">
                 <div class="row">
                   <span>Transaction ID:</span>
-                  <span class="bold">${transactionData.id}</span>
+                  <span class="bold">${transactionData._id}</span>
                 </div>
                 <div class="row">
                   <span>Date:</span>
@@ -233,7 +233,7 @@ export default function SuccessModal({ open, onOpenChange, transactionData, onCl
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="text-center">
               <p className="text-sm text-gray-600">Transaction ID</p>
-              <p className="font-mono font-bold text-lg">{transactionData.id}</p>
+              <p className="font-mono font-bold text-lg">#TXN{transactionData._id}</p>
               <p className="text-xs text-gray-500 mt-1">
                 {formattedDate} • {formattedTime}
               </p>
