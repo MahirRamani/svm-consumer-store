@@ -413,11 +413,6 @@ export default function ShoppingCart({
 }
 
 
-
-
-
-
-
 // // components/admin/pos/shopping-cart.tsx
 // "use client";
 

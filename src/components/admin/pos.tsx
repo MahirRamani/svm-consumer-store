@@ -94,8 +94,9 @@ export default function PosPage() {
         </div>
 
         {/* Right Side - Add flex, h-full, overflow-hidden */}
+        {/* Right Side - Add flex, h-full, overflow-hidden */}
         <div className="lg:col-span-1 flex flex-col h-full overflow-hidden space-y-2">
-          {/* Student Lookup - stays fixed */}
+          {/* Student Lookup - stays fixed with flex-shrink-0 */}
           <div className="flex-shrink-0">
             <StudentLookup
               selectedStudent={selectedStudent}
@@ -104,7 +105,7 @@ export default function PosPage() {
           </div>
 
           {/* Shopping Cart - takes remaining space, scrolls internally */}
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-hidden">
             <ShoppingCart
               selectedStudent={selectedStudent}
               cartItems={cartItems}
