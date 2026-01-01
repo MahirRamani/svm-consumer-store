@@ -11,6 +11,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+// Helper function to get correct dashboard for role
+function getDashboardForRole(role: string): string {
+  switch (role?.toUpperCase()) {
+    case 'SELLER':
+      return '/seller/dashboard';
+    case 'ADMIN':
+      return '/admin/dashboard';
+    case 'ACCOUNTANT':
+      return '/accountant/dashboard';
+    case 'USER':
+      return '/user/dashboard';
+    case 'SUPERUSER':
+      return '/admin/dashboard';
+    default:
+      return '/login'; // Default fallback
+  }
+}
+
+// Helper to validate if callback URL is appropriate for user role
+function isValidCallbackForRole(callbackUrl: string, role: string): boolean {
+  // SUPERUSER can access all routes
+  if (role === 'SUPERUSER') return true;
+  
+  // Check if callback matches user's role
+  if (callbackUrl.startsWith('/seller') && (role === 'SELLER'|| role === 'SUPERUSER')) return true;
+  if (callbackUrl.startsWith('/admin') && (role === 'ADMIN' || role === 'SUPERUSER')) return true;
+  if (callbackUrl.startsWith('/accountant') && (role === 'ACCOUNTANT' || role === 'SUPERUSER')) return true;
+  if (callbackUrl.startsWith('/user') && role === 'SUPERUSER') return true;
+  
+  // If callback is a non-role-specific route, allow it
+  if (!callbackUrl.startsWith('/seller') && 
+      !callbackUrl.startsWith('/admin') && 
+      !callbackUrl.startsWith('/accountant') && 
+      !callbackUrl.startsWith('/user')) {
+    return true;
+  }
+  
+  return false;
+}
+
 function LoginForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -22,7 +62,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl');
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,18 +73,37 @@ function LoginForm() {
       const result = await signIn('credentials', {
         username: formData.username,
         password: formData.password,
-        redirect: false,
+        redirect: false, // Don't auto-redirect
       });
 
       if (result?.error) {
         setError('Invalid username or password');
+        setIsLoading(false);
       } else if (result?.ok) {
-        router.push('/user/dashboard');
-        router.refresh();
+        // Fetch session to get user role
+        const sessionResponse = await fetch('/api/auth/session');
+        const session = await sessionResponse.json();
+        
+        if (session?.user?.role) {
+          // Get the correct dashboard for user's role
+          const userDashboard = getDashboardForRole(session.user.role);
+          
+          // Use callbackUrl only if it's valid for this user's role
+          const redirectTo = callbackUrl && isValidCallbackForRole(callbackUrl, session.user.role)
+            ? callbackUrl
+            : userDashboard;
+          
+          router.push(redirectTo);
+          router.refresh();
+        } else {
+          // Fallback if role not found
+          router.push('/admin/signin');
+          router.refresh();
+        }
       }
     } catch (err) {
+      // console.error('Login error:', err);
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
