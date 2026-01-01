@@ -8,7 +8,7 @@ const ROLE_ROUTES: Record<string, string[]> = {
   '/seller': ['SELLER', 'SUPERUSER'],
   '/admin': ['ADMIN', 'SUPERUSER'],
   '/accountant': ['ACCOUNTANT', 'SUPERUSER'],
-  '/user': ['USER', 'SUPERUSER'],
+  '/user': ['SUPERUSER'],
 };
 
 // Public routes that don't require authentication
