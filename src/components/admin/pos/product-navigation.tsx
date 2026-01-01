@@ -1068,7 +1068,7 @@ export default function ProductNavigation({
               <Package className="w-5 h-5 text-green-600" />
               Products ({matchedProducts.length})
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
               {matchedProducts.map((product) => renderProductCard(product, true))}
             </div>
           </div>
@@ -1118,7 +1118,7 @@ export default function ProductNavigation({
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
           {topSellingProducts.map((topProduct, index) => {
             const stockInfo = productStocks.get(topProduct.productId);
             const outOfStock = !stockInfo || stockInfo.quantityLeft <= 0;
@@ -1324,7 +1324,7 @@ export default function ProductNavigation({
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
                 <Package className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="font-medium text-gray-900 text-sm line-clamp-1">{category.name}</h3>
+              <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
               <p className="text-xs text-gray-500">{productCount} products</p>
               <Badge 
                 variant={inStockCount > 0 ? "default" : "secondary"} 
@@ -1369,7 +1369,7 @@ export default function ProductNavigation({
               <Package className="w-5 h-5 text-green-600" />
               Available ({productsWithStock.length})
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3">
               {productsWithStock.map((product) => renderProductCard(product, false))}
             </div>
           </div>
@@ -1381,7 +1381,7 @@ export default function ProductNavigation({
               <AlertTriangle className="w-5 h-5 text-amber-600" />
               Out of Stock ({productsWithoutStock.length})
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3">
               {productsWithoutStock.map((product) => {
                 const isRefreshing = refreshingStocks.has(product._id);
                 return (
