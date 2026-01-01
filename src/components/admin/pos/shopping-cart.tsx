@@ -204,7 +204,7 @@ export default function ShoppingCart({
   return (
     <div className="h-full flex flex-col">
       <Card className="shadow-lg h-full flex flex-col">   
-        <CardHeader className="flex-shrink-0">
+        <CardHeader className="shrink-0">
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
             <ShoppingCartIcon className="w-5 h-5 mr-2" />
             Shopping Cart
@@ -238,13 +238,13 @@ export default function ShoppingCart({
                           <img 
                             src={item.imageURL} 
                             alt={item.name}
-                            className="w-10 h-10 rounded object-cover flex-shrink-0"
+                            className="w-10 h-10 rounded object-cover shrink-0"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center shrink-0">
                             <ShoppingCartIcon className="w-5 h-5 text-gray-400" />
                           </div>
                         )}
@@ -317,7 +317,7 @@ export default function ShoppingCart({
           </div>
 
           {/* Fixed footer section with total and buttons */}
-          <div className="border-t border-gray-200 pt-4 flex-shrink-0">
+          <div className="border-t border-gray-200 pt-4 shrink-0">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-900">Total:</span>
               <span className="text-xl font-bold text-green-500">₹{total.toFixed(2)}</span>

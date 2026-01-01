@@ -97,7 +97,7 @@ export default function PosPage() {
         {/* Right Side - Add flex, h-full, overflow-hidden */}
         <div className="lg:col-span-1 flex flex-col h-full overflow-hidden space-y-2">
           {/* Student Lookup - stays fixed with flex-shrink-0 */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <StudentLookup
               selectedStudent={selectedStudent}
               onStudentSelect={setSelectedStudent}
