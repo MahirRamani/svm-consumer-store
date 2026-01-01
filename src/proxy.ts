@@ -1,4 +1,4 @@
-// middleware.ts - FIXED VERSION
+// proxy.ts - FIXED VERSION FOR NEXT.JS 16 WITH DEBUG LOGS
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/auth/auth';
@@ -35,10 +35,12 @@ export async function proxy(request: NextRequest) {
   // 1. Not logged in + trying to access protected route
   // =============================================
   if (!isLoggedIn && !PUBLIC_ROUTES.includes(pathname)) {
+    console.log('🚫 NOT LOGGED IN - Redirecting to login');
     const loginUrl = new URL('/login', request.url);
     if (!pathname.startsWith('/api/')) {
       loginUrl.searchParams.set('callbackUrl', pathname);
     }
+    console.log('→ Redirect to:', loginUrl.toString());
     return NextResponse.redirect(loginUrl);
   }
 
@@ -48,13 +50,18 @@ export async function proxy(request: NextRequest) {
   if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
     const callbackUrl = searchParams.get('callbackUrl');
     
+    console.log('✅ LOGGED IN on login page:', { callbackUrl });
+    
     // Don't redirect if coming from auth error
     if (callbackUrl?.includes('/api/auth/error')) {
+      console.log('⚠️  Auth error detected, allowing login page');
       return NextResponse.next();
     }
     
     // Role-based redirect with safe callback
     const redirectUrl = getRoleBasedRedirect(userRole, callbackUrl);
+    
+    console.log('→ Redirecting from login to:', redirectUrl);
     
     // Add cache control headers to prevent back button access
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
@@ -71,11 +78,21 @@ export async function proxy(request: NextRequest) {
     // Skip role check if already on an error page (prevent redirect loops)
     const hasErrorParam = searchParams.has('error');
     
+    console.log('🔐 ROLE CHECK:', { 
+      pathname, 
+      userRole, 
+      hasErrorParam 
+    });
+    
     if (!hasErrorParam) {
       const unauthorizedRedirect = checkRoleAccess(pathname, userRole, request.url);
       if (unauthorizedRedirect) {
+        console.log('❌ UNAUTHORIZED ACCESS DETECTED!');
         return unauthorizedRedirect;
       }
+      console.log('✅ Role access granted');
+    } else {
+      console.log('⏭️  Skipping role check (error param present)');
     }
   }
 
@@ -86,6 +103,8 @@ export async function proxy(request: NextRequest) {
     const redirectUrl = isLoggedIn 
       ? getRoleDashboard(userRole)
       : '/login';
+    
+    console.log('🏠 ROOT REDIRECT:', { isLoggedIn, userRole, redirectUrl });
     
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
     
@@ -99,6 +118,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  console.log('✅ ALLOWING ACCESS to:', pathname);
   return NextResponse.next();
 }
 
@@ -106,17 +126,33 @@ export async function proxy(request: NextRequest) {
 // Check if user has access to the route (FIXED)
 // =============================================
 function checkRoleAccess(pathname: string, userRole: string, baseUrl: string): NextResponse | null {
+  console.log('   🔍 checkRoleAccess:', { pathname, userRole });
+  
   // Find matching route prefix
   for (const [routePrefix, allowedRoles] of Object.entries(ROLE_ROUTES)) {
     // Use exact prefix matching - this is the key fix!
-    if (pathname === routePrefix || pathname.startsWith(routePrefix + '/')) {
+    const isMatch = pathname === routePrefix || pathname.startsWith(routePrefix + '/');
+    
+    console.log(`   📍 Testing route: ${routePrefix}`, {
+      isMatch,
+      allowedRoles,
+      hasAccess: allowedRoles.includes(userRole)
+    });
+    
+    if (isMatch) {
       // Check if user's role is allowed
       if (!allowedRoles.includes(userRole)) {
+        console.log('   ❌ ACCESS DENIED!');
+        console.log('   → User role:', userRole);
+        console.log('   → Required roles:', allowedRoles);
+        
         // Redirect to their own dashboard with unauthorized message
         const userDashboard = getRoleDashboard(userRole);
         const redirectUrl = new URL(userDashboard, baseUrl);
         redirectUrl.searchParams.set('error', 'unauthorized');
         redirectUrl.searchParams.set('message', 'You do not have access to that page');
+        
+        console.log('   → Redirecting to:', redirectUrl.toString());
         
         const response = NextResponse.redirect(redirectUrl);
         // Add cache control headers
@@ -126,10 +162,13 @@ function checkRoleAccess(pathname: string, userRole: string, baseUrl: string): N
         
         return response;
       }
+      console.log('   ✅ ACCESS GRANTED!');
       // Access granted - stop checking other routes
       return null;
     }
   }
+  
+  console.log('   ℹ️  No protected route matched, allowing access');
   return null;
 }
 
@@ -193,7 +232,6 @@ function isRouteAllowedForRole(pathname: string, role: string): boolean {
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };
-
 
 
 
