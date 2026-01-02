@@ -1118,7 +1118,7 @@ export default function ProductNavigation({
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-1">
           {topSellingProducts.map((topProduct, index) => {
             const stockInfo = productStocks.get(topProduct.productId);
             const outOfStock = !stockInfo || stockInfo.quantityLeft <= 0;
@@ -1201,7 +1201,7 @@ export default function ProductNavigation({
                   </Button>
                 </div>
 
-                <div className="p-2">
+                <div className="p-1">
                   <h4 className="font-medium text-gray-900 text-xs line-clamp-1 mb-0.5">{topProduct.name}</h4>
                   
                   <button
@@ -1231,7 +1231,7 @@ export default function ProductNavigation({
                         size="sm" 
                         className="w-full h-7 text-xs bg-orange-500 hover:bg-orange-600"
                       >
-                        <ShoppingCart className="w-3 h-3 mr-1" />
+                        <ShoppingCart className="w-3 h-3 mr-0" />
                         Add to Cart
                       </Button>
                     ) : (
@@ -1306,7 +1306,7 @@ export default function ProductNavigation({
   // Render Categories View
   // =============================================
   const renderCategories = () => (
-    <div>
+    <div className="p-0">
       <div className="mb-3">
         <h2 className="text-xl font-bold text-gray-900">Category</h2>
       </div>
