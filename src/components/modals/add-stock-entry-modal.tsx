@@ -100,8 +100,8 @@ export default function AddStockEntryModal({
       errors.buyingPrice = "Purchase price is required";
     } else {
       const buyingPrice = Number(formData.buyingPrice);
-      if (isNaN(buyingPrice) || buyingPrice <= 0) {
-        errors.buyingPrice = "Purchase price must be greater than 0";
+      if (isNaN(buyingPrice) || buyingPrice < 0) {
+        errors.buyingPrice = "Purchase price must be greater or equal to 0";
       }
     }
 

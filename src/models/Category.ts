@@ -44,14 +44,14 @@ const categorySchema = new Schema<ICategory>(
 );
 
 // Unique case-insensitive index
-categorySchema.index(
-  { name: 1 },
-  {
-    unique: true,
-    collation: { locale: 'en', strength: 2 },
-    background: true,
-  }
-);
+// categorySchema.index(
+//   { name: 1 },
+//   {
+//     unique: true,
+//     collation: { locale: 'en', strength: 2 },
+//     background: true,
+//   }
+// );
 
 // Compound index for common queries
 categorySchema.index({ isActive: 1, priority: -1, name: 1 });

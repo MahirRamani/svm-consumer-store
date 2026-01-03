@@ -1,8 +1,6 @@
 // app/admin/dashboard/page.tsx
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Store, Bell, LogOut, AlertCircle } from 'lucide-react';
