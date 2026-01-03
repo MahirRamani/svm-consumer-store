@@ -54,8 +54,8 @@ const StudentSchema = new Schema<IStudent>(
 )
 
 // Create indexes
-StudentSchema.index({ rollNumber: 1 })
-StudentSchema.index({ name: 1 })
+// StudentSchema.index({ rollNumber: 1 })
+// StudentSchema.index({ name: 1 })
 StudentSchema.index({ isActive: 1 })
 StudentSchema.index({ standard: 1 })
 StudentSchema.index({ year: 1 })
