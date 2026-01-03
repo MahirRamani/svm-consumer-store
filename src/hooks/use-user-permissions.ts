@@ -41,7 +41,9 @@ export function useUserPermissions(): UserPermissionsResponse {
         
         // Extract role and allowed tabs
         const role = userData.role || '';
+        console.log("🚀 ~ fetchPermissions ~ role:", role)
         const tabs = userData.allowedTabs || [];
+        console.log("🚀 ~ fetchPermissions ~ tabs:", tabs)
 
         setUserRole(role);
         setAllowedTabs(tabs);
