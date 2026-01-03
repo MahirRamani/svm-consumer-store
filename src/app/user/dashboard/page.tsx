@@ -116,7 +116,7 @@ export default function Dashboard() {
       </header>
 
       {/* Tabs Navigation */}
-      <nav className="bg-white border-b">
+      <nav className="bg-white border-b sticky top-0 z-10">
         <div className="px-6 flex space-x-8 overflow-x-auto">
           {accessibleTabs.map((tab) => {
             const Icon = tab.icon;

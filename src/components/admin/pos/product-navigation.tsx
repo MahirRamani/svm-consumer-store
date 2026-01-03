@@ -1118,7 +1118,7 @@ export default function ProductNavigation({
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-1">
           {topSellingProducts.map((topProduct, index) => {
             const stockInfo = productStocks.get(topProduct.productId);
             const outOfStock = !stockInfo || stockInfo.quantityLeft <= 0;
@@ -1206,7 +1206,7 @@ export default function ProductNavigation({
                   
                   <button
                     onClick={() => navigateToCategoryFromProduct(topProduct.categoryId)}
-                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline line-clamp-1 mb-1"
+                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline text-left mb-1"
                   >
                     {topProduct.categoryName}
                   </button>
@@ -1419,7 +1419,7 @@ export default function ProductNavigation({
                       </Button>
                     </div>
                     <div className="p-2.5">
-                      <h4 className="font-medium text-gray-600 text-sm line-clamp-1">{product.name}</h4>
+                      <h4 className="font-medium text-gray-600 text-sm">{product.name}</h4>
                       <Button disabled size="sm" className="w-full h-8 text-sm mt-2">Out of Stock</Button>
                     </div>
                   </div>

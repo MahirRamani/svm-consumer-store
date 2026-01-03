@@ -105,7 +105,7 @@ export default function PosPage() {
           </div>
 
           {/* Shopping Cart - takes remaining space, scrolls internally */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 overflow-auto min-h-50">
             <ShoppingCart
               selectedStudent={selectedStudent}
               cartItems={cartItems}
