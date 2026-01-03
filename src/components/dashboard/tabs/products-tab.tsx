@@ -290,37 +290,41 @@ export default function ProductsTab() {
   // STEP 1: Category Selection (ORIGINAL SIZE)
   if (!selectedCategoryId) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Select Category</h2>
-          <div className="flex space-x-2">
-            <Button onClick={() => setShowStockReportModal(true)} variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
-              <FileSpreadsheet className="w-4 h-4 mr-2" />Stock Report
-            </Button>
-            <Button onClick={handleExportAll} variant="outline" disabled={products.length === 0}>
-              <Download className="w-4 h-4 mr-2" />Export All
-            </Button>
-            <Button onClick={() => setShowAddModal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />Add Product
-            </Button>
-          </div>
-        </div>
+      <div className="">
+        {/* <div className="flex justify-between items-center"> */}
+          {/* <h2 className="text-2xl font-bold text-gray-900">Select Category</h2> */}
+        {/* </div> */}
 
-        <Card>
-          <CardContent className="p-6">
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Search Categories</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search for a category..." value={categorySearchTerm} onChange={(e) => setCategorySearchTerm(e.target.value)} className="pl-10" />
+        <Card className="mt-0 mb-1.5 p-0 overflow-auto">
+          <div className="flex space-x-2 p-1.5 justify-between items-center">
+            <div>
+              <CardContent className="p-2">
+                <Label className="block text-sm font-medium text-gray-700 mb-2">Search Categories</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input placeholder="Search for a category..." value={categorySearchTerm} onChange={(e) => setCategorySearchTerm(e.target.value)} className="pl-10" />
+                </div>
+              </CardContent>
             </div>
-          </CardContent>
+            <div className="flex space-x-2">
+              <Button onClick={() => setShowStockReportModal(true)} variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
+                <FileSpreadsheet className="w-4 h-4 mr-2" />Stock Report
+              </Button>
+              <Button onClick={handleExportAll} variant="outline" disabled={products.length === 0}>
+                <Download className="w-4 h-4 mr-2" />Export All
+              </Button>
+              <Button onClick={() => setShowAddModal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />Add Product
+              </Button>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Categories ({filteredCategories.length})</CardTitle>
+        <Card className="p-2 overflow-auto gap-0.5">
+          <CardHeader className="p-1 m-0">
+            <CardTitle className="">Available Categories ({filteredCategories.length})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-1 mt-0">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-4xl mb-4">🔍</div>
@@ -328,12 +332,12 @@ export default function ProductsTab() {
                 <p className="text-gray-500">Try adjusting your search.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-9 gap-1.5">
                 {filteredCategories.map((category) => (
-                  <Card key={category._id} className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 hover:border-blue-400" onClick={() => setSelectedCategoryId(category._id)}>
-                    <CardContent className="p-6 text-center">
+                  <Card key={category._id} className="cursor-pointer transition-all hover:shadow-lg hover:scale-102 border-2 hover:border-blue-400" onClick={() => setSelectedCategoryId(category._id)}>
+                    <CardContent className="p-0 text-center overflow-auto">
                       <div className="text-5xl mb-3">{getCategoryIcon(category.name)}</div>
-                      <h3 className="font-semibold text-lg capitalize mb-2">{category.name}</h3>
+                      <h3 className="font-semibold text-lg capitalize mb-1.5">{category.name}</h3>
                       <div className="flex items-center justify-center space-x-2">
                         <p className="text-3xl font-bold text-blue-600">{categoryProductCounts[category._id] || 0}</p>
                         <span className="text-sm text-gray-500">{(categoryProductCounts[category._id] || 0) === 1 ? "product" : "products"}</span>
