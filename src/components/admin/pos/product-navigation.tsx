@@ -825,7 +825,8 @@ export default function ProductNavigation({
 
           <div className="flex items-center justify-between mb-1.5">
             {stockInfo ? (
-              <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
+              // <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
+              <span className="text-sm font-bold text-green-600">₹{Number(stockInfo.sellingPrice).toFixed(0)}</span>
             ) : (
               <span className="text-xs text-gray-400">No price</span>
             )}
@@ -1217,7 +1218,8 @@ export default function ProductNavigation({
 
                   <div className="flex items-center justify-between mb-1.5">
                     {stockInfo ? (
-                      <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
+                      // <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
+                      <span className="text-sm font-bold text-green-600">₹{Number(stockInfo.sellingPrice).toFixed(0)}</span>
                     ) : (
                       <span className="text-xs text-gray-400">No price</span>
                     )}

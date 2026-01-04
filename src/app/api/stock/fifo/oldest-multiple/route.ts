@@ -65,13 +65,25 @@ const bulkOldestStockHandler = async (req: Request) => {
     },
   ]);
 
-  // Create lookup map
+  // // Create lookup map
+  // const stockMap = new Map(
+  //   oldestStocks.map((stock) => [
+  //     stock._id.toString(),
+  //     {
+  //       stockTransactionId: stock.stockTransactionId.toString(),
+  //       sellingPrice: stock.sellingPrice,
+  //       quantityLeft: stock.quantityLeft,
+  //       stockDate: stock.stockDate,
+  //     },
+  //   ])
+  // );
+
   const stockMap = new Map(
     oldestStocks.map((stock) => [
       stock._id.toString(),
       {
         stockTransactionId: stock.stockTransactionId.toString(),
-        sellingPrice: stock.sellingPrice,
+        sellingPrice: stock.sellingPrice ? parseFloat(stock.sellingPrice.toString()) : 0, // ADD THIS
         quantityLeft: stock.quantityLeft,
         stockDate: stock.stockDate,
       },

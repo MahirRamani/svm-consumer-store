@@ -98,16 +98,25 @@ async function deductStockByTransactionId(
     );
   }
 
-  const updatedStock = await StockTransaction.findByIdAndUpdate(
-    stockTransactionId,
-    { $inc: { quantityLeft: -quantityToDeduct } },
-    { new: true }
-  );
+  // //NOTE - Old (X endAt)
+  // const updatedStock = await StockTransaction.findByIdAndUpdate(
+  //   stockTransactionId,
+  //   { $inc: { quantityLeft: -quantityToDeduct } },
+  //   { new: true }
+  // );
+  stockTransaction.quantityLeft -= quantityToDeduct;
+  await stockTransaction.save();
+
+  // return {
+  //   stockTransactionId: stockTransaction._id,
+  //   deductedQuantity: quantityToDeduct,
+  //   remainingQuantity: updatedStock?.quantityLeft || 0,
+  // };
 
   return {
     stockTransactionId: stockTransaction._id,
     deductedQuantity: quantityToDeduct,
-    remainingQuantity: updatedStock?.quantityLeft || 0,
+    remainingQuantity: stockTransaction.quantityLeft,
   };
 }
 
@@ -149,16 +158,25 @@ async function deductStockFIFO(
     const availableInThisStock = stock.quantityLeft || 0;
     const deductFromThis = Math.min(availableInThisStock, remainingToDeduct);
 
-    const updated = await StockTransaction.findByIdAndUpdate(
-      stock._id,
-      { $inc: { quantityLeft: -deductFromThis } },
-      { new: true }
-    );
+    // //NOTE - Old (X endAt)
+    // const updated = await StockTransaction.findByIdAndUpdate(
+    //   stock._id,
+    //   { $inc: { quantityLeft: -deductFromThis } },
+    //   { new: true }
+    // );
+    stock.quantityLeft -= deductFromThis;
+    await stock.save();
+
+    // deductions.push({
+    //   stockTransactionId: stock._id,
+    //   deductedQuantity: deductFromThis,
+    //   remainingQuantity: updated?.quantityLeft || 0,
+    // });
 
     deductions.push({
       stockTransactionId: stock._id,
       deductedQuantity: deductFromThis,
-      remainingQuantity: updated?.quantityLeft || 0,
+      remainingQuantity: stock.quantityLeft,
     });
 
     remainingToDeduct -= deductFromThis;

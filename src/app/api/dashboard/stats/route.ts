@@ -178,7 +178,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     name: product.name,
     size: product.size,
     category: product.category?.name || 'Uncategorized',
-    price: product.price,
+    price: parseInt(product.price.toString()),
     stock: product.currentStock,
   }));
 

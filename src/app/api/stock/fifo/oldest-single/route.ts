@@ -47,7 +47,7 @@ const getOldestStockHandler = async (req: Request) => {
     {
       stockTransactionId: oldestStock._id.toString(),
       productId,
-      sellingPrice: oldestStock.sellingPrice,
+      sellingPrice: parseInt(oldestStock.sellingPrice.toString()),
       quantityLeft: oldestStock.quantityLeft,
       stockDate: oldestStock.purchaseDate,
     },

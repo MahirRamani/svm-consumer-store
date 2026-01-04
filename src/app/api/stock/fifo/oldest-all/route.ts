@@ -115,7 +115,7 @@ const getProductsWithStockHandler = async (req: Request) => {
       stock._id.toString(),
       {
         stockTransactionId: stock.stockTransactionId.toString(),
-        sellingPrice: stock.sellingPrice,
+        sellingPrice: parseInt(stock.sellingPrice.toString()),
         quantityLeft: stock.quantityLeft,
         stockDate: stock.stockDate,
       },
