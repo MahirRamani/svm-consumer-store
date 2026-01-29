@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Login - Hostel Store Management',
+  title: 'Login - Consumer Store Management',
   description: 'Sign in to your account',
 };
 

@@ -355,18 +355,18 @@ export default function StockReportModal({
                   CSV
                 </Label>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <RadioGroupItem value="excel" id="format-excel" />
                 <Label htmlFor="format-excel" className="text-sm cursor-pointer font-normal">
                   Excel
                 </Label>
-              </div>
-              <div className="flex items-center gap-2">
+              </div> */}
+              {/* <div className="flex items-center gap-2">
                 <RadioGroupItem value="pdf" id="format-pdf" />
                 <Label htmlFor="format-pdf" className="text-sm cursor-pointer font-normal">
                   PDF
                 </Label>
-              </div>
+              </div> */}
             </RadioGroup>
           </div>
 

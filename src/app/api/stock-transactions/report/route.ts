@@ -249,9 +249,9 @@ function generateCSV(data: ReportRow[], reportType: string): string {
       row.transactionType,
       row.initialQuantity,
       row.quantityLeft,
-      row.buyingPrice.toFixed(2),
-      row.sellingPrice.toFixed(2),
-      row.totalValue.toFixed(2),
+      Number(row.buyingPrice || 0).toFixed(2),  // Ensure it's a number
+      Number(row.sellingPrice || 0).toFixed(2), // Ensure it's a number
+      Number(row.totalValue || 0).toFixed(2),   // Ensure it's a number
       `"${row.reason}"`,
       `"${row.notes.replace(/"/g, '""')}"`,
     ].join(",")

@@ -99,8 +99,8 @@ export default function Dashboard() {
               <Store className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-sm text-gray-600">Hostel Store Management</p>
+              <h1 className="text-xl font-bold text-gray-900">User Dashboard</h1>
+              <p className="text-sm text-gray-600">Consumer Store Management</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">

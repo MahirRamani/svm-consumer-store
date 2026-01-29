@@ -138,7 +138,7 @@ function LoginForm() {
 
           <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
           <p className="text-lg text-white/90 mb-2">
-            Hostel Store Management System
+            Consumer Store Management System
           </p>
           <p className="text-sm text-white/70">
             Manage your inventory, sales, and transactions efficiently

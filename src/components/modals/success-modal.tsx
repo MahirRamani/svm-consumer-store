@@ -144,7 +144,7 @@ export default function SuccessModal({ open, onOpenChange, transactionData, onCl
           <body>
             <div class="receipt">
               <div class="header">
-                <h1>HOSTEL STORE</h1>
+                <h1>CONSUMER STORE</h1>
                 <p>Official Receipt</p>
               </div>
               
