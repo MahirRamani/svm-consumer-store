@@ -22,8 +22,6 @@ declare module "next-auth" {
             isActive?: boolean;
         } & DefaultSession["user"];
     }
-
-    // Augment the default User type returned by the provider
 }
 
 declare module "next-auth/jwt" {

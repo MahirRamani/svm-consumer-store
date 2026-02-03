@@ -141,4 +141,4 @@ const deleteProductHandler = async (
 // =============================================
 export const GET = withErrorHandler(withAuth(getProductHandler));
 export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateProductHandler));
-export const DELETE = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(deleteProductHandler));
+export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteProductHandler));

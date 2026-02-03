@@ -81,4 +81,4 @@ const deleteCategoryHandler = async (
 // =============================================
 export const GET = withErrorHandler(withAuth(getCategoryHandler));
 export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateCategoryHandler));
-export const DELETE = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(deleteCategoryHandler));
+export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteCategoryHandler));

@@ -11,7 +11,7 @@ export const createStudentSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export const updateStudentSchema = createStudentSchema.partial();
+export const updateStudentSchema = createStudentSchema.partial().omit({ rollNumber: true, balance: true });;
 
 export const getStudentsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

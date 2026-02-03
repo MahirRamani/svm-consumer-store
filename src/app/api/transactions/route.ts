@@ -12,34 +12,34 @@ import { z } from 'zod';
 // Validation Schemas
 // =============================================
 const transactionItemSchema = z.object({
-  categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   productId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  stockTransactionId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  stockTransactionId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   quantity: z.number().int().positive(),
   price: z.number().min(0),
 });
 
 const createPurchaseTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  transactionType: z.literal('Purchase').optional().default('Purchase'),
+  userId: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  transactionType: z.literal('Purchase').default('Purchase'),
   items: z.array(transactionItemSchema).min(1),
 });
 
 const createTopupTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  userId: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/),
   transactionType: z.literal('Topup'),
   totalAmount: z.number().positive(),
-  reason: z.string().optional(),
+  reason: z.string(),
 });
 
 const createDeductionTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
-  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  userId: z.string().regex(/^[0-9a-fA-F]{24}$/),
+  performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/),
   transactionType: z.literal('Deduction'),
   totalAmount: z.number().positive(),
   reason: z.string().min(1),

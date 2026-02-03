@@ -77,7 +77,7 @@ export function useUpdate<TData, TVariables extends { _id: string }>(
   return useMutation({
     mutationFn: async ({ _id, ...data }: TVariables): Promise<TData> => {
       const response = await fetch(`${endpoint}/${_id}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
