@@ -1,8 +1,16 @@
-import { Category } from './Category'
-import { Product } from './Product'
-import { StockTransaction } from './StockTransaction'
-import { Transaction } from './Transaction'
-import { Student } from './Student'
-import { User } from './User'
+// models/index.ts
+// Just importing these will register them with Mongoose
+import './Category'
+import './Product'
+import './StockTransaction'
+import './Transaction'
+import './Student'
+import './User'
 
-export default { Category, Product, StockTransaction, Transaction, Student, User }
+// Optionally still export them for use elsewhere
+export { Category } from './Category'
+export { Product } from './Product'
+export { StockTransaction } from './StockTransaction'
+export { Transaction } from './Transaction'
+export { Student } from './Student'
+export { User } from './User'
