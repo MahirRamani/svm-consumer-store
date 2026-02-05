@@ -21,7 +21,6 @@ const transactionItemSchema = z.object({
 
 const createPurchaseTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/),
   transactionType: z.literal('Purchase').default('Purchase'),
   items: z.array(transactionItemSchema).min(1),
@@ -29,7 +28,6 @@ const createPurchaseTransactionSchema = z.object({
 
 const createTopupTransactionSchema = z.object({
   studentId: z.string().regex(/^[0-9a-fA-F]{24}$/),
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/),
   performedBy: z.string().regex(/^[0-9a-fA-F]{24}$/),
   transactionType: z.literal('Topup'),
   totalAmount: z.number().positive(),
@@ -190,8 +188,10 @@ async function deductStockFIFO(
 // =============================================
 const createPurchaseHandler = async (data: CreatePurchaseDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
+  console.log("data", data);
+  
   const performedBy = data.performedBy 
-    ? new mongoose.Types.ObjectId(data.performedBy) 
+    ? new mongoose.Types.ObjectId(data.performedBy)
     : undefined;
 
   const student = await Student.findById(studentId);
@@ -248,7 +248,7 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 
   const totalAmount = processedItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  if (student.balance < totalAmount) {
+  if (student.balance < totalAmount && !WILD_ROLL_NUMBERS.includes(student.rollNumber)) {
     throw new ApiError(
       `Insufficient balance. Required: ₹${totalAmount}, Available: ₹${student.balance}`,
       400
@@ -451,6 +451,7 @@ export const POST = withErrorHandler(createTransactionHandler);
 import { Category } from "@/models/Category";
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';
+import { WILD_ROLL_NUMBERS } from '@/lib/constant';
 
 // =============================================
 // Type Definitions

@@ -21,6 +21,9 @@ import type {
   ApiResponse, 
   TransactionApiResponse
 } from "@/types/pos";
+import { WILD_ROLL_NUMBERS } from "@/lib/constant";
+import { ObjectId } from "mongoose";
+import { useSession } from "next-auth/react";
 
 interface ShoppingCartProps {
   selectedStudent: Student | null;
@@ -34,6 +37,7 @@ interface ShoppingCartProps {
 interface CreateTransactionPayload {
   studentId: string;
   items: TransactionItem[];
+  performedBy: ObjectId;
 }
 
 export default function ShoppingCart({
@@ -44,6 +48,7 @@ export default function ShoppingCart({
   onClearCart,
   onTransactionComplete,
 }: ShoppingCartProps) {
+  const { data: session } = useSession();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
@@ -116,11 +121,17 @@ export default function ShoppingCart({
   }, [cartItems]);
 
   const canCheckout = useMemo(() => {
+    if (selectedStudent && WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber)) {
+      return true;
+    }
     return selectedStudent && cartItems.length > 0 && selectedStudent.balance >= total;
   }, [selectedStudent, cartItems, total]);
 
   const hasInsufficientBalance = useMemo(() => {
-    return selectedStudent && cartItems.length > 0 && selectedStudent.balance < total;
+    if (selectedStudent && WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber)) {
+      return false;
+    }
+    return selectedStudent && cartItems.length > 0 && selectedStudent.balance < total ;
   }, [selectedStudent, cartItems, total]);
 
   useEffect(() => {
@@ -155,6 +166,7 @@ export default function ShoppingCart({
     processTransactionMutation.mutate({
       studentId: selectedStudent._id,
       items,
+      performedBy: session?.user.id as unknown as ObjectId,
     });
   }, [selectedStudent, cartItems, processTransactionMutation]);
 
@@ -368,10 +380,7 @@ export default function ShoppingCart({
                 )}
               </Button>
 
-              {!canCheckout &&
-                selectedStudent &&
-                cartItems.length > 0 &&
-                selectedStudent.balance < total && (
+              {!canCheckout && hasInsufficientBalance && selectedStudent && (
                   <div className="text-center">
                     <Badge variant="destructive" className="text-xs">
                       Insufficient Balance (Need ₹{(total - selectedStudent.balance).toFixed(2)} more)

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2, CreditCard, X, ShoppingCart } from "lucide-react";
 import type { Student, CartItem } from "@/types/pos";
+import { WILD_ROLL_NUMBERS } from "@/lib/constant";
 
 interface ConfirmationModalProps {
   open: boolean;
@@ -119,7 +120,7 @@ export default function ConfirmationModal({
           )}
 
           {/* Insufficient balance warning */}
-          {remainingBalance < 0 && (
+          {remainingBalance < 0 && !WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber) &&(
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-700">
@@ -142,7 +143,7 @@ export default function ConfirmationModal({
             </Button>
             <Button
               onClick={onConfirm}
-              disabled={isLoading || remainingBalance < 0 || cartItems.length === 0}
+              disabled={isLoading || cartItems.length === 0 || (remainingBalance < 0 && !WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber))}
               className="flex-1 bg-green-500 hover:bg-green-600 text-white"
             >
               {isLoading ? (

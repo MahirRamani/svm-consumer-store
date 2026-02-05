@@ -20,7 +20,7 @@ export interface ITransaction extends Document {
   items?: ITransactionItem[];
   totalAmount: number;
   status: "Pending" | "Completed" | "Cancelled";
-  transactionType: "Purchase" | "Topup" | "Deduction";
+  transactionType: "Purchase" | "Topup" | "Deduction" | "Reverted" | "Revert";
   reason?: string;
   performedBy: ObjectId;
   createdAt: Date;
@@ -98,7 +98,7 @@ const TransactionSchema = new Schema<ITransaction>(
     transactionType: {
       type: String,
       enum: {
-        values: ["Purchase", "Topup", "Deduction"],
+        values: ["Purchase", "Topup", "Deduction", "Reverted", "Revert"],
         message: "{VALUE} is not a valid transaction type",
       },
       default: "Purchase",
