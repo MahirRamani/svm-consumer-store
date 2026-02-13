@@ -82,7 +82,7 @@ const getProductsHandler = async (req: Request) => {
   // Fetch stock transactions for all products (only "Buy" with quantityLeft > 0)
   const stockTransactions = await StockTransaction.find({
     productId: { $in: productIds },
-    transactionType: 'Buy',
+    stockType: 'Buy',
     quantityLeft: { $gt: 0 },
   })
     .select('productId quantityLeft purchaseDate createdAt')

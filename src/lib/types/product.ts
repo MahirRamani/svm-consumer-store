@@ -82,7 +82,6 @@ export interface UpdateProductInput {
   description?: string;
   priority?: number;
   isActive?: boolean;
-  // Merged from SubProduct
   imageURL?: string;
   size?: string;
   weight?: string;

@@ -43,7 +43,7 @@ const bulkOldestStockHandler = async (req: Request) => {
     {
       $match: {
         productId: { $in: validIds },
-        transactionType: { $in: ['Buy', 'Adjustment'] },
+        stockType: { $in: ['Buy', 'Adjustment'] },
         quantityLeft: { $gt: 0 },
       },
     },

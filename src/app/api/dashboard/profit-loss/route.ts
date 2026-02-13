@@ -27,7 +27,7 @@ const getProfitLossHandler = async (req: Request, authContext: AuthContext) => {
       {
         $match: {
           status: 'Completed',
-          transactionType: 'Purchase',
+          type: 'Purchase',
           createdAt: { $gte: date, $lte: endDate },
         },
       },

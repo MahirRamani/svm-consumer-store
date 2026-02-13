@@ -175,7 +175,7 @@ export default function AddStockEntryModal({
         initialQuantity: Number(formData.initialQuantity),
         quantityLeft: Number(formData.initialQuantity),
         purchaseDate: new Date(formData.purchaseDate),
-        transactionType: "Buy",
+        stockType: "Buy",
         notes: formData.notes.trim() || undefined,
         createdBy: user.id,
       },

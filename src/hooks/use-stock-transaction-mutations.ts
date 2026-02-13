@@ -1,4 +1,5 @@
 // hooks/use-stock-transaction-mutations.ts
+import { CreateStockTransactionDto } from "@/lib/validations/stockTransaction";
 import { useCreate, useUpdate, useDelete } from "./use-mutations";
 import type { 
   StockTransaction, 
@@ -16,12 +17,23 @@ export function useCreateStockTransaction() {
   });
 }
 
+// export function useUpdateStockTransaction() {
+//   return useUpdate<StockTransaction, { _id: string } & Partial<CreateStockTransactionInput>>(ENDPOINT, {
+//     queryKey: QUERY_KEY,
+//     successMessage: "Stock entry updated successfully",
+//     errorMessage: "Failed to update stock entry",
+//   });
+// }
+
 export function useUpdateStockTransaction() {
-  return useUpdate<StockTransaction, { _id: string } & Partial<CreateStockTransactionInput>>(ENDPOINT, {
-    queryKey: QUERY_KEY,
-    successMessage: "Stock entry updated successfully",
-    errorMessage: "Failed to update stock entry",
-  });
+  return useUpdate<StockTransaction, { _id: string } & Partial<CreateStockTransactionDto>>(
+    ENDPOINT,
+    {
+      queryKey: QUERY_KEY,
+      successMessage: "Stock transaction updated successfully",
+      errorMessage: "Failed to update stock transaction",
+    }
+  );
 }
 
 export function useDeleteStockTransaction() {

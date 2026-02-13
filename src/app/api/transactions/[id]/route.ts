@@ -499,7 +499,6 @@ interface AggregatedTransaction {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
   status: string;
-  type: string;
   totalAmount: number;
   student?: {
     name: string;
@@ -509,14 +508,11 @@ interface AggregatedTransaction {
 }
 
 interface ProcessedItem {
-  categoryId?: string;
-  productId: string;
-  stockTransactionId?: string;
   name: string;
   size?: string;
   quantity: number;
-  price: number;
-  totalPrice: number;
+  price: string;
+  totalPrice: string;
 }
 
 interface FormattedTransaction {
@@ -622,6 +618,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       Object.assign(filter, dateFilter);
     }
 
+    // // Search filter
+    // let searchFilter: SearchFilter = {};
+    // if (search) {
+    //   const students = await Student.find({
+    //     $or: [
+    //       { name: { $regex: search, $options: "i" } },
+    //       { rollNumber: { $regex: search, $options: "i" } }
+    //     ]
+    //   }).select("_id");
+
+    //   const studentIds = students.map(s => s._id as mongoose.Types.ObjectId);
+
+    //   searchFilter = {
+    //     $or: [
+    //       { _id: { $regex: search, $options: "i" } },
+    //       { studentId: { $in: studentIds } }
+    //     ]
+    //   };
+    // }
+
     // Search filter
     let searchFilter: SearchFilter = {};
     if (search) {
@@ -706,38 +722,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Fetch detailed information for items
     const transactionsWithItemDetails: FormattedTransaction[] = await Promise.all(
       transactions.map(async (transaction) => {
-        // //NOTE - Enough to handle Full Revert
-        // const itemsWithNames: ProcessedItem[] = await Promise.all(
-        //   (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
-        //     let name = "Unknown Item";
-        //     let size: string | undefined;
-            
-        //     // Get name from Product (which is now the base item)
-        //     if (item.productId) {
-        //       const product = await Product.findById(item.productId).select("name size");
-        //       if (product) {
-        //         name = product.name;
-        //         size = product.size;
-        //       }
-        //     } else if (item.categoryId) {
-        //       // Fallback to Category
-        //       const category = await Category.findById(item.categoryId).select("name");
-        //       if (category) {
-        //         name = category.name;
-        //       }
-        //     }
-
-        //     return {
-        //       name,
-        //       size,
-        //       quantity: item.quantity,
-        //       price: item.price.toString(),
-        //       totalPrice: item.totalPrice.toString()
-        //     };
-        //   })
-        // );
-
-        // //NOTE - to handle Partial and Full both Revert
         const itemsWithNames: ProcessedItem[] = await Promise.all(
           (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
             let name = "Unknown Item";
@@ -759,18 +743,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             }
 
             return {
-              categoryId: item.categoryId?.toString(),
-              productId: item.productId?.toString(),
-              stockTransactionId: item.stockTransactionId?.toString(),
               name,
               size,
               quantity: item.quantity,
-              price: item.price,
-              totalPrice: item.totalPrice
+              price: item.price.toString(),
+              totalPrice: item.totalPrice.toString()
             };
           })
         );
-        
+
         return {
           id: transaction._id.toString(),
           student: {
@@ -779,8 +760,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           },
           items: JSON.stringify(itemsWithNames),
           totalAmount: transaction.totalAmount.toString(),
-          status: transaction.status,
-          type: transaction.type,
+          status: transaction.status.toLowerCase(),
           createdAt: transaction.createdAt
         };
       })

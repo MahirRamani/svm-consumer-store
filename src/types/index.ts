@@ -2,6 +2,18 @@
 // API Response Types
 // =============================================
 
+import { Category } from "@/lib/types/category"
+import { Product } from "@/lib/types/product"
+
+export type TransactionType = 
+  | "Purchase" 
+  | "Topup" 
+  | "Deduction" 
+  | "Partial Reverted" 
+  | "Partial Revert" 
+  | "Reverted" 
+  | "Revert";
+
 export interface ApiSuccessResponse<T = unknown> {
   success: true
   message?: string
@@ -42,184 +54,184 @@ export interface BaseEntity {
 // Category Types
 // =============================================
 
-export interface Category extends BaseEntity {
-  name: string
-  description?: string
-  priority: number
-  isActive: boolean
-}
+// export interface Category extends BaseEntity {
+//   name: string
+//   description?: string
+//   priority: number
+//   isActive: boolean
+// }
 
-export interface CreateCategoryDto {
-  name: string
-  description?: string
-  priority?: number
-}
+// export interface CreateCategoryDto {
+//   name: string
+//   description?: string
+//   priority?: number
+// }
 
-export interface UpdateCategoryDto {
-  name?: string
-  description?: string
-  priority?: number
-  isActive?: boolean
-}
+// export interface UpdateCategoryDto {
+//   name?: string
+//   description?: string
+//   priority?: number
+//   isActive?: boolean
+// }
 
 // API Response Types for Categories
 export type CategoriesListResponse = ApiPaginatedResponse<{
   categories: Category[]
 }>
 
-export type CategoryResponse = ApiSuccessResponse<Category>
+// export type CategoryResponse = ApiSuccessResponse<Category>
 
 // =============================================
 // Product Types
 // =============================================
 
-export interface CategoryInfo {
-  id: string
-  name: string
-  description?: string
-}
+// export interface CategoryInfo {
+//   id: string
+//   name: string
+//   description?: string
+// }
 
-export interface Product extends BaseEntity {
-  name: string
-  description?: string
-  categoryId: string
-  category?: CategoryInfo | null
-  priority: number
-  isActive: boolean
-  hasVariants: boolean
-  variantCount?: number
-}
+// export interface Product extends BaseEntity {
+//   name: string
+//   description?: string
+//   categoryId: string
+//   category?: CategoryInfo | null
+//   priority: number
+//   isActive: boolean
+//   hasVariants: boolean
+//   variantCount?: number
+// }
 
-export interface CreateProductDto {
-  name: string
-  description?: string
-  categoryId: string
-  hasVariants?: boolean
-}
+// export interface CreateProductDto {
+//   name: string
+//   description?: string
+//   categoryId: string
+//   hasVariants?: boolean
+// }
 
-export interface UpdateProductDto {
-  name?: string
-  description?: string
-  categoryId?: string
-  hasVariants?: boolean
-  isActive?: boolean
-  priority?: number
-}
+// export interface UpdateProductDto {
+//   name?: string
+//   description?: string
+//   categoryId?: string
+//   hasVariants?: boolean
+//   isActive?: boolean
+//   priority?: number
+// }
 
 // API Response Types for Products
-export type ProductsListResponse = ApiPaginatedResponse<{
-  products: Product[]
-}>
+// export type ProductsListResponse = ApiPaginatedResponse<{
+//   products: Product[]
+// }>
 
-export type ProductResponse = ApiSuccessResponse<Product>
+// export type ProductResponse = ApiSuccessResponse<Product>
 
 // =============================================
 // SubProduct/Variant Types
 // =============================================
 
-export interface SubProduct extends BaseEntity {
-  productId: string
-  name: string
-  description?: string
-  size?: string
-  priority: number
-  imageURL?: string
-  lowStockThreshold: number
-  weight?: string
-  volume?: string
-  barcode?: string
-  isActive: boolean
-}
+// export interface SubProduct extends BaseEntity {
+//   productId: string
+//   name: string
+//   description?: string
+//   size?: string
+//   priority: number
+//   imageURL?: string
+//   lowStockThreshold: number
+//   weight?: string
+//   volume?: string
+//   barcode?: string
+//   isActive: boolean
+// }
 
-export interface SubProductWithProduct extends SubProduct {
-  product?: {
-    id: string
-    name: string
-    categoryId: string
-    category: CategoryInfo
-  }
-}
+// export interface SubProductWithProduct extends SubProduct {
+//   product?: {
+//     id: string
+//     name: string
+//     categoryId: string
+//     category: CategoryInfo
+//   }
+// }
 
-export interface CreateSubProductDto {
-  productId: string
-  name: string
-  description?: string
-  size?: string
-  lowStockThreshold: number
-  weight?: string
-  volume?: string
-  barcode?: string
-  imageURL?: string
-  priority?: number
-}
+// export interface CreateSubProductDto {
+//   productId: string
+//   name: string
+//   description?: string
+//   size?: string
+//   lowStockThreshold: number
+//   weight?: string
+//   volume?: string
+//   barcode?: string
+//   imageURL?: string
+//   priority?: number
+// }
 
-export interface UpdateSubProductDto {
-  name?: string
-  description?: string
-  size?: string
-  lowStockThreshold?: number
-  weight?: string
-  volume?: string
-  barcode?: string
-  imageURL?: string
-  isActive?: boolean
-  priority?: number
-}
+// export interface UpdateSubProductDto {
+//   name?: string
+//   description?: string
+//   size?: string
+//   lowStockThreshold?: number
+//   weight?: string
+//   volume?: string
+//   barcode?: string
+//   imageURL?: string
+//   isActive?: boolean
+//   priority?: number
+// }
 
 // API Response Types for SubProducts
-export type SubProductsListResponse = ApiPaginatedResponse<{
-  subProducts: SubProduct[]
-}>
+// export type SubProductsListResponse = ApiPaginatedResponse<{
+//   subProducts: SubProduct[]
+// }>
 
-export type SubProductResponse = ApiSuccessResponse<SubProduct>
+// export type SubProductResponse = ApiSuccessResponse<SubProduct>
 
 // =============================================
 // Product with Variants (for combined view)
 // =============================================
 
-export interface ProductWithVariants extends Product {
-  variants: SubProduct[]
-}
+// export interface ProductWithVariants extends Product {
+//   variants: SubProduct[]
+// }
 
-export type ProductsWithVariantsResponse = ApiSuccessResponse<{
-  products: ProductWithVariants[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
-}>
+// export type ProductsWithVariantsResponse = ApiSuccessResponse<{
+//   products: ProductWithVariants[]
+//   pagination: {
+//     page: number
+//     limit: number
+//     total: number
+//     totalPages: number
+//   }
+// }>
 
 // =============================================
 // Stock Transaction Types
 // =============================================
 
-export interface StockTransaction extends BaseEntity {
-  subProductId: string
-  transactionType: 'Buy' | 'Sell' | 'Adjustment'
-  buyingPrice?: number
-  sellingPrice: number
-  initialQuantity: number
-  quantityLeft: number
-  reason?: string
-  description?: string
-  date: Date
-  createdBy: string
-}
+// export interface StockTransaction extends BaseEntity {
+//   subProductId: string
+//   transactionType: 'Buy' | 'Sell' | 'Adjustment'
+//   buyingPrice?: number
+//   sellingPrice: number
+//   initialQuantity: number
+//   quantityLeft: number
+//   reason?: string
+//   description?: string
+//   date: Date
+//   createdBy: string
+// }
 
-export interface CreateStockTransactionDto {
-  subProductId: string
-  transactionType: 'Buy' | 'Sell' | 'Adjustment'
-  buyingPrice?: number
-  sellingPrice: number
-  initialQuantity: number
-  quantityLeft?: number
-  reason?: string
-  description?: string
-  date?: Date
-  createdBy: string
-}
+// export interface CreateStockTransactionDto {
+//   subProductId: string
+//   transactionType: 'Buy' | 'Sell' | 'Adjustment'
+//   buyingPrice?: number
+//   sellingPrice: number
+//   initialQuantity: number
+//   quantityLeft?: number
+//   reason?: string
+//   description?: string
+//   date?: Date
+//   createdBy: string
+// }
 
 export interface UpdateStockTransactionDto {
   sellingPrice?: number
@@ -228,52 +240,52 @@ export interface UpdateStockTransactionDto {
 }
 
 // Stock Info Types
-export interface StockInfo {
-  stockTransactionId: string
-  subProductId: string
-  sellingPrice: number
-  quantityLeft: number
-  stockDate: Date
-}
+// export interface StockInfo {
+//   stockTransactionId: string
+//   subProductId: string
+//   sellingPrice: number
+//   quantityLeft: number
+//   stockDate: Date
+// }
 
-export interface SubProductWithStock {
-  subProductId: string
-  name: string
-  size: string
-  barcode: string
-  imageURL: string | null
-  lowStockThreshold: number
-  currentStock: StockInfo | null
-}
+// export interface SubProductWithStock {
+//   subProductId: string
+//   name: string
+//   size: string
+//   barcode: string
+//   imageURL: string | null
+//   lowStockThreshold: number
+//   currentStock: StockInfo | null
+// }
 
-export type SubProductsWithStockResponse = ApiSuccessResponse<{
-  data: SubProductWithStock[]
-  pagination: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
-}>
+// export type SubProductsWithStockResponse = ApiSuccessResponse<{
+//   data: SubProductWithStock[]
+//   pagination: {
+//     total: number
+//     page: number
+//     limit: number
+//     totalPages: number
+//   }
+// }>
 
 // Bulk Stock Request/Response
 export interface BulkStockRequest {
   subProductIds: string[]
 }
 
-export interface BulkStockItem {
-  subProductId: string
-  stock: StockInfo | null
-}
+// export interface BulkStockItem {
+//   subProductId: string
+//   stock: StockInfo | null
+// }
 
-export type BulkStockResponse = ApiSuccessResponse<{
-  data: BulkStockItem[]
-  summary: {
-    total: number
-    withStock: number
-    withoutStock: number
-  }
-}>
+// export type BulkStockResponse = ApiSuccessResponse<{
+//   data: BulkStockItem[]
+//   summary: {
+//     total: number
+//     withStock: number
+//     withoutStock: number
+//   }
+// }>
 
 // =============================================
 // Student Types
@@ -358,10 +370,9 @@ export type CurrentUserResponse = ApiSuccessResponse<User>
 // =============================================
 
 export interface TransactionItem {
-  categoryId?: string
-  productId?: string  
-  subProductId?: string
-  stockTransactionId?: string
+  categoryId: string
+  productId: string
+  stockTransactionId: string
   name: string
   quantity: number
   price: number
@@ -376,7 +387,7 @@ export interface Transaction extends BaseEntity {
   items?: TransactionItem[]
   totalAmount: number
   status: 'Pending' | 'Completed' | 'Cancelled'
-  transactionType: 'Purchase' | 'Topup' | 'Deduction'
+  type: TransactionType; 
   reason?: string
   performedBy?: string
 }
@@ -385,7 +396,7 @@ export interface CreateTransactionDto {
   studentId: string
   items?: TransactionItem[]
   totalAmount: number
-  transactionType: 'Purchase' | 'Topup' | 'Deduction'
+  type: TransactionType;
   reason?: string
 }
 
@@ -491,7 +502,7 @@ export interface StudentFilters extends PaginationParams {
 
 export interface TransactionFilters extends PaginationParams {
   studentId?: string
-  transactionType?: 'Purchase' | 'Topup' | 'Deduction'
+  type?: TransactionType
   status?: 'Pending' | 'Completed' | 'Cancelled'
   startDate?: string
   endDate?: string
@@ -520,13 +531,13 @@ export interface FilterState {
   showInactive: boolean
 }
 
-export interface CategoryFilterState extends FilterState {
-  // Add category-specific filters if needed
-}
+// export interface CategoryFilterState extends FilterState {
+//   // Add category-specific filters if needed
+// }
 
-export interface ProductFilterState extends FilterState {
-  selectedCategory: string
-}
+// export interface ProductFilterState extends FilterState {
+//   selectedCategory: string
+// }
 
 // =============================================
 // Utility Types
@@ -1067,3 +1078,26 @@ export interface TransactionsResponse {
 // //   todaysProfitMargin: number;
 // //   yesterdayProfit: number;
 // // }
+
+type StockType = 'Buy' | 'Sell' | 'Adjustment';
+
+// export interface StockTransaction {
+//   _id: string;
+//   productId: Product;
+//   subProductId: string;
+//   categoryId: Category;
+//   transactionType: TransactionType;
+//   initialQuantity: number;
+//   quantityLeft: number;
+//   buyingPrice?: number;
+//   sellingPrice: number;
+//   date: string;
+//   reason?: string;
+//   notes?: string;
+//   createdBy: User;
+//   updatedBy?: User;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+export type { Category }

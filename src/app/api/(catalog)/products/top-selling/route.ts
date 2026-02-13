@@ -92,7 +92,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const topProducts = await Transaction.aggregate<TopProductAggregation>([
       {
         $match: {
-          transactionType: "Purchase",
+          type: "Purchase",
           status: "Completed",
           ...dateFilter,
         },

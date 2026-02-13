@@ -46,7 +46,7 @@ const updateBalanceHandler = async (
   }
 
   // Determine transaction type based on amount
-  const transactionType = amount > 0 ? 'Topup' : 'Deduction';
+  const type = amount > 0 ? 'Topup' : 'Deduction';
 
   // Create transaction record
   const transaction = await Transaction.create({
@@ -54,7 +54,7 @@ const updateBalanceHandler = async (
     items: [], // No items for topup/deduction
     totalAmount: Math.abs(amount), // Always positive in transaction record
     status: 'Completed',
-    transactionType,
+    type,
     reason,
     performedBy: authContext.user?.id,
   });
@@ -69,7 +69,7 @@ const updateBalanceHandler = async (
       transaction: transaction.toObject(),
     },
     200,
-    `Balance ${transactionType.toLowerCase()} successful`
+    `Balance ${type.toLowerCase()} successful`
   );
 };
 

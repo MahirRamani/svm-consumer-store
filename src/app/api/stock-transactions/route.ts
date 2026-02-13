@@ -17,7 +17,7 @@ const getStockTransactionsHandler = async (req: Request) => {
   await connectDB();
 
   const query = validateQuery(req, getStockTransactionsQuerySchema);
-  const { page, limit, sortBy, sortOrder, productId, categoryId, transactionType } = query;
+  const { page, limit, sortBy, sortOrder, productId, categoryId, stockType } = query;
 
   // Build filter
   const filter: FilterQuery<IStockTransaction> = {};
@@ -28,8 +28,8 @@ const getStockTransactionsHandler = async (req: Request) => {
   if (categoryId) {
     filter.categoryId = categoryId;
   }
-  if (transactionType) {
-    filter.transactionType = transactionType;
+  if (stockType) {
+    filter.stockType = stockType;
   }
 
   const skip = (page - 1) * limit;
@@ -41,7 +41,7 @@ const getStockTransactionsHandler = async (req: Request) => {
     StockTransaction.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(limit)
+      .limit(1000)
       .populate('createdBy', 'username')
       .populate('productId', 'name size imageURL')
       .populate('categoryId', 'name')

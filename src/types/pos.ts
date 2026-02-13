@@ -1,5 +1,7 @@
 // types/pos.ts
 
+import type { TransactionType } from "@/types"
+
 // =============================================
 // Base API Response Type
 // =============================================
@@ -158,6 +160,7 @@ export interface CartItem {
 // =============================================
 // Transaction Types
 // =============================================
+
 export interface TransactionItem {
   productId: string;
   categoryId?: string;
@@ -172,8 +175,8 @@ export interface Transaction {
   studentId: string;
   items: TransactionItem[];
   totalAmount: number;
-  status: 'Pending' | 'Completed' | 'Cancelled' | 'Refunded';
-  transactionType: 'Purchase' | 'Topup' | 'Deduction';
+  status: 'Pending' | 'Completed' | 'Cancelled';
+  type: TransactionType;
   createdBy?: string;
   createdAt: Date | string;
   updatedAt: Date | string;

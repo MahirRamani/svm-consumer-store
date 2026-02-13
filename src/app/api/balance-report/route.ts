@@ -10,7 +10,7 @@ import ExcelJS from "exceljs";
 
 interface BalanceReportFilter {
   studentId?: mongoose.Types.ObjectId;
-  transactionType?: { $in: string[] };
+  type?: { $in: string[] };
   status: string;
   createdAt?: {
     $gte?: Date;
@@ -27,7 +27,7 @@ interface PopulatedTransaction {
     standard: string;
     year: number;
   } | null;
-  transactionType: "Purchase" | "Topup" | "Deduction";
+  type: "Purchase" | "Topup" | "Deduction";
   totalAmount: number;
   reason?: string;
   status: string;
@@ -70,19 +70,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const reportType = searchParams.get("reportType") as "today" | "specific" | "range" | "all";
     const format = searchParams.get("format") || "csv";
     const studentId = searchParams.get("studentId");
-    const transactionType = searchParams.get("transactionType") || "all";
+    const type = searchParams.get("type") || "all";
     const date = searchParams.get("date");
     const fromDate = searchParams.get("fromDate");
     const toDate = searchParams.get("toDate");
 
     const filter: BalanceReportFilter = { status: "Completed" };
 
-    if (transactionType === "topup") {
-      filter.transactionType = { $in: ["Topup"] };
-    } else if (transactionType === "deduction") {
-      filter.transactionType = { $in: ["Deduction"] };
+    if (type === "topup") {
+      filter.type = { $in: ["Topup"] };
+    } else if (type === "deduction") {
+      filter.type = { $in: ["Deduction"] };
     } else {
-      filter.transactionType = { $in: ["Purchase", "Topup", "Deduction"] };
+      filter.type = { $in: ["Purchase", "Topup", "Deduction"] };
     }
 
     if (studentId && studentId !== "all") {
@@ -157,9 +157,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         "Roll Number": transaction.studentId?.rollNumber || "N/A",
         "Standard": transaction.studentId?.standard || "N/A",
         "Year": transaction.studentId?.year || 0,
-        "Transaction Type": transaction.transactionType,
+        "Transaction Type": transaction.type,
         "Amount (₹)": transaction.totalAmount,
-        "Reason": transaction.reason || (transaction.transactionType === "Purchase" ? "Store Purchase" : "-"),
+        "Reason": transaction.reason || (transaction.type === "Purchase" ? "Store Purchase" : "-"),
         "Performed By": performedByName,
       };
     });
@@ -168,8 +168,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // CSV FORMAT
     if (format === "csv") {
-      const csvContent = generateCSV(reportData, summary, reportType, transactionType);
-      const filename = generateFilename(reportType, studentId, transactionType, "csv");
+      const csvContent = generateCSV(reportData, summary, reportType, type);
+      const filename = generateFilename(reportType, studentId, type, "csv");
       
       const BOM = "\uFEFF";
       const csvWithBOM = BOM + csvContent;
@@ -184,8 +184,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // EXCEL FORMAT - Using ExcelJS
     if (format === "excel") {
-      const excelBuffer = await generateExcel(reportData, summary, reportType, transactionType);
-      const filename = generateFilename(reportType, studentId, transactionType, "xlsx");
+      const excelBuffer = await generateExcel(reportData, summary, reportType, type);
+      const filename = generateFilename(reportType, studentId, type, "xlsx");
       
       return new NextResponse(Buffer.from(excelBuffer), {
         headers: {
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: {
         reportType,
-        transactionType,
+        type,
         generatedAt: new Date().toISOString(),
         totalEntries: reportData.length,
         entries: reportData,

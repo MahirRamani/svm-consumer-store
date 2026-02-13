@@ -28,7 +28,7 @@ interface ApiResponse<T = unknown> {
   error?: {
     code: string;
     message: string;
-    details?: Record<string, unknown>;
+    details?: Record<string, unknown> | unknown[];
   };
   metadata?: {
     page?: number;
@@ -91,13 +91,14 @@ export function errorResponse(
   message: string,
   statusCode: number = 400,
   code?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown> | unknown[]
 ): NextResponse<ApiResponse> {
   return NextResponse.json(
     {
       success: false,
       error: {
         code: code || 'ERROR',
+        status: statusCode,
         message,
         details,
       },
@@ -106,6 +107,7 @@ export function errorResponse(
   );
 }
 
+import {inspect} from 'util';
 // =============================================
 // Global Error Handler Wrapper
 // =============================================
@@ -116,15 +118,21 @@ export function withErrorHandler<T extends unknown[]>(
     try {
       return await handler(...args);
     } catch (error: unknown) {
-      console.error('API Error:', error);
+      console.error('API Error:', inspect(error, { depth: null, colors: true }));
 
-      // Handle Zod validation errors
-      if (error instanceof ZodError) {
-        const details = error.issues.reduce((acc, err) => {
-          const path = err.path.join('.');
-          acc[path] = err.message;
-          return acc;
-        }, {} as Record<string, string>);
+        // Handle Zod validation errors
+        if (error instanceof ZodError) {
+          const details = error.issues.map(issue => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code
+          }));
+        // if (error instanceof ZodError) {
+        // const details = error.issues.reduce((acc, err) => {
+        //   const path = err.path.join('.');
+        //   acc[path] = err.message;
+        //   return acc;
+        // }, {} as Record<string, string>);
 
         return errorResponse(
           'Validation failed',

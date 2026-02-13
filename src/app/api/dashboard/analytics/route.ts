@@ -10,7 +10,7 @@ import type { PipelineStage } from 'mongoose';
 // Validation Schema
 // =============================================
 const getAnalyticsSchema = z.object({
-  view: z.enum(['category', 'product', 'subproduct']).default('subproduct'),
+  view: z.enum(['category', 'product', 'product']).default('product'),
   categoryId: objectIdSchema.optional(),
   productId: objectIdSchema.optional(),
 });
@@ -34,7 +34,7 @@ const getAnalyticsHandler = async (req: Request, authContext: AuthContext) => {
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: thirtyDaysAgo },
       },
     },
@@ -99,17 +99,17 @@ const getAnalyticsHandler = async (req: Request, authContext: AuthContext) => {
     aggregationPipeline.push(
       {
         $lookup: {
-          from: 'subproducts',
-          localField: 'items.subProductId',
+          from: 'products',
+          localField: 'items.productId',
           foreignField: '_id',
-          as: 'subProduct',
+          as: 'product',
         },
       },
-      { $unwind: '$subProduct' },
+      { $unwind: '$product' },
       {
         $group: {
-          _id: '$items.subProductId',
-          name: { $first: '$subProduct.name' },
+          _id: '$items.productId',
+          name: { $first: '$product.name' },
           sales: { $sum: '$items.totalPrice' },
           quantity: { $sum: '$items.quantity' },
         },

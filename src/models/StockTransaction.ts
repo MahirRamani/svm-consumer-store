@@ -4,13 +4,12 @@ import mongoose, { Document, Model, Schema, Types } from "mongoose";
 export interface IStockTransaction extends Document {
   productId: Types.ObjectId;
   categoryId: Types.ObjectId;
-  transactionType: "Buy" | "Sell" | "Adjustment";
+  stockType: "Buy" | "Sell" | "Adjustment";
   buyingPrice?: number;
   sellingPrice?: number;
   initialQuantity: number;
   quantityLeft: number;
   reason?: string;
-  notes?: string;
   purchaseDate: Date;
   createdBy: Types.ObjectId;
   endedAt?: Date | null;  // Add null as possible type
@@ -22,7 +21,7 @@ export interface IStockTransactionDocument extends Omit<Document, '_id'> {
   _id: mongoose.Types.ObjectId;
   productId: mongoose.Types.ObjectId;
   categoryId?: mongoose.Types.ObjectId;
-  transactionType: "Buy" | "Sell" | "Adjustment";
+  stockType: "Buy" | "Sell" | "Adjustment";
   buyingPrice?: mongoose.Types.Decimal128;
   sellingPrice?: mongoose.Types.Decimal128;
   initialQuantity: number;
@@ -50,7 +49,7 @@ const StockTransactionSchema = new Schema(
       required: false,
       index: true,
     },
-    transactionType: {
+    stockType: {
       type: String,
       required: true,
       enum: ["Buy", "Sell", "Adjustment"],
@@ -60,7 +59,7 @@ const StockTransactionSchema = new Schema(
     buyingPrice: {
       type: Schema.Types.Decimal128,
       required: function (this: any) {
-        return this.transactionType === "Buy";
+        return this.stockType === "Buy";
       },
       validate: {
         validator: function(v: mongoose.Types.Decimal128) {
@@ -81,7 +80,7 @@ const StockTransactionSchema = new Schema(
     sellingPrice: {
       type: Schema.Types.Decimal128,
       required: function (this: any) {
-        return this.transactionType === "Sell";
+        return this.stockType === "Sell";
       },
       validate: {
         validator: function(v: mongoose.Types.Decimal128) {
@@ -166,13 +165,13 @@ const StockTransactionSchema = new Schema(
 // Compound indexes for better query performance
 StockTransactionSchema.index({ productId: 1, purchaseDate: -1 });
 StockTransactionSchema.index({ categoryId: 1, purchaseDate: -1 });
-StockTransactionSchema.index({ transactionType: 1, purchaseDate: -1 });
+StockTransactionSchema.index({ stockType: 1, purchaseDate: -1 });
 StockTransactionSchema.index({ createdBy: 1, purchaseDate: -1 });
 StockTransactionSchema.index({ productId: 1, quantityLeft: 1 });
 
 // Keep only this middleware
 StockTransactionSchema.pre("save", function (next) {
-  if (this.transactionType === "Sell") {
+  if (this.stockType === "Sell") {
     this.quantityLeft = 0;
     if (!this.endedAt) {
       this.endedAt = new Date();

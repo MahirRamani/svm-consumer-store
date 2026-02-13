@@ -125,7 +125,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
               _id: null,
               currentStock: {
                 $sum: {
-                  $cond: [{ $eq: ['$transactionType', 'Buy'] }, '$quantityLeft', 0],
+                  $cond: [{ $eq: ['$type', 'Buy'] }, '$quantityLeft', 0],
                 },
               },
               latestPrice: { $last: '$sellingPrice' },
@@ -187,7 +187,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: today, $lt: tomorrow },
       },
     },
@@ -264,7 +264,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: today, $lt: tomorrow },
       },
     },
@@ -326,7 +326,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: startOfMonth },
       },
     },
@@ -346,7 +346,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
       },
     },
@@ -368,7 +368,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: today, $lt: tomorrow },
       },
     },
@@ -405,7 +405,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: today, $lt: tomorrow },
       },
     },
@@ -446,7 +446,7 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
     {
       $match: {
         status: 'Completed',
-        transactionType: 'Purchase',
+        type: 'Purchase',
         createdAt: { $gte: yesterday, $lt: today },
       },
     },

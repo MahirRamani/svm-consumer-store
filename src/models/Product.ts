@@ -7,7 +7,6 @@ export interface IProduct extends Document {
   categoryId: mongoose.Types.ObjectId;
   priority: number;
   isActive: boolean;
-  // Merged from SubProduct
   imageURL?: string;
   size?: string;
   weight?: string;

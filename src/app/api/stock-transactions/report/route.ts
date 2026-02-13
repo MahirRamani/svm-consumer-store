@@ -27,7 +27,7 @@ interface PopulatedStockTransaction {
     _id: mongoose.Types.ObjectId;
     name: string;
   };
-  transactionType: "Buy" | "Sell" | "Adjustment";
+  stockType: "Buy" | "Sell" | "Adjustment";
   buyingPrice: number;
   sellingPrice: number;
   initialQuantity: number;
@@ -43,7 +43,7 @@ interface ReportRow {
   productName: string;
   productSize: string;
   category: string;
-  transactionType: string;
+  stockType: string;
   initialQuantity: number;
   quantityLeft: number;
   buyingPrice: number;
@@ -148,13 +148,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         productName,
         productSize,
         category: categoryName,
-        transactionType: transaction.transactionType,
+        stockType: transaction.stockType,
         initialQuantity: transaction.initialQuantity,
         quantityLeft: transaction.quantityLeft,
         buyingPrice: transaction.buyingPrice || 0,
         sellingPrice: transaction.sellingPrice || 0,
         totalValue:
-          transaction.transactionType === "Buy"
+          transaction.stockType === "Buy"
             ? transaction.initialQuantity * (transaction.buyingPrice || 0)
             : transaction.initialQuantity * (transaction.sellingPrice || 0),
         reason: transaction.reason || "",
@@ -246,7 +246,7 @@ function generateCSV(data: ReportRow[], reportType: string): string {
       `"${row.productName}"`,
       `"${row.productSize}"`,
       `"${row.category}"`,
-      row.transactionType,
+      row.stockType,
       row.initialQuantity,
       row.quantityLeft,
       Number(row.buyingPrice || 0).toFixed(2),  // Ensure it's a number
@@ -313,11 +313,11 @@ function calculateSummary(data: ReportRow[]): ReportSummary {
     (acc, row) => {
       acc.totalEntries++;
 
-      if (row.transactionType === "Buy") {
+      if (row.stockType === "Buy") {
         acc.buyCount++;
         acc.totalBuyValue += row.totalValue;
         acc.totalQuantityIn += row.initialQuantity;
-      } else if (row.transactionType === "Sell") {
+      } else if (row.stockType === "Sell") {
         acc.sellCount++;
         acc.totalSellValue += row.totalValue;
         acc.totalQuantityOut += row.initialQuantity;

@@ -25,7 +25,7 @@ const getOldestStockHandler = async (req: Request) => {
   // Fetch oldest available stock (FIFO)
   const oldestStock = await StockTransaction.findOne({
     productId: new mongoose.Types.ObjectId(productId),
-    transactionType: { $in: ['Buy', 'Adjustment'] },
+    stockType: { $in: ['Buy', 'Adjustment'] },
     quantityLeft: { $gt: 0 },
   })
     .sort({ purchaseDate: 1, createdAt: 1 })

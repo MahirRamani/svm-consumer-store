@@ -93,7 +93,7 @@ const getProductsWithStockHandler = async (req: Request) => {
     {
       $match: {
         productId: { $in: productIds },
-        transactionType: { $in: ['Buy', 'Adjustment'] },
+        stockType: { $in: ['Buy', 'Adjustment'] },
         quantityLeft: { $gt: 0 },
       },
     },

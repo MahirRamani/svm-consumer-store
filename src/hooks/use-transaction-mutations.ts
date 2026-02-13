@@ -16,7 +16,7 @@ interface CreateTransactionInput {
   studentId: string;
   items: Array<{
     productId?: string;
-    subProductId?: string;
+    // subProductId?: string;
     quantity: number;
     price: number;
     stockTransactionId?: string;

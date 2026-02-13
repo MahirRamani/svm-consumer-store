@@ -1,5 +1,7 @@
 // types/stock-transaction.ts
 
+import { BaseEntity } from ".";
+
 export interface StockEntryFormData {
   buyingPrice: string;
   sellingPrice: string;
@@ -16,39 +18,39 @@ export interface StockEntryFormErrors {
   notes?: string;
 }
 
-export interface StockTransaction {
-  _id: string;
-  productId: string;
-  categoryId?: string;
-  transactionType: "Buy" | "Sell" | "Adjustment";
-  buyingPrice: number;
+export type StockTransactionReason = 'Adjustment' | 'Return' | 'Damage' | 'Expired'| 'Loss';
+
+export interface StockTransaction extends BaseEntity {
+  productId: {
+    _id: string;
+    name: string;
+    size?: string;
+    imageURL?: string;
+  };
+  categoryId: {
+    _id: string;
+    name: string;
+  };
+  stockType: "Buy" | "Sell" | "Adjustment";
+  buyingPrice?: number;
   sellingPrice: number;
   initialQuantity: number;
   quantityLeft: number;
   reason?: string;
   notes?: string;
   purchaseDate: Date | string;
-  createdBy?: string;
-  endedAt?: Date | string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  // Populated fields
-  product?: {
+  date?: Date | string; // Legacy field for backward compatibility
+  createdBy: {
     _id: string;
-    name: string;
-    size?: string;
-    imageURL?: string;
+    username: string;
   };
-  category?: {
-    _id: string;
-    name: string;
-  };
+  endedAt?: Date | string | null;
 }
 
 export interface CreateStockTransactionInput {
   productId: string;
   categoryId?: string;
-  transactionType: "Buy" | "Sell" | "Adjustment";
+  stockType: "Buy" | "Sell" | "Adjustment";
   buyingPrice?: number;
   sellingPrice?: number;
   initialQuantity: number;
@@ -69,6 +71,25 @@ export interface StockTransactionsResponse {
     pages: number;
   };
 }
+
+export interface StockTransactionFormData {
+  sellingPrice: string;
+  buyingPrice: string;
+  initialQuantity: string;
+  quantityLeft: string;
+  reason: StockTransactionReason | '';
+  notes: string;
+}
+
+export interface StockTransactionFormErrors {
+  sellingPrice?: string;
+  buyingPrice?: string;
+  initialQuantity?: string;
+  quantityLeft?: string;
+  reason?: string;
+  notes?: string;
+}
+ 
 // // types/stock-transaction.ts
 
 // import type { ApiResponse } from './category';
@@ -121,3 +142,16 @@ export interface StockTransactionsResponse {
 //   purchaseDate?: string;
 //   notes?: string; // ✅ Added this
 // }
+
+export interface StockTransactionsListResponse {
+  success: true;
+  data: {
+    transactions: StockTransaction[];
+  };
+  metadata: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}

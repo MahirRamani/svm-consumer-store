@@ -38,13 +38,13 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
-  // stocks: {
-  //   label: 'Stocks',
-  //   icon: Warehouse,
-  //   component: dynamic(() => import('@/components/dashboard/tabs/stock-tab'), {
-  //     loading: () => <LoadingSkeleton />,
-  //   }),
-  // },
+  stocks: {
+    label: 'Stocks Transactions',
+    icon: Warehouse,
+    component: dynamic(() => import('@/components/dashboard/tabs/stock-transactions-management'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
   selling: {
     label: 'Selling',
     icon: ShoppingCart,
@@ -63,6 +63,13 @@ export const TABS_REGISTRY = {
     label: 'Students',
     icon: Package,
     component: dynamic(() => import('@/components/dashboard/tabs/student-management'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
+  reports: {
+    label: 'Reports',
+    icon: Receipt,
+    component: dynamic(() => import('@/components/dashboard/tabs/reports-tab'), {
       loading: () => <LoadingSkeleton />,
     }),
   },
