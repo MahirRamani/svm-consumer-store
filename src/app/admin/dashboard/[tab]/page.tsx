@@ -61,7 +61,11 @@ export default function TabPage() {
   }
 
   const Component = tab.component;
-  return <Component />;
+  return (
+    <div className="p-0">
+      <Component />
+    </div>
+  );
 }
 // // app/admin/dashboard/[tab]/page.tsx
 // 'use client';

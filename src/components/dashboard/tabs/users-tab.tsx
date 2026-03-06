@@ -37,7 +37,7 @@ export default function UsersTab() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 m-0">
       <UserCreateForm onUserCreated={handleUserCreated} />
       <UserList 
         users={users} 

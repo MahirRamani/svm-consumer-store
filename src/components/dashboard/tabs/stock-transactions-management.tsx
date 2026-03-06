@@ -36,7 +36,7 @@ export default function StockTransactionsManagement() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
-  const [sortBy, setSortBy] = useState<string>("createdAt");
+  const [sortBy, setSortBy] = useState<string>("purchaseDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<StockTransaction | null>(null);
@@ -291,7 +291,7 @@ export default function StockTransactionsManagement() {
             {/* Transaction Type Filter */}
             <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">
-                Transaction Type
+                Stock Type
               </Label>
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger>
@@ -323,8 +323,8 @@ export default function StockTransactionsManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="date-desc">Date (Newest)</SelectItem>
-                  <SelectItem value="date-asc">Date (Oldest)</SelectItem>
+                  <SelectItem value="purchaseDate-desc">Date (Newest)</SelectItem>
+                  <SelectItem value="purchaseDate-asc">Date (Oldest)</SelectItem>
                   <SelectItem value="sellingPrice-desc">Price (High to Low)</SelectItem>
                   <SelectItem value="sellingPrice-asc">Price (Low to High)</SelectItem>
                   <SelectItem value="initialQuantity-desc">Quantity (High to Low)</SelectItem>

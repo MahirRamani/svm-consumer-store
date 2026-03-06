@@ -59,6 +59,13 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
+  'all-transactions': {
+    label: 'All Transactions',
+    icon: Receipt,
+    component: dynamic(() => import('@/components/dashboard/tabs/all-transactions-tab'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
   students: {
     label: 'Students',
     icon: Package,

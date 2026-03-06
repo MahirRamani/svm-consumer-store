@@ -77,7 +77,7 @@ export interface StockTransactionFormData {
   buyingPrice: string;
   initialQuantity: string;
   quantityLeft: string;
-  reason: StockTransactionReason | '';
+  reason: StockTransactionReason;
   notes: string;
 }
 

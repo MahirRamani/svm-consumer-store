@@ -86,7 +86,7 @@ export default function PosPage() {
 
   return (
     // Add h-screen and overflow-hidden to lock viewport
-    <div className="h-screen overflow-hidden">
+    <div className="h-screen overflow-hidden p-0 m-0">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 h-full">
         {/* Left Side - Add flex, h-full, overflow-hidden */}
         <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">

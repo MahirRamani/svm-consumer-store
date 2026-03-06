@@ -40,7 +40,7 @@ export default function EditStockTransactionModal({
     sellingPrice: "",
     initialQuantity: "",
     quantityLeft: "",
-    reason: "",
+    reason: "Adjustment",
     notes: "",
   });
 
@@ -79,11 +79,11 @@ export default function EditStockTransactionModal({
         setDisplayTransaction(null); // Clear after 300ms
         // Also clear form data
       }, 300); // Match dialog animation duration
-      
+
       return () => clearTimeout(timer);
     }
   }, [open]);
-  
+
   useEffect(() => {
     if (transaction && open) {
       setFormData({
@@ -114,7 +114,7 @@ export default function EditStockTransactionModal({
         sellingPrice: "",
         initialQuantity: "",
         quantityLeft: "",
-        reason: "",
+        reason: "Adjustment",
         notes: "",
       });
       setErrors({});
@@ -183,7 +183,7 @@ export default function EditStockTransactionModal({
         }
         break;
       case "reason":
-        if (value && !['purchase', 'return', 'damage', 'expired', 'adjustment', ''].includes(value)) {
+        if (value && !['Adjustment', 'Return', 'Damage', 'Expired', 'Loss'].includes(value)) {
           return "Invalid reason selected";
         }
         break;
@@ -454,16 +454,16 @@ export default function EditStockTransactionModal({
               </div>
 
               {/* Quantity Warning */}
-              {formData.initialQuantity && formData.quantityLeft && 
+              {formData.initialQuantity && formData.quantityLeft &&
                 Number(formData.quantityLeft) > Number(formData.initialQuantity) && (
-                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <p className="font-medium">Warning</p>
-                    <p>Quantity left ({formData.quantityLeft}) exceeds initial quantity ({formData.initialQuantity})</p>
+                  <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-medium">Warning</p>
+                      <p>Quantity left ({formData.quantityLeft}) exceeds initial quantity ({formData.initialQuantity})</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Reason */}
               <div className="space-y-2">
@@ -977,7 +977,7 @@ export default function EditStockTransactionModal({
 //               </div>
 
 //               {/* Quantity Warning */}
-//               {formData.initialQuantity && formData.quantityLeft && 
+//               {formData.initialQuantity && formData.quantityLeft &&
 //                 Number(formData.quantityLeft) > Number(formData.initialQuantity) && (
 //                 <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
 //                   <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
