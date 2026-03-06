@@ -205,6 +205,7 @@ export default function TransactionsTab() {
       day: "2-digit",
       month: "short",
       year: "numeric",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
   }, []);
 
