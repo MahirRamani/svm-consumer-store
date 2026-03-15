@@ -150,6 +150,13 @@ export default function TransactionsTab() {
   //   placeholderData: (previousData) => previousData,
   // });
 
+  // Add this helper
+  const getYesterday = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate());
+    return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
+  };
+
   // Add this helper above your component
   const getUTCBoundaries = (
     dateRange: string,
@@ -238,12 +245,45 @@ export default function TransactionsTab() {
   const transactions = response?.data || [];
   const pagination = response?.pagination;
 
+  // const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+  //   setFilters((prev) => ({
+  //     ...prev,
+  //     [key]: value,
+  //     ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
+  //   }));
+  // }, []);
+
   const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-      ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
-    }));
+    setFilters((prev) => {
+      // ✅ Pre-fill yesterday when switching to custom
+      if (key === "dateRange" && value === "custom") {
+        const yesterday = getYesterday();
+        return {
+          ...prev,
+          dateRange: "custom" as FilterState["dateRange"],
+          startDate: yesterday,
+          endDate: yesterday,
+          currentPage: 1,
+        };
+      }
+
+      // ✅ Clear dates when switching away from custom
+      if (key === "dateRange" && value !== "custom") {
+        return {
+          ...prev,
+          [key]: value,
+          startDate: "",
+          endDate: "",
+          currentPage: 1,
+        };
+      }
+
+      return {
+        ...prev,
+        [key]: value,
+        ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
+      };
+    });
   }, []);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -476,8 +516,10 @@ export default function TransactionsTab() {
   const PaginationControls = useCallback(() => {
     if (!pagination) return null;
 
-    const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
+    const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
 
+    const currentPage = filters.currentPage;
+    
     const getPageNumbers = (): number[] => {
       const maxVisible = 5;
       const pages: number[] = [];
@@ -559,7 +601,7 @@ export default function TransactionsTab() {
         </div>
       </div>
     );
-  }, [pagination, filters.pageSize, handlePageChange, handlePageSizeChange]);
+  }, [pagination, filters.currentPage, filters.pageSize, handlePageChange, handlePageSizeChange]);
 
   // Show skeleton on initial load
   const showSkeleton = isLoading || isFetching;

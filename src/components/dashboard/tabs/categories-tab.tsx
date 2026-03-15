@@ -15,11 +15,11 @@ import AddCategoryModal from "@/components/modals/add-category-modal";
 import EditCategoryModal from "@/components/modals/edit-category-modal";
 
 import type { 
-  ApiResponse, 
   Category, 
   CategoriesResponse, 
   CategoryFilterState 
 } from "@/types/category";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 export default function CategoriesTab() {
   const [filterState, setFilterState] = useState<CategoryFilterState>({

@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
-import type { Student, ApiResponse } from "@/types/pos";
+import type { Student } from "@/types/pos";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 interface StudentLookupProps {
   selectedStudent: Student | null;

@@ -41,7 +41,7 @@ const getStockTransactionsHandler = async (req: Request) => {
     StockTransaction.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(1000)
+      .limit(limit)
       .populate('createdBy', 'username')
       .populate('productId', 'name size imageURL')
       .populate('categoryId', 'name')

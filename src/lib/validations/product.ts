@@ -31,9 +31,8 @@ export const createProductSchema = z.object({
   
   // Merged from SubProduct
   imageURL: z
-    .string()
+    .url({ message: "Must be a valid URL" })
     .trim()
-    .url('Must be a valid URL')
     .optional()
     .or(z.literal('')),
   

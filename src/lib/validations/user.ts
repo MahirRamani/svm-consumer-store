@@ -27,12 +27,12 @@ export const updateUserSchema = z.object({
     .max(50, 'Username cannot exceed 50 characters')
     .trim()
     .regex(/^[A-Za-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
   role: z.string().refine(isValidRole, { message: 'Invalid role' }),
   allowedTabs: z
     .array(z.string().refine(isValidTab, { message: 'Invalid tab' }))
-    .min(0).optional(),
-  isActive: z.boolean(),
+    .optional(),
+  isActive: z.boolean().optional(),
 });
 
 // Query Schema for listing users

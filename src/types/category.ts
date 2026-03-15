@@ -1,22 +1,22 @@
 // types/category.ts
 
 /** Base API Response Structure (matching your backend) */
-export interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
-  metadata?: {
-    page?: number;
-    limit?: number;
-    totalCount?: number;
-    totalPages?: number;
-  };
-}
+// export interface ApiResponse<T> {
+//   success: boolean;
+//   message?: string;
+//   data?: T;
+//   error?: {
+//     code: string;
+//     message: string;
+//     details?: Record<string, unknown>;
+//   };
+//   metadata?: {
+//     page?: number;
+//     limit?: number;
+//     totalCount?: number;
+//     totalPages?: number;
+//   };
+// }
 
 /** Category Entity (as returned from API) */
 export interface Category {

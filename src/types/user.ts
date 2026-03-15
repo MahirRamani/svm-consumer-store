@@ -9,6 +9,6 @@ export interface User {
   username: string;
   role: AppRole;
   allowedTabs: string[];
-  createdAt?: string; // Date is serialized as a string over JSON
+  createdAt?: string;
   createdBy?: string;
 }

@@ -32,10 +32,10 @@ import type {
   ImageUploadResponse,
 } from "@/lib/types/product";
 import type { 
-  ApiResponse, 
   Category, 
   CategoriesResponse 
 } from "@/types/category";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 interface EditProductModalProps {
   open: boolean;

@@ -1,8 +1,8 @@
 // types/product.ts
 
-import type { ApiResponse } from './category';
+// import type { ApiResponse } from './category';
 
-export type { ApiResponse };
+// export type { ApiResponse };
 
 // =============================================
 // Base Entity Interface

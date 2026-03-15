@@ -12,7 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { ApiResponse, AnalyticsDataPoint, AnalyticsView, CustomTooltipProps } from "@/types/dashboard/overview"
+import type { AnalyticsDataPoint, AnalyticsView, CustomTooltipProps } from "@/types/dashboard/overview"
+import { ApiResponse } from "@/lib/api/base-handler"
 
 interface CategoryAnalyticsChartProps {
   view: AnalyticsView

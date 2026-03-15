@@ -16,14 +16,13 @@ import type {
   Student, 
   CartItem, 
   TransactionItem,
-  Transaction,
   TransactionData,
-  ApiResponse, 
   TransactionApiResponse
 } from "@/types/pos";
 import { WILD_ROLL_NUMBERS } from "@/lib/constant";
 import { ObjectId } from "mongoose";
 import { useSession } from "next-auth/react";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 interface ShoppingCartProps {
   selectedStudent: Student | null;

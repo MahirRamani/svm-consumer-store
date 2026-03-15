@@ -5,22 +5,22 @@ import type { TransactionType } from "@/types"
 // =============================================
 // Base API Response Type
 // =============================================
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
-  metadata?: {
-    page?: number;
-    limit?: number;
-    totalCount?: number;
-    totalPages?: number;
-  };
-}
+// export interface ApiResponse<T = unknown> {
+//   success: boolean;
+//   message?: string;
+//   data?: T;
+//   error?: {
+//     code: string;
+//     message: string;
+//     details?: Record<string, unknown>;
+//   };
+//   metadata?: {
+//     page?: number;
+//     limit?: number;
+//     totalCount?: number;
+//     totalPages?: number;
+//   };
+// }
 
 // =============================================
 // Student Entity

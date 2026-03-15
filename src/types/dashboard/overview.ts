@@ -1,22 +1,22 @@
 // types/dashboard.ts
 
 /** Base API Response Structure (matching your backend) */
-export interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
-  metadata?: {
-    page?: number;
-    limit?: number;
-    totalCount?: number;
-    totalPages?: number;
-  };
-}
+// export interface ApiResponse<T> {
+//   success: boolean;
+//   message?: string;
+//   data?: T;
+//   error?: {
+//     code: string;
+//     message: string;
+//     details?: Record<string, unknown>;
+//   };
+//   metadata?: {
+//     page?: number;
+//     limit?: number;
+//     totalCount?: number;
+//     totalPages?: number;
+//   };
+// }
 
 /** Dashboard Statistics */
 export interface DashboardStats {

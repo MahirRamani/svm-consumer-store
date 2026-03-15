@@ -21,7 +21,7 @@ export class ApiError extends Error {
 // =============================================
 // Response Interfaces
 // =============================================
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;

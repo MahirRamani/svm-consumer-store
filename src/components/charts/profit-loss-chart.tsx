@@ -12,7 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { ApiResponse, ProfitLossDataPoint, CustomTooltipProps } from "@/types/dashboard/overview"
+import type { ProfitLossDataPoint, CustomTooltipProps } from "@/types/dashboard/overview"
+import { ApiResponse } from "@/lib/api/base-handler"
 
 export default function ProfitLossChart() {
   const { data: chartResponse, isLoading } = useQuery<ApiResponse<ProfitLossDataPoint[]>>({

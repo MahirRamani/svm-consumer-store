@@ -1,7 +1,7 @@
 // hooks/use-mutations.ts
+import { ApiResponse } from "@/lib/api/base-handler";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { ApiResponse } from "@/types/category";
 
 interface MutationConfig<TData, TVariables> {
   queryKey: string[];

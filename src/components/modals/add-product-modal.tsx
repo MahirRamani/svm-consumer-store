@@ -30,10 +30,10 @@ import type {
   ImageUploadResponse,
 } from "@/lib/types/product";
 import type { 
-  ApiResponse, 
   Category, 
   CategoriesResponse 
 } from "@/types/category";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 interface AddProductModalProps {
   open: boolean;
@@ -49,8 +49,7 @@ const validateImageFile = (
     'image/jpeg', 
     'image/jpg', 
     'image/png', 
-    'image/webp', 
-    'image/gif'
+    'image/webp'
   ];
   
   if (!allowedTypes.includes(file.type)) {

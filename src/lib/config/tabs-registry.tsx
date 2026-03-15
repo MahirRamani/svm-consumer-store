@@ -80,6 +80,13 @@ export const TABS_REGISTRY = {
       loading: () => <LoadingSkeleton />,
     }),
   },
+  account: {
+    label: 'Account',
+    icon: Receipt,
+    component: dynamic(() => import('@/components/dashboard/tabs/account-dashboard-tab'), {
+      loading: () => <LoadingSkeleton />,
+    }),
+  },
   users: {
     label: 'Users',
     icon: Package,

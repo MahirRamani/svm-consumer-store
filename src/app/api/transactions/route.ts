@@ -703,7 +703,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //   }
     // ]);
 
-        const search = searchParams.get("search") || "";
+    const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "all";
     const startDate = searchParams.get("startDate"); // Already UTC ISO string from client
     const endDate = searchParams.get("endDate");     // Already UTC ISO string from client

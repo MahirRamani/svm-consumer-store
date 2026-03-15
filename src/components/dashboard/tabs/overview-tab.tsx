@@ -22,13 +22,13 @@ import LowStockModal from "@/components/modals/low-stock-modal"
 import TodaysSalesModal from "@/components/modals/todays-sales-modal"
 import LowBalanceModal from "@/components/modals/low-balance-students-modal"
 import type { 
-  ApiResponse, 
   DashboardStatsResponse,
   AdminDashboardStats,
   Category, 
   Product,
   AnalyticsView 
 } from "@/types/dashboard/overview"
+import { ApiResponse } from "@/lib/api/base-handler"
 
 export default function OverviewTab() {
   const [showLowStockModal, setShowLowStockModal] = useState(false)

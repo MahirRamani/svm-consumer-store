@@ -19,10 +19,9 @@ import EditProductModal from "@/components/modals/edit-product-modal";
 import AddStockEntryModal from "@/components/modals/add-stock-entry-modal";
 import StockReportModal from "@/components/modals/stock-report-modal";
 
-import type { 
-  ApiResponse, Product, ProductsResponse, ProductFilterState 
-} from "@/types/product";
+import type { Product, ProductsResponse, ProductFilterState } from "@/types/product";
 import type { Category, CategoriesResponse } from "@/types/category";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 // Helper function to format stock entries as "latest + ... + oldest"
 const formatStockEntries = (entries: Array<{ quantity: number; createdAt: string }> | undefined) => {

@@ -37,7 +37,6 @@ import {
 import { toast } from "sonner";
 
 import type {
-  ApiResponse,
   CartItem,
   Product,
   StockInfo,
@@ -47,6 +46,7 @@ import type {
   SearchResult,
 } from "@/types/pos";
 import type { Category, CategoriesResponse } from "@/types/category";
+import { ApiResponse } from "@/lib/api/base-handler";
 
 // =============================================
 // Types

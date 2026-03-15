@@ -7,8 +7,6 @@ import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
 import {
   createCategorySchema,
   getCategoriesQuerySchema,
-  type CreateCategoryDto,
-  type GetCategoriesQueryDto,
 } from '@/lib/validations/category';
 import type { FilterQuery } from 'mongoose';
 
