@@ -20,7 +20,7 @@ export const updateCategorySchema = createCategorySchema.partial();
 
 export const getCategoriesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(['name', 'createdAt', 'priority']).default('name'),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
   includeInactive: z.coerce.boolean().default(false),

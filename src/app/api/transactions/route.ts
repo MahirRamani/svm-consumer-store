@@ -452,12 +452,13 @@ import { Category } from "@/models/Category";
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';
 import { WILD_ROLL_NUMBERS } from '@/lib/constant';
+import { TransactionType } from '@/types';
 
 // =============================================
 // Type Definitions
 // =============================================
 interface TransactionFilter {
-  type: string;
+  type?: string;
   status?: string;
   createdAt?: {
     $gte?: Date;
@@ -500,6 +501,8 @@ interface AggregatedTransaction {
   createdAt: Date;
   status: string;
   type: string;
+  reason?: string;
+  performedBy?: { username: string };
   totalAmount: number;
   student?: {
     name: string;
@@ -528,6 +531,7 @@ interface FormattedTransaction {
   items: string;
   totalAmount: string;
   status: string;
+  reason?: string;
   createdAt: Date;
 }
 
@@ -710,7 +714,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
 
-    const filter: TransactionFilter = { type: "Purchase" };
+    // const filter: TransactionFilter = { type: "Purchase" };
+
+    const filter: TransactionFilter = {};
+
+    const typeParam = searchParams.get("type"); // or however you read query params
+    console.log("🚀 ~ GET ~ searchParams:", searchParams)
+    console.log("🚀 ~ GET ~ typeParam:", typeParam)
+
+    if (typeParam) {
+      filter.type = typeParam as TransactionType;
+    }
 
     // Status filter
     if (status !== "all") {
@@ -779,6 +793,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         },
       },
       { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "users", // your users collection name
+          localField: "performedBy",
+          foreignField: "_id",
+          as: "performedBy",
+        },
+      },
+      { $unwind: { path: "$performedBy", preserveNullAndEmptyArrays: true } },
       {
         $addFields: {
           itemsWithDetails: {
@@ -877,6 +900,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           totalAmount: transaction.totalAmount.toString(),
           status: transaction.status,
           type: transaction.type,
+          performedBy: transaction.performedBy?.username ?? null,
+          reason: transaction?.reason,
           createdAt: transaction.createdAt
         };
       })

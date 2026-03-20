@@ -103,10 +103,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     >();
 
     for (const st of stockTxs) {
-      const pid = (st.productId as mongoose.Types.ObjectId).toString();
+      const productId = (st.productId as mongoose.Types.ObjectId).toString();
 
-      if (!productStockMap.has(pid)) {
-        productStockMap.set(pid, {
+      if (!productStockMap.has(productId)) {
+        productStockMap.set(productId, {
           batches: [],
           totalInitial: 0,
           totalLeft: 0,
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
 
-      const entry = productStockMap.get(pid)!;
+      const entry = productStockMap.get(productId)!;
 
       // Parse buyingPrice — stored as Decimal128
       const buyingPrice =
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           : 0;
 
       const soldQty = st.initialQuantity - st.quantityLeft;
-      const threshold = productMap.get(pid)?.lowStockThreshold ?? 10;
+      const threshold = productMap.get(productId)?.lowStockThreshold ?? 10;
 
       // Determine batch-level status
       let batchStatus: StockStatus = "ok";
@@ -165,9 +165,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const data: StockProduct[] = [];
 
     for (const product of products) {
-      const pid = (product._id as mongoose.Types.ObjectId).toString();
-      const info = productMap.get(pid)!;
-      const stockEntry = productStockMap.get(pid) ?? {
+      const productId = (product._id as mongoose.Types.ObjectId).toString();
+      const info = productMap.get(productId)!;
+      const stockEntry = productStockMap.get(productId) ?? {
         batches: [],
         totalInitial: 0,
         totalLeft: 0,
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       data.push({
-        productId: pid,
+        productId: productId,
         productName: info.name,
         categoryId: info.categoryId,
         categoryName: categoryMap.get(info.categoryId) ?? "Unknown",
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         totalSold: stockEntry.totalSold,
         stockStatus,
         batches: stockEntry.batches.sort(
-          (a, b) =>
+          (b, a) =>
             new Date(a.purchaseDate).getTime() -
             new Date(b.purchaseDate).getTime()
         ),
@@ -209,11 +209,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       low: 1,
       ok: 2,
     };
-    data.sort(
-      (a, b) =>
-        statusOrder[a.stockStatus] - statusOrder[b.stockStatus] ||
-        a.productName.localeCompare(b.productName)
-    );
+    data.sort((a, b) => {
+      // First, compare Category Names
+      const catCompare = a.categoryName.localeCompare(b.categoryName);
+      
+      // If categories are different, return the result
+      if (catCompare !== 0) return catCompare;
+
+      // If categories are the same, sort by Product Name
+      return a.productName.localeCompare(b.productName);
+    });
 
     const summary: StockReportSummary = {
       totalProducts: data.length,

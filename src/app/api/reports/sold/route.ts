@@ -264,15 +264,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         totalQtySold: entry.totalQtySold,
         totalRevenue: entry.totalRevenue,
         batches: Array.from(entry.batchMap.values()).sort(
-          (a, b) =>
+          (b, a) =>
             new Date(a.purchaseDate).getTime() -
             new Date(b.purchaseDate).getTime()
         ),
       })
     );
 
-    // Sort by revenue descending
-    data.sort((a, b) => b.totalRevenue - a.totalRevenue);
+    // // Sort by revenue descending
+    // data.sort((a, b) => b.totalRevenue - a.totalRevenue);
+    // Sort by Category Name (A-Z), then by Product Name (A-Z)
+    data.sort((a, b) => {
+      // First, compare Category Names
+      const catCompare = a.categoryName.localeCompare(b.categoryName);
+      
+      // If categories are different, return the result
+      if (catCompare !== 0) return catCompare;
+
+      // If categories are the same, sort by Product Name
+      return a.productName.localeCompare(b.productName);
+    });
 
     const summary: SoldReportSummary = {
       totalProducts: data.length,

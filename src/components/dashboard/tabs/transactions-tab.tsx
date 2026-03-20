@@ -153,7 +153,7 @@ export default function TransactionsTab() {
   // Add this helper
   const getYesterday = () => {
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate());
+    yesterday.setDate(yesterday.getDate()-1);
     return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
   };
 
@@ -790,7 +790,7 @@ export default function TransactionsTab() {
 
                       if (items.length === 0) {
                         return (
-                          <tr key={transaction._id} className="hover:bg-gray-50">
+                          <tr key={transaction.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>

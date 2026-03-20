@@ -99,7 +99,7 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
   },
   {
     timestamps: true,
-    collection: 'accounttransactions',
+    collection: 'account_transactions',
   }
 );
 

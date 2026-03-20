@@ -39,7 +39,7 @@ export default function StockTransactionsManagement() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [sortBy, setSortBy] = useState<string>("purchaseDate");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<StockTransaction | null>(null);
 

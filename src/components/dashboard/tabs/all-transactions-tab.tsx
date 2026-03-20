@@ -21,16 +21,18 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
-import RevertTransactionModal, { 
+import RevertTransactionModal, {
   type RevertTransaction,
   type RevertTransactionItem,
 } from "@/components/modals/revert-transaction-modal";
 import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata, TransactionType } from "@/types";
 
 type DateRangeType = "today" | "week" | "month" | "custom" | "all";
-type StatusType = "all" | "Completed" | "Pending" | "Cancelled";
+export type TransactionTypeFilter = TransactionType | "all";
+type StatusType = "Completed" | "Pending" | "Cancelled" | "all";
 
 interface FilterState {
+  typeFilter: TransactionTypeFilter;
   statusFilter: StatusType;
   dateRange: DateRangeType;
   startDate: string;
@@ -88,6 +90,7 @@ export default function TransactionsTab() {
   const [committedSearch, setCommittedSearch] = useState("");
 
   const [filters, setFilters] = useState<FilterState>({
+    typeFilter: "all" as TransactionTypeFilter,
     statusFilter: "all",
     dateRange: "today",
     startDate: "",
@@ -120,6 +123,87 @@ export default function TransactionsTab() {
     setFilters(prev => ({ ...prev, currentPage: 1 }));
   }, []);
 
+  // const { data: response, isLoading, isFetching } = useQuery<TransactionsResponse>({
+  //   queryKey: [
+  //     "transactions",
+  //     committedSearch,
+  //     filters.statusFilter,
+  //     filters.dateRange,
+  //     filters.startDate,
+  //     filters.endDate,
+  //     filters.currentPage,
+  //     filters.pageSize,
+  //   ],
+  //   queryFn: async (): Promise<TransactionsResponse> => {
+  //     const params = new URLSearchParams();
+
+  //     if (committedSearch) params.append("search", committedSearch);
+  //     if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
+  //     if (filters.dateRange !== "all") params.append("dateRange", filters.dateRange);
+  //     if (filters.dateRange === "custom" && filters.startDate) params.append("startDate", filters.startDate);
+  //     if (filters.dateRange === "custom" && filters.endDate) params.append("endDate", filters.endDate);
+  //     params.append("page", filters.currentPage.toString());
+  //     params.append("limit", filters.pageSize.toString());
+
+  //     const response = await fetch(`/api/transactions?${params}`);
+  //     if (!response.ok) throw new Error("Failed to fetch transactions");
+  //     return response.json();
+  //   },
+  //   staleTime: 30 * 1000,
+  //   placeholderData: (previousData) => previousData,
+  // });
+
+  // Add this helper
+  const getYesterday = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate()-1);
+    return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
+  };
+
+  // Add this helper above your component
+  const getUTCBoundaries = (
+    dateRange: string,
+    startDate: string,
+    endDate: string
+  ): { startDate: string; endDate: string } | null => {
+    const now = new Date();
+
+    switch (dateRange) {
+      case "today": {
+        const start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(now);
+        end.setHours(23, 59, 59, 999);
+        return { startDate: start.toISOString(), endDate: end.toISOString() };
+      }
+      case "week": {
+        const start = new Date(now);
+        start.setDate(now.getDate() - now.getDay());
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(now);
+        end.setHours(23, 59, 59, 999);
+        return { startDate: start.toISOString(), endDate: end.toISOString() };
+      }
+      case "month": {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        end.setHours(23, 59, 59, 999);
+        return { startDate: start.toISOString(), endDate: end.toISOString() };
+      }
+      case "custom": {
+        if (!startDate || !endDate) return null;
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return { startDate: start.toISOString(), endDate: end.toISOString() };
+      }
+      default:
+        return null;
+    }
+  };
+  // Updated useQuery — only change is in queryFn params building
   const { data: response, isLoading, isFetching } = useQuery<TransactionsResponse>({
     queryKey: [
       "transactions",
@@ -136,9 +220,24 @@ export default function TransactionsTab() {
 
       if (committedSearch) params.append("search", committedSearch);
       if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
-      if (filters.dateRange !== "all") params.append("dateRange", filters.dateRange);
-      if (filters.dateRange === "custom" && filters.startDate) params.append("startDate", filters.startDate);
-      if (filters.dateRange === "custom" && filters.endDate) params.append("endDate", filters.endDate);
+      console.log("filters.typeFilter", filters.typeFilter);
+      if (filters.typeFilter !== "all") {
+        params.append("type", filters.typeFilter as TransactionType); // ✅ cast after narrowing
+      }
+      
+      // ✅ Client computes UTC boundaries, server stays timezone-agnostic
+      if (filters.dateRange !== "all") {
+        const boundaries = getUTCBoundaries(
+          filters.dateRange,
+          filters.startDate,
+          filters.endDate
+        );
+        if (boundaries) {
+          params.append("startDate", boundaries.startDate);
+          params.append("endDate", boundaries.endDate);
+        }
+      }
+
       params.append("page", filters.currentPage.toString());
       params.append("limit", filters.pageSize.toString());
 
@@ -153,12 +252,45 @@ export default function TransactionsTab() {
   const transactions = response?.data || [];
   const pagination = response?.pagination;
 
+  // const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+  //   setFilters((prev) => ({
+  //     ...prev,
+  //     [key]: value,
+  //     ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
+  //   }));
+  // }, []);
+
   const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-      ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
-    }));
+    setFilters((prev) => {
+      // ✅ Pre-fill yesterday when switching to custom
+      if (key === "dateRange" && value === "custom") {
+        const yesterday = getYesterday();
+        return {
+          ...prev,
+          dateRange: "custom" as FilterState["dateRange"],
+          startDate: yesterday,
+          endDate: yesterday,
+          currentPage: 1,
+        };
+      }
+
+      // ✅ Clear dates when switching away from custom
+      if (key === "dateRange" && value !== "custom") {
+        return {
+          ...prev,
+          [key]: value,
+          startDate: "",
+          endDate: "",
+          currentPage: 1,
+        };
+      }
+
+      return {
+        ...prev,
+        [key]: value,
+        ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
+      };
+    });
   }, []);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -219,7 +351,7 @@ export default function TransactionsTab() {
   const handleRevertClick = useCallback((apiTransaction: Transaction) => {
     // Parse items if they're in string format
     let apiItems: TransactionItem[];
-    
+
     if (Array.isArray(apiTransaction.items)) {
       apiItems = apiTransaction.items;
     } else if (typeof apiTransaction.items === "string") {
@@ -256,7 +388,7 @@ export default function TransactionsTab() {
       totalAmount: Number(apiTransaction.totalAmount),
       status: apiTransaction.status,
       createdAt: apiTransaction.createdAt,
-      type: (apiTransaction.type as TransactionType) || "Purchase",
+      type: apiTransaction.type as TransactionType,
     };
 
     setSelectedTransaction(formattedTransaction);
@@ -276,21 +408,21 @@ export default function TransactionsTab() {
   // }, []);
 
   const canRevert = useCallback((transaction: Transaction): boolean => {
-  const type = transaction.type as TransactionType;
-  
-  // Can only revert completed original transactions
-  const isOriginalTransaction = ["Purchase", "Topup", "Deduction"].includes(type);
-  
-  console.log('Checking canRevert for transaction:', {
-    id: transaction.id,
-    status: transaction.status,
-    type: transaction.type,
-    isOriginal: isOriginalTransaction,
-    canRevert: transaction.status === "Completed" && isOriginalTransaction
-  });
-  
-  return transaction.status === "Completed" && isOriginalTransaction;
-}, []);
+    const type = transaction.type as TransactionType;
+
+    // Can only revert completed original transactions
+    const isOriginalTransaction = ["Purchase", "Topup", "Deduction"].includes(type);
+
+    console.log('Checking canRevert for transaction:', {
+      id: transaction.id,
+      status: transaction.status,
+      type: transaction.type,
+      isOriginal: isOriginalTransaction,
+      canRevert: transaction.status === "Completed" && isOriginalTransaction
+    });
+
+    return transaction.status === "Completed" && isOriginalTransaction;
+  }, []);
 
   const handleExport = useCallback(() => {
     try {
@@ -317,10 +449,10 @@ export default function TransactionsTab() {
         const items = Array.isArray(transaction.items)
           ? transaction.items
           : parseTransactionItems(
-              typeof transaction.items === "string"
-                ? transaction.items
-                : JSON.stringify(transaction.items || [])
-            );
+            typeof transaction.items === "string"
+              ? transaction.items
+              : JSON.stringify(transaction.items || [])
+          );
         const transactionDate = new Date(transaction.createdAt);
         const dateStr = transactionDate.toLocaleDateString("en-GB", {
           day: "2-digit",
@@ -391,8 +523,10 @@ export default function TransactionsTab() {
   const PaginationControls = useCallback(() => {
     if (!pagination) return null;
 
-    const { currentPage, totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
+    const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
 
+    const currentPage = filters.currentPage;
+    
     const getPageNumbers = (): number[] => {
       const maxVisible = 5;
       const pages: number[] = [];
@@ -474,7 +608,7 @@ export default function TransactionsTab() {
         </div>
       </div>
     );
-  }, [pagination, filters.pageSize, handlePageChange, handlePageSizeChange]);
+  }, [pagination, filters.currentPage, filters.pageSize, handlePageChange, handlePageSizeChange]);
 
   // Show skeleton on initial load
   const showSkeleton = isLoading || isFetching;
@@ -656,21 +790,21 @@ export default function TransactionsTab() {
                       const items = Array.isArray(transaction.items)
                         ? transaction.items
                         : parseTransactionItems(
-                            typeof transaction.items === "string"
-                              ? transaction.items
-                              : JSON.stringify(transaction.items || [])
-                          );
+                          typeof transaction.items === "string"
+                            ? transaction.items
+                            : JSON.stringify(transaction.items || [])
+                        );
 
                       if (items.length === 0) {
                         return (
-                          <tr key={transaction._id} className="hover:bg-gray-50">
+                          <tr key={transaction.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
                                 <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">No items</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> {transaction.reason}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">-</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">-</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right">

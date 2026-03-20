@@ -290,7 +290,7 @@ export default function InventoryReportDashboard() {
 
   // Default: category asc (groups by category, then product within)
   const [soldSort, setSoldSort]   = useState<SortState<SoldSortKey>>({ key: "categoryName", dir: "asc" });
-  const [stockSort, setStockSort] = useState<SortState<StockSortKey>>({ key: "newestBatch", dir: "desc" });
+  const [stockSort, setStockSort] = useState<SortState<StockSortKey>>({ key: "categoryName", dir: "asc" });
 
   // ── Derived date ──────────────────────────────────────────────────────────
   const selectedDate = useMemo<string>(
