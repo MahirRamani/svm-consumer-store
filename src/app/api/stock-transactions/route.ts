@@ -8,28 +8,35 @@ import {
   createStockTransactionSchema,
   getStockTransactionsQuerySchema,
 } from '@/lib/validations/stockTransaction';
-import type { FilterQuery } from 'mongoose';
+import type { FilterQuery, Types } from 'mongoose';
+import { Category, Product } from '@/models';
 
 // =============================================
 // GET - List Stock Transactions
 // =============================================
+
 const getStockTransactionsHandler = async (req: Request) => {
   await connectDB();
 
   const query = validateQuery(req, getStockTransactionsQuerySchema);
-  const { page, limit, sortBy, sortOrder, productId, categoryId, stockType } = query;
+  const { page, limit, sortBy, sortOrder, productId, categoryId, stockType, search } = query;
 
-  // Build filter
   const filter: FilterQuery<IStockTransaction> = {};
-  
-  if (productId) {
-    filter.productId = productId;
-  }
-  if (categoryId) {
-    filter.categoryId = categoryId;
-  }
-  if (stockType) {
-    filter.stockType = stockType;
+
+  if (productId) filter.productId = productId;
+  if (categoryId) filter.categoryId = categoryId;
+  if (stockType) filter.stockType = stockType;
+
+  if (search) {
+    const [matchingProducts, matchingCategories] = await Promise.all([
+      Product.find({ name: { $regex: search, $options: 'i' } }).select('_id').lean(),
+      Category.find({ name: { $regex: search, $options: 'i' } }).select('_id').lean(),
+    ]);
+
+    filter.$or = [
+      { productId: { $in: matchingProducts.map((p) => p._id as Types.ObjectId) } },
+      { categoryId: { $in: matchingCategories.map((c) => c._id as Types.ObjectId) } },
+    ];
   }
 
   const skip = (page - 1) * limit;

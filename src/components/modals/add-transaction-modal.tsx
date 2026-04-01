@@ -37,12 +37,18 @@ interface FormErrors {
   enteredAt?: string;
 }
 
+// ✅ Helper — add this above getInitialFormData
+const toLocalDateTimeString = (date: Date): string => {
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+
 const getInitialFormData = (): FormData => ({
   type: "CREDIT",
   amount: "",
   note: "",
   billUrl: "",
-  enteredAt: new Date().toISOString().slice(0, 16),
+  enteredAt: toLocalDateTimeString(new Date()), // ✅ local time now
 });
 
 export default function AddTransactionModal({

@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Edit, 
+import {
+  Search,
+  Edit,
   Package,
   TrendingUp,
   TrendingDown,
@@ -20,34 +20,66 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Loader2,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import EditStockTransactionModal from "@/components/modals/edit-stock-transaction-modal";
 import type { Category, CategoriesListResponse } from "@/types";
 import type { StockTransaction, StockTransactionsListResponse } from "@/types/stock-transaction";
 
-interface StockTransactionsApiResponse extends StockTransactionsListResponse {}
+interface StockTransactionsApiResponse extends StockTransactionsListResponse { }
 
 export default function StockTransactionsManagement() {
   // =============================================
   // STATE
   // =============================================
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  // const [page, setPage] = useState(1);
+  // const [limit] = useState(20);
   const [sortBy, setSortBy] = useState<string>("purchaseDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<StockTransaction | null>(null);
 
-  // =============================================
-  // QUERIES
-  // =============================================
-  const { data: transactionsData, isLoading } = useQuery({
-    queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType],
+  // // =============================================
+  // // QUERIES
+  // // =============================================
+  // const { data: transactionsData, isLoading } = useQuery({
+  //   queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType],
+  //   queryFn: async (): Promise<StockTransactionsApiResponse> => {
+  //     const params = new URLSearchParams({
+  //       page: page.toString(),
+  //       limit: limit.toString(),
+  //       sortBy,
+  //       sortOrder,
+  //     });
+
+  //     if (selectedCategory !== "all") {
+  //       params.append("categoryId", selectedCategory);
+  //     }
+  //     if (selectedType !== "all") {
+  //       params.append("stockType", selectedType);
+  //     }
+
+  //     const response = await fetch(`/api/stock-transactions?${params}`);
+  //     if (!response.ok) throw new Error("Failed to fetch stock transactions");
+  //     return response.json();
+  //   },
+  // });
+
+  // Replace search, page, limit state and query
+  const [searchTerm, setSearchTerm] = useState("");
+  const [committedSearch, setCommittedSearch] = useState(""); // ✅ committed on Enter/button
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20); // ✅ proper state now
+
+  // Update query key and queryFn
+  const { data: transactionsData, isLoading, isFetching } = useQuery({
+    queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType, committedSearch],
     queryFn: async (): Promise<StockTransactionsApiResponse> => {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -56,18 +88,19 @@ export default function StockTransactionsManagement() {
         sortOrder,
       });
 
-      if (selectedCategory !== "all") {
-        params.append("categoryId", selectedCategory);
-      }
-      if (selectedType !== "all") {
-        params.append("stockType", selectedType);
-      }
+      if (selectedCategory !== "all") params.append("categoryId", selectedCategory);
+      if (selectedType !== "all") params.append("stockType", selectedType);
+      if (committedSearch) params.append("search", committedSearch); // ✅ send to server
 
       const response = await fetch(`/api/stock-transactions?${params}`);
       if (!response.ok) throw new Error("Failed to fetch stock transactions");
       return response.json();
     },
+    placeholderData: (prev) => prev,
   });
+
+  // ✅ No more filteredTransactions — use transactions directly
+  const transactions: StockTransaction[] = transactionsData?.data?.transactions || [];
 
   // Fetch categories for filter
   const { data: categoriesData } = useQuery<Category[]>({
@@ -80,7 +113,7 @@ export default function StockTransactionsManagement() {
     },
   });
 
-  const transactions: StockTransaction[] = transactionsData?.data?.transactions || [];
+  // const transactions: StockTransaction[] = transactionsData?.data?.transactions || [];
   const pagination = transactionsData?.metadata;
   // const categories: Category[] = categoriesData || [];
   const categories: Category[] = Array.isArray(categoriesData) ? categoriesData : [];
@@ -99,7 +132,7 @@ export default function StockTransactionsManagement() {
   // =============================================
   const filteredTransactions = useMemo(() => {
     if (!searchTerm) return transactions;
-    
+
     return transactions.filter((txn) => {
       const searchLower = searchTerm.toLowerCase();
       return (
@@ -140,7 +173,8 @@ export default function StockTransactionsManagement() {
         "Created By",
       ];
 
-      const rows = filteredTransactions.map((txn) => [
+      // const rows = filteredTransactions.map((txn) => [
+      const rows = transactions.map((txn) => [
         new Date(txn.purchaseDate || txn.date || txn.createdAt).toLocaleDateString(),
         `"${txn.productId?.name || 'Unknown'}${txn.productId?.size ? ` (${txn.productId.size})` : ""}"`,
         `"${txn.categoryId?.name || 'N/A'}"`,
@@ -242,7 +276,8 @@ export default function StockTransactionsManagement() {
           <Button
             onClick={handleExportTransactions}
             variant="outline"
-            disabled={filteredTransactions.length === 0}
+            // disabled={filteredTransactions.length === 0}
+            disabled={transactions.length === 0}
           >
             <Download className="w-4 h-4 mr-2" />
             Export
@@ -255,7 +290,7 @@ export default function StockTransactionsManagement() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
-            <div>
+            {/* <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">
                 Search
               </Label>
@@ -267,6 +302,52 @@ export default function StockTransactionsManagement() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
+              </div>
+            </div> */}
+
+            {/* Search */}
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Product, category, user..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setCommittedSearch(searchTerm.trim());
+                        setPage(1);
+                      }
+                    }}
+                    className="pl-10 pr-8"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setCommittedSearch("");
+                        setPage(1);
+                      }}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      type="button"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <Button
+                  size="icon"
+                  className="shrink-0"
+                  disabled={isFetching}
+                  onClick={() => {
+                    setCommittedSearch(searchTerm.trim());
+                    setPage(1);
+                  }}
+                >
+                  {isFetching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                </Button>
               </div>
             </div>
 
@@ -313,8 +394,8 @@ export default function StockTransactionsManagement() {
               <Label className="block text-sm font-medium text-gray-700 mb-2">
                 Sort By
               </Label>
-              <Select 
-                value={`${sortBy}-${sortOrder}`} 
+              <Select
+                value={`${sortBy}-${sortOrder}`}
                 onValueChange={(value) => {
                   const [newSortBy, newSortOrder] = value.split("-");
                   setSortBy(newSortBy);
@@ -391,7 +472,7 @@ export default function StockTransactionsManagement() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredTransactions.map((txn) => {
                       const typeConfig = getTransactionTypeConfig(txn.stockType);
-                      
+
                       return (
                         <tr key={txn._id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -472,115 +553,63 @@ export default function StockTransactionsManagement() {
                 </table>
               </div>
 
-              {/* Pagination */}
-              {/* {pagination && pagination.totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                      Showing page {pagination.page} of {pagination.totalPages}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(page - 1)}
-                        disabled={page === 1}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(page + 1)}
-                        disabled={page === pagination.totalPages}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
+              {pagination && pagination.totalPages >= 1 && (
+                <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700">
+                      {((page - 1) * limit) + 1}–{Math.min(page * limit, pagination.totalCount)} of {pagination.totalCount}
+                    </span>
+                    <Select value={limit.toString()} onValueChange={(v) => { setLimit(parseInt(v)); setPage(1); }}>
+                      <SelectTrigger className="w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-gray-700">per page</span>
                   </div>
-                </div>
-              )} */}
-              {pagination && pagination.totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                      Showing page {page} of {pagination.totalPages}
-                      {/* ✅ Use local `page` state not pagination.page */}
-                    </div>
-                    <div className="flex gap-2">
 
-                      {/* First + Prev */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(1)}
-                        disabled={page === 1}
-                      >
+                  {pagination.totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={page === 1}>
                         <ChevronsLeft className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => p - 1)}
-                        disabled={page === 1}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-
-                      {/* Page number buttons */}
-                      <div className="flex items-center gap-1">
-                        {(() => {
-                          const totalPages = pagination.totalPages;
-                          const maxVisible = 5;
-                          const pages: number[] = [];
-
-                          if (totalPages <= maxVisible) {
-                            for (let i = 1; i <= totalPages; i++) pages.push(i);
-                          } else if (page <= 3) {
-                            for (let i = 1; i <= maxVisible; i++) pages.push(i);
-                          } else if (page >= totalPages - 2) {
-                            for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) pages.push(i);
-                          } else {
-                            for (let i = page - 2; i <= page + 2; i++) pages.push(i);
-                          }
-
-                          return pages.map((pageNumber) => (
-                            <Button
-                              key={pageNumber}
-                              variant={page === pageNumber ? "default" : "outline"}
-                              // ✅ `page` is local state — updates instantly on click
-                              size="sm"
-                              onClick={() => setPage(pageNumber)}
-                              className="w-8 h-8"
-                            >
-                              {pageNumber}
-                            </Button>
-                          ));
-                        })()}
-                      </div>
-
-                      {/* Next + Last */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => p + 1)}
-                        disabled={page === pagination.totalPages}
-                      >
+                      {(() => {
+                        const totalPages = pagination.totalPages;
+                        const maxVisible = 5;
+                        const pages: number[] = [];
+                        if (totalPages <= maxVisible) {
+                          for (let i = 1; i <= totalPages; i++) pages.push(i);
+                        } else if (page <= 3) {
+                          for (let i = 1; i <= maxVisible; i++) pages.push(i);
+                        } else if (page >= totalPages - 2) {
+                          for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) pages.push(i);
+                        } else {
+                          for (let i = page - 2; i <= page + 2; i++) pages.push(i);
+                        }
+                        return pages.map((n) => (
+                          <Button key={n} variant={page === n ? "default" : "outline"} size="sm" onClick={() => setPage(n)} className="w-8 h-8">
+                            {n}
+                          </Button>
+                        ));
+                      })()}
+                      <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page === pagination.totalPages}>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(pagination.totalPages)}
-                        disabled={page === pagination.totalPages}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => setPage(pagination.totalPages)} disabled={page === pagination.totalPages}>
                         <ChevronsRight className="w-4 h-4" />
                       </Button>
-
                     </div>
-                  </div>
+                  )}
                 </div>
-)}
+              )}
             </>
           )}
         </CardContent>

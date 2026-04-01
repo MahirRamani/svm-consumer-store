@@ -466,12 +466,15 @@ interface TransactionFilter {
   };
 }
 
-interface SearchFilter {
-  $or?: Array<{
-    _id?: { $regex: string; $options: string };
-    studentId?: { $in: mongoose.Types.ObjectId[] };
-  }>;
-}
+// interface SearchFilter {
+//   $or?: Array<{
+//     _id?: { $regex: string; $options: string };
+//     studentId?: { $in: mongoose.Types.ObjectId[] };
+//   }>;
+// }
+
+type SearchFilter = Record<string, unknown>;
+
 
 interface DateFilter {
   createdAt?: {
@@ -744,13 +747,55 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       };
     }
 
+    // // Search filter
+    // let searchFilter: SearchFilter = {};
+    // if (search) {
+    //   const students = await Student.find({
+    //     $or: [
+    //       { name: { $regex: search, $options: "i" } },
+    //       { rollNumber: { $regex: search, $options: "i" } },
+    //     ],
+    //   }).select("_id");
+
+    //   const studentIds = students.map((s) => s._id as mongoose.Types.ObjectId);
+    //   const searchConditions: Array<Record<string, unknown>> = [];
+
+    //   if (studentIds.length > 0) {
+    //     searchConditions.push({ studentId: { $in: studentIds } });
+    //   }
+
+    //   if (mongoose.Types.ObjectId.isValid(search) && search.length === 24) {
+    //     searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+    //   }
+
+    //   if (searchConditions.length > 0) {
+    //     searchFilter = { $or: searchConditions };
+    //   }
+    // }
+
+    // const finalFilter = {
+    //   ...filter,
+    //   ...(Object.keys(searchFilter).length > 0 ? searchFilter : {}),
+    // };
+
     // Search filter
-    let searchFilter: SearchFilter = {};
+    // let searchFilter: SearchFilter = {};
+    let searchFilter: Record<string, unknown> = {};
     if (search) {
+      const trimmedSearch = search.trim(); // ✅ trim whitespace
+
+      // const students = await Student.find({
+      //   $or: [
+      //     { name: { $regex: trimmedSearch, $options: "i" } },
+      //     { rollNumber: { $regex: trimmedSearch, $options: "i" } },
+      //   ],
+      // }).select("_id");
+
       const students = await Student.find({
         $or: [
-          { name: { $regex: search, $options: "i" } },
-          { rollNumber: { $regex: search, $options: "i" } },
+          { name: { $regex: trimmedSearch, $options: "i" } },           // ✅ partial match for name
+          { rollNumber: trimmedSearch },                                  // ✅ exact match for rollNumber
+          { rollNumber: { $regex: `^${trimmedSearch}$`, $options: "i" } } // ✅ case-insensitive exact
         ],
       }).select("_id");
 
@@ -761,19 +806,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         searchConditions.push({ studentId: { $in: studentIds } });
       }
 
-      if (mongoose.Types.ObjectId.isValid(search) && search.length === 24) {
-        searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+      if (mongoose.Types.ObjectId.isValid(trimmedSearch) && trimmedSearch.length === 24) {
+        searchConditions.push({ _id: new mongoose.Types.ObjectId(trimmedSearch) });
       }
 
-      if (searchConditions.length > 0) {
+      // ✅ If search was provided but nothing matched, return empty — not all transactions
+      if (searchConditions.length === 0) {
+        searchFilter = { _id: new mongoose.Types.ObjectId("000000000000000000000000") }; // guaranteed no match
+      } else {
         searchFilter = { $or: searchConditions };
       }
     }
 
-    const finalFilter = {
-      ...filter,
-      ...(Object.keys(searchFilter).length > 0 ? searchFilter : {}),
-    };
+    // ✅ Properly merge $or filters without conflict
+    const finalFilter: Record<string, unknown> = { ...filter };
+
+    if (Object.keys(searchFilter).length > 0) {
+      // If filter already has $or (unlikely here but safe), combine with $and
+      if (finalFilter.$or) {
+        finalFilter.$and = [
+          { $or: finalFilter.$or as unknown[] },
+          searchFilter,
+        ];
+        delete finalFilter.$or;
+      } else {
+        Object.assign(finalFilter, searchFilter);
+      }
+    }
 
     const skip = (page - 1) * limit;
     const totalCount = await Transaction.countDocuments(finalFilter);
