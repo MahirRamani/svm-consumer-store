@@ -39,7 +39,7 @@ const cancelAccountTransactionHandler = async (
     throw new ApiError('Account not found', 404);
   }
 
-  const isMaster = authContext.user.role === 'MASTER';
+  const isMaster = authContext.user.role === 'SUPERUSER' && authContext.user.username === 'SVM';
   const isOwner = account.ownerId.toString() === authContext.user.id;
 
   if (!isMaster && !isOwner) {

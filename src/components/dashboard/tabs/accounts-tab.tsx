@@ -97,7 +97,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
   const [searchInput, setSearchInput] = useState("");
   const [committedSearch, setCommittedSearch] = useState("");
   const [filters, setFilters] = useState<FilterState>({
-    includeInactive: false, currentPage: 1, pageSize: 10,
+    includeInactive: false, currentPage: 1, pageSize: 100,
     sortBy: "name", sortOrder: "asc",
   });
 
@@ -188,7 +188,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <span>{startIndex}–{endIndex} of {totalCount}</span>
-          <Select value={String(filters.pageSize)} onValueChange={(v) => updateFilter("pageSize", Number(v) as FilterState["pageSize"])}>
+          <Select value={String(filters.pageSize)} onValueChange={(v) => updateFilter("pageSize", Number(v))}>
             <SelectTrigger className="w-16 h-7 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>{[5, 10, 20, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
           </Select>

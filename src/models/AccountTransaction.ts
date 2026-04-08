@@ -50,9 +50,9 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
     },
     note: {
       type: String,
+      required: [true, 'Note is required'],
       trim: true,
       maxlength: [500, 'Note cannot exceed 500 characters'],
-      default: '',
     },
     billUrl: {
       type: String,

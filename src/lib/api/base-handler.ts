@@ -69,17 +69,28 @@ export function paginatedResponse<T>(
   }
 ): NextResponse<ApiResponse<Record<string, T[]>>> {
   const { page, limit, totalCount } = pagination;
-  
+  const totalPages = Math.ceil(totalCount / limit);
+  const skip = (page - 1) * limit;
   return NextResponse.json({
     success: true,
     data: {
       [dataKey]: data,
     },
-    metadata: {
-      page,
-      limit,
+    // metadata: {
+    //   page,
+    //   limit,
+    //   totalCount,
+    //   totalPages: Math.ceil(totalCount / limit),
+    // },
+    pagination: {
+      currentPage: page,
+      totalPages,
       totalCount,
-      totalPages: Math.ceil(totalCount / limit),
+      limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      startIndex: totalCount === 0 ? 0 : skip + 1,
+      endIndex: Math.min(skip + limit, totalCount),
     },
   });
 }

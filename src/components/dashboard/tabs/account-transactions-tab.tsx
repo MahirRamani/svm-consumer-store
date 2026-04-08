@@ -116,8 +116,7 @@ function getUTCBoundaries(dateRange: string, startDate: string, endDate: string)
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AccountTransactionsTab({ account, onBack }: AccountTransactionsTabProps) {
-  const { data: session } = useSession();
-  const isMaster = session?.user?.role?.toUpperCase() === "SUPERUSER";  
+  const { data: session } = useSession(); 
 
   const cancelMutation = useCancelAccountTransaction();
 
@@ -164,8 +163,14 @@ export default function AccountTransactionsTab({ account, onBack }: AccountTrans
     placeholderData: (prev) => prev,
   });
 
+  // const transactions: AccountTransaction[] = data?.data?.transactions ?? [];
+  // const pagination: PaginationMetadata | undefined = data?.pagination;
+
   const transactions: AccountTransaction[] = data?.data?.transactions ?? [];
-  const pagination: PaginationMetadata | undefined = data?.pagination;
+const pagination = data?.pagination;
+
+// DEBUG - remove after
+console.log("RAW data:", JSON.stringify(data, null, 2));
 
   // Handlers
   const handleSearch = useCallback(() => {
@@ -208,8 +213,10 @@ export default function AccountTransactionsTab({ account, onBack }: AccountTrans
   // Pagination
   const PaginationControls = () => {
     if (!pagination) return null;
-    const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
+
     const cp = filters.currentPage;
+    const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
+
     const pages: number[] = [];
     if (totalPages <= 5) for (let i = 1; i <= totalPages; i++) pages.push(i);
     else if (cp <= 3) for (let i = 1; i <= 5; i++) pages.push(i);
@@ -220,23 +227,46 @@ export default function AccountTransactionsTab({ account, onBack }: AccountTrans
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <span>{startIndex}–{endIndex} of {totalCount}</span>
-          <Select value={String(filters.pageSize)} onValueChange={(v) => updateFilter("pageSize", Number(v) as FilterState["pageSize"])}>
+          <Select
+            value={String(filters.pageSize)}
+            onValueChange={(v) => updateFilter("pageSize", Number(v) as FilterState["pageSize"])}
+          >
             <SelectTrigger className="w-16 h-7 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>{[5, 10, 20, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
+            <SelectContent>
+              {[5, 10, 20, 50].map((n) => (
+                <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
           <span>per page</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateFilter("currentPage", 1)} disabled={!hasPreviousPage}><ChevronsLeft className="h-3.5 w-3.5" /></Button>
-          <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateFilter("currentPage", cp - 1)} disabled={!hasPreviousPage}><ChevronLeft className="h-3.5 w-3.5" /></Button>
-          {pages.map((p) => <Button key={p} variant={cp === p ? "default" : "outline"} size="icon" className="h-7 w-7 text-xs" onClick={() => updateFilter("currentPage", p)}>{p}</Button>)}
-          <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateFilter("currentPage", cp + 1)} disabled={!hasNextPage}><ChevronRight className="h-3.5 w-3.5" /></Button>
-          <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateFilter("currentPage", totalPages)} disabled={!hasNextPage}><ChevronsRight className="h-3.5 w-3.5" /></Button>
+          <Button variant="outline" size="icon" className="h-7 w-7"
+            onClick={() => updateFilter("currentPage", 1)} disabled={!hasPreviousPage}>
+            <ChevronsLeft className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="outline" size="icon" className="h-7 w-7"
+            onClick={() => updateFilter("currentPage", cp - 1)} disabled={!hasPreviousPage}>
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Button>
+          {pages.map((p) => (
+            <Button key={p} variant={cp === p ? "default" : "outline"} size="icon"
+              className="h-7 w-7 text-xs" onClick={() => updateFilter("currentPage", p)}>
+              {p}
+            </Button>
+          ))}
+          <Button variant="outline" size="icon" className="h-7 w-7"
+            onClick={() => updateFilter("currentPage", cp + 1)} disabled={!hasNextPage}>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="outline" size="icon" className="h-7 w-7"
+            onClick={() => updateFilter("currentPage", totalPages)} disabled={!hasNextPage}>
+            <ChevronsRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
     );
   };
-
   return (
     <div className="space-y-5">
 
@@ -459,6 +489,7 @@ export default function AccountTransactionsTab({ account, onBack }: AccountTrans
           </table>
         </div>
         <PaginationControls />
+      
       </Card>
 
       {/* Add Transaction Modal */}
