@@ -12,10 +12,18 @@ const ENDPOINT = '/api/account-transactions';
 const QUERY_KEY = ['accountTransactions'];
 
 export function useCreateAccountTransaction() {
+  const queryClient = useQueryClient();
+
   return useCreate<AccountTransaction, CreateAccountTransactionInput>(ENDPOINT, {
-    queryKey: [...QUERY_KEY, 'accounts'], // Also invalidate accounts for balance update
+    // queryKey: [...QUERY_KEY, 'accounts'], // Also invalidate accounts for balance update
+    queryKey: QUERY_KEY, // Also invalidate accounts for balance update
     successMessage: 'Transaction recorded successfully',
     errorMessage: 'Failed to record transaction',
+    onSuccess: () => {
+      // Invalidate separately, not merged into one key
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['account-summary'] });
+    },
   });
 }
 

@@ -211,7 +211,8 @@ export function withErrorHandler<T extends unknown[]>(
           }, {} as Record<string, string>);
 
           return errorResponse(
-            'Database validation failed',
+            // 'Database validation failed',
+            details[Object.keys(details)[0]],
             400,
             'DB_VALIDATION_ERROR',
             details
