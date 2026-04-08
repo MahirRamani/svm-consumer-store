@@ -43,7 +43,7 @@ export const getAccountTransactionsQuerySchema = z.object({
   accountId: objectIdSchema,
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  sortBy: z.enum(['enteredAt', 'amount', 'createdAt']).default('enteredAt'),
+  sortBy: z.enum(['createdAt', 'enteredAt', ]).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   type: z.enum(['CREDIT', 'DEBIT']).optional(),
   startDate: z.coerce.date().optional(),

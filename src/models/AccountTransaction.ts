@@ -1,20 +1,20 @@
 // models/AccountTransaction.ts
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
-export interface IAccountTransaction extends Document {
-  accountId: Types.ObjectId;
-  type: 'CREDIT' | 'DEBIT';
-  amount: number;
-  note: string;
-  billUrl?: string | null;
-  balanceBefore: number;
-  balanceAfter: number;
-  performedBy: Types.ObjectId;
-  enteredAt: Date;
-  isDeleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+  export interface IAccountTransaction extends Document {
+    accountId: Types.ObjectId;
+    type: 'CREDIT' | 'DEBIT';
+    amount: number;
+    note: string;
+    billUrl?: string | null;
+    balanceBefore: number;
+    balanceAfter: number;
+    performedBy: Types.ObjectId;
+    enteredAt: Date;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
 
 interface IAccountTransactionModel extends Model<IAccountTransaction> {
   findByAccount(accountId: Types.ObjectId): Promise<IAccountTransaction[]>;
@@ -108,66 +108,66 @@ accountTransactionSchema.index({ accountId: 1, isDeleted: 1, enteredAt: -1 });
 accountTransactionSchema.index({ accountId: 1, type: 1, isDeleted: 1 });
 accountTransactionSchema.index({ performedBy: 1, enteredAt: -1 });
 
-// Pre-save: Auto-calculate balanceBefore and balanceAfter
-accountTransactionSchema.pre('save', async function (next) {
-  if (this.isNew) {
-    // Get last transaction for THIS account
-    const lastTransaction = await mongoose.models.AccountTransaction.findOne({
-      accountId: this.accountId,
-      isDeleted: false,
-    })
-      .sort({ enteredAt: -1, createdAt: -1 })
-      .select('balanceAfter');
+// // Pre-save: Auto-calculate balanceBefore and balanceAfter
+// accountTransactionSchema.pre('save', async function (next) {
+//   if (this.isNew) {
+//     // Get last transaction for THIS account
+//     const lastTransaction = await mongoose.models.AccountTransaction.findOne({
+//       accountId: this.accountId,
+//       isDeleted: false,
+//     })
+//       .sort({ enteredAt: -1, createdAt: -1 })
+//       .select('balanceAfter');
 
-    const currentBalance = lastTransaction?.balanceAfter ?? 0;
+//     const currentBalance = lastTransaction?.balanceAfter ?? 0;
 
-    this.balanceBefore = currentBalance;
-    this.balanceAfter =
-      this.type === 'CREDIT'
-        ? currentBalance + this.amount
-        : currentBalance - this.amount;
-  }
-  next();
-});
+//     this.balanceBefore = currentBalance;
+//     this.balanceAfter =
+//       this.type === 'CREDIT'
+//         ? currentBalance + this.amount
+//         : currentBalance - this.amount;
+//   }
+//   next();
+// });
 
-// Post-save: Update account's currentBalance
-accountTransactionSchema.post('save', async function () {
-  await mongoose.models.Account.findByIdAndUpdate(this.accountId, {
-    currentBalance: this.balanceAfter,
-  });
-});
+// // Post-save: Update account's currentBalance
+// accountTransactionSchema.post('save', async function () {
+//   await mongoose.models.Account.findByIdAndUpdate(this.accountId, {
+//     currentBalance: this.balanceAfter,
+//   });
+// });
 
-// Static methods
-accountTransactionSchema.statics.findByAccount = function (accountId: Types.ObjectId) {
-  return this.find({ accountId, isDeleted: false })
-    .sort({ enteredAt: -1 })
-    .populate('performedBy', 'name email');
-};
+// // Static methods
+// accountTransactionSchema.statics.findByAccount = function (accountId: Types.ObjectId) {
+//   return this.find({ accountId, isDeleted: false })
+//     .sort({ enteredAt: -1 })
+//     .populate('performedBy', 'name email');
+// };
 
-accountTransactionSchema.statics.getLatestBalance = async function (accountId: Types.ObjectId) {
-  const lastTransaction = await this.findOne({
-    accountId,
-    isDeleted: false,
-  })
-    .sort({ enteredAt: -1, createdAt: -1 })
-    .select('balanceAfter');
+// accountTransactionSchema.statics.getLatestBalance = async function (accountId: Types.ObjectId) {
+//   const lastTransaction = await this.findOne({
+//     accountId,
+//     isDeleted: false,
+//   })
+//     .sort({ enteredAt: -1, createdAt: -1 })
+//     .select('balanceAfter');
 
-  return lastTransaction?.balanceAfter ?? 0;
-};
+//   return lastTransaction?.balanceAfter ?? 0;
+// };
 
-accountTransactionSchema.statics.findByDateRange = function (
-  accountId: Types.ObjectId,
-  startDate: Date,
-  endDate: Date
-) {
-  return this.find({
-    accountId,
-    isDeleted: false,
-    enteredAt: { $gte: startDate, $lte: endDate },
-  })
-    .sort({ enteredAt: -1 })
-    .populate('performedBy', 'name email');
-};
+// accountTransactionSchema.statics.findByDateRange = function (
+//   accountId: Types.ObjectId,
+//   startDate: Date,
+//   endDate: Date
+// ) {
+//   return this.find({
+//     accountId,
+//     isDeleted: false,
+//     enteredAt: { $gte: startDate, $lte: endDate },
+//   })
+//     .sort({ enteredAt: -1 })
+//     .populate('performedBy', 'name email');
+// };
 
 export const AccountTransaction: IAccountTransactionModel =
   (mongoose.models.AccountTransaction as IAccountTransactionModel) ||
