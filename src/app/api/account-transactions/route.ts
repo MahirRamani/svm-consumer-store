@@ -78,9 +78,16 @@ const getAccountTransactionsHandler = async (req: Request, authContext: AuthCont
     }
 
     const skip = (page - 1) * limit;
-    const sort: Record<string, 1 | -1> = {
-        [sortBy]: sortOrder === 'desc' ? -1 : 1,
-    };
+    // const sort: Record<string, 1 | -1> = {
+    //     [sortBy]: sortOrder === 'desc' ? -1 : 1,
+    // };
+    
+    const sortDirection = sortOrder === 'desc' ? -1 : 1;
+
+    const sort: Record<string, 1 | -1> =
+      sortBy === 'enteredAt'
+      ? { enteredAt: sortDirection, createdAt: sortDirection, _id: sortDirection }
+      : { createdAt: sortDirection, _id: sortDirection };
 
     const [transactions, totalCount] = await Promise.all([
         AccountTransaction.find(filter)
