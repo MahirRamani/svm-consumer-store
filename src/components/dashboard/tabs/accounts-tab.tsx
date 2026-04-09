@@ -21,7 +21,6 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import AddAccountModal from "@/components/modals/add-account-modal";
 import EditAccountModal from "@/components/modals/edit-account-modal";
 import AddTransactionModal from "@/components/modals/add-transaction-modal";
 import { useDeleteAccount, useUpdateAccount } from "@/hooks/use-account-mutations";
@@ -101,7 +100,6 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
     sortBy: "name", sortOrder: "asc",
   });
 
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddTxnModal, setShowAddTxnModal] = useState(false);
   const [activeAccount, setActiveAccount] = useState<Account | null>(null);
@@ -212,7 +210,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
       <div className="flex flex-col lg:flex-row gap-4 items-start">
 
         {/* Left half — search + sort controls */}
-        <div className="flex-1 space-y-3 min-w-0">
+        <div className="flex-1 min-w-0">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -232,46 +230,40 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
             <Button onClick={handleSearch} size="icon" variant="outline" disabled={isFetching}>
               {isFetching && !isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             </Button>
-            {/* New Account — MASTER only */}
-            {isMaster && (
-              <Button onClick={() => setShowAddModal(true)} className="gap-1.5 whitespace-nowrap">
-                <Plus className="w-4 h-4" />New Account
-              </Button>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Label className="text-xs text-gray-500 whitespace-nowrap">Sort</Label>
-              <Select
-                value={`${filters.sortBy}-${filters.sortOrder}`}
-                onValueChange={(v) => {
-                  const [by, order] = v.split("-") as [FilterState["sortBy"], FilterState["sortOrder"]];
-                  setFilters((p) => ({ ...p, sortBy: by, sortOrder: order, currentPage: 1 }));
-                }}
-              >
-                <SelectTrigger className="w-44 h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name-asc">Name (A → Z)</SelectItem>
-                  <SelectItem value="name-desc">Name (Z → A)</SelectItem>
-                  <SelectItem value="currentBalance-desc">Balance (High → Low)</SelectItem>
-                  <SelectItem value="currentBalance-asc">Balance (Low → High)</SelectItem>
-                  <SelectItem value="createdAt-desc">Newest First</SelectItem>
-                  <SelectItem value="createdAt-asc">Oldest First</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-              <input type="checkbox" checked={filters.includeInactive}
-                onChange={(e) => updateFilter("includeInactive", e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600" />
-              <span className="text-xs text-gray-500">Show inactive</span>
-            </label>
           </div>
         </div>
 
+        <div className="flex flex-col gap-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs text-gray-500 whitespace-nowrap">Sort</Label>
+            <Select
+              value={`${filters.sortBy}-${filters.sortOrder}`}
+              onValueChange={(v) => {
+                const [by, order] = v.split("-") as [FilterState["sortBy"], FilterState["sortOrder"]];
+                setFilters((p) => ({ ...p, sortBy: by, sortOrder: order, currentPage: 1 }));
+              }}
+            >
+              <SelectTrigger className="w-44 h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Name (A → Z)</SelectItem>
+                <SelectItem value="name-desc">Name (Z → A)</SelectItem>
+                <SelectItem value="currentBalance-desc">Balance (High → Low)</SelectItem>
+                <SelectItem value="currentBalance-asc">Balance (Low → High)</SelectItem>
+                <SelectItem value="createdAt-desc">Newest First</SelectItem>
+                <SelectItem value="createdAt-asc">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="checkbox" checked={filters.includeInactive}
+              onChange={(e) => updateFilter("includeInactive", e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600" />
+            <span className="text-xs text-gray-500">Show inactive</span>
+          </label>
+        </div>
+
         {/* Right half — stat tiles */}
-        <div className="flex flex-wrap gap-2 shrink-0">
+        <div className="flex flex-wrap gap-3 shrink-0">
           <StatTile label="Balance" value={fmt(totalBalance)} sub="visible accounts"
             icon={Wallet} colorClass="bg-blue-50 text-blue-700 border-blue-100" />
           <StatTile label="Active" value={String(activeCount)} sub={`of ${accounts.length}`}
@@ -342,10 +334,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
                           <td className="px-4 py-3">
                             {ownerObj ? (
                               <div>
-                                <p className="font-medium text-gray-700 truncate max-w-[140px]">{ownerObj.name ?? "—"}</p>
-                                <p className="text-xs text-gray-400 truncate max-w-[140px]">
-                                  @{ownerObj.username ?? ownerObj.email?.split("@")[0]}
-                                </p>
+                                <p className="font-medium text-gray-700 truncate max-w-[140px]">@{ownerObj.username}</p>
                               </div>
                             ) : (
                               <span className="text-xs text-gray-300 italic">—</span>
@@ -446,7 +435,6 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
       </Card>
 
       {/* ── Modals ── */}
-      {isMaster && <AddAccountModal open={showAddModal} onOpenChange={setShowAddModal} />}
       <EditAccountModal open={showEditModal} onOpenChange={(o) => { setShowEditModal(o); if (!o) setActiveAccount(null); }} account={activeAccount} />
       {activeAccount && (
         <AddTransactionModal open={showAddTxnModal} onOpenChange={(o) => { setShowAddTxnModal(o); if (!o) setActiveAccount(null); }} account={activeAccount} />

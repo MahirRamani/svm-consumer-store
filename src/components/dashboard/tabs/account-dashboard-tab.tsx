@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Wallet, Receipt } from "lucide-react";
+import { ChevronRight, Wallet, Receipt, Plus } from "lucide-react";
 import AccountsTab from "@/components/dashboard/tabs/accounts-tab";
 import AccountTransactionsTab from "@/components/dashboard/tabs/account-transactions-tab";
 import type { Account } from "@/types/account";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import AddAccountModal from "@/components/modals/add-account-modal";
 
 // ── Breadcrumb ────────────────────────────────────────────────────────────
 
@@ -16,11 +19,15 @@ interface BreadcrumbItem {
 }
 
 function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
+  const { data: session } = useSession();
+  const isMaster = session?.user?.role?.toUpperCase() === "SUPERUSER"
+  const [showAddModal, setShowAddModal] = useState(false);
+  
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1 mb-6">
+    <div className="flex justify-between mb-2">
+    <nav aria-label="Breadcrumb" className="flex items-center gap-1">
       {items.map((item, i) => {
         const Icon = item.icon;
-        const isLast = i === items.length - 1;
 
         return (
           <span key={i} className="flex items-center gap-1">
@@ -46,6 +53,17 @@ function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         );
       })}
     </nav>
+    
+      {isMaster && ( // ✅ single isMaster check
+        <>
+          <Button onClick={() => setShowAddModal(true)} className="gap-1.5 whitespace-nowrap">
+            <Plus className="w-4 h-4" />New Account
+          </Button>
+          <AddAccountModal open={showAddModal} onOpenChange={setShowAddModal} />
+        </>
+      )}
+    
+    </div>
   );
 }
 
