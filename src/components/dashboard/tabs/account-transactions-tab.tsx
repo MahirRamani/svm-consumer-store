@@ -369,8 +369,8 @@ console.log("RAW data:", JSON.stringify(data, null, 2));
 
         {/* Right — stat tiles */}
         <div className="flex flex-wrap gap-2 shrink-0">
-          <StatTile label="Balance" value={fmt(account.currentBalance)} icon={Wallet}
-            colorClass={account.currentBalance >= 0 ? "bg-blue-50 text-blue-700 border-blue-100" : "bg-red-50 text-red-700 border-red-100"} />
+          <StatTile label="Balance" value={summary ? fmt(summary.currentBalance) : "-"} icon={Wallet}
+            colorClass={summary?.currentBalance && summary?.currentBalance >= 0 ? "bg-blue-50 text-blue-700 border-blue-100" : "bg-red-50 text-red-700 border-red-100"} loading={summaryLoading}/>
           <StatTile label="Credit" value={summary ? fmt(summary.totalCredit) : "—"} icon={TrendingUp}
             colorClass="bg-green-50 text-green-700 border-green-100" loading={summaryLoading} />
           <StatTile label="Debit" value={summary ? fmt(summary.totalDebit) : "—"} icon={TrendingDown}

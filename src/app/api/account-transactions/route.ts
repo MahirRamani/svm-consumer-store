@@ -98,23 +98,88 @@ const getAccountTransactionsHandler = async (req: Request, authContext: AuthCont
 // =============================================
 // POST - Create Account Transaction
 // =============================================
+// const createAccountTransactionHandler = async (req: Request, authContext: AuthContext) => {
+//     await connectDB();
+
+//     const data = await validateBody(req, createAccountTransactionSchema);
+
+//     await verifyAccountAccess(data.accountId, authContext);
+
+//     const transaction = await AccountTransaction.create({
+//         ...data,
+//         performedBy: authContext.user.id,
+//         balanceBefore: 0,
+//         balanceAfter: 0,
+//     });
+
+//     const populated = await transaction.populate('accountId', 'name');
+
+//     return successResponse(populated.toObject(), 201, 'Transaction recorded successfully');
+// };
+
 const createAccountTransactionHandler = async (req: Request, authContext: AuthContext) => {
-    await connectDB();
+  await connectDB();
 
-    const data = await validateBody(req, createAccountTransactionSchema);
+  const data = await validateBody(req, createAccountTransactionSchema);
+  await verifyAccountAccess(data.accountId, authContext);
 
-    await verifyAccountAccess(data.accountId, authContext);
+  const enteredAt = new Date(data.enteredAt);
 
-    const transaction = await AccountTransaction.create({
-        ...data,
-        performedBy: authContext.user.id,
-        balanceBefore: 0,
-        balanceAfter: 0,
-    });
+  // Find the transaction just before this enteredAt
+  const previousTransaction = await AccountTransaction.findOne({
+    accountId: data.accountId,
+    isDeleted: false,
+    enteredAt: { $lte: enteredAt },
+  })
+    .sort({ enteredAt: -1, createdAt: -1 })
+    .select('balanceAfter');
 
-    const populated = await transaction.populate('accountId', 'name');
+  const baseBalance = previousTransaction?.balanceAfter ?? 0;
+  const balanceBefore = baseBalance;
+  const balanceAfter =
+    data.type === 'CREDIT'
+      ? baseBalance + data.amount
+      : baseBalance - data.amount;
 
-    return successResponse(populated.toObject(), 201, 'Transaction recorded successfully');
+  const transaction = await AccountTransaction.create({
+    ...data,
+    performedBy: authContext.user.id,
+    balanceBefore,
+    balanceAfter,
+  });
+
+  // Re-chain all subsequent transactions
+  const subsequentTransactions = await AccountTransaction.find({
+    accountId: data.accountId,
+    isDeleted: false,
+    $or: [
+      { enteredAt: { $gt: enteredAt } },
+      { enteredAt, createdAt: { $gt: transaction.createdAt } },
+    ],
+  }).sort({ enteredAt: 1, createdAt: 1 });
+
+  let runningBalance = balanceAfter;
+  for (const tx of subsequentTransactions) {
+    const newBalanceAfter =
+      tx.type === 'CREDIT'
+        ? runningBalance + tx.amount
+        : runningBalance - tx.amount;
+
+    await AccountTransaction.updateOne(
+      { _id: tx._id },
+      { balanceBefore: runningBalance, balanceAfter: newBalanceAfter }
+    );
+
+    runningBalance = newBalanceAfter;
+  }
+
+  // Update account's currentBalance to end of chain
+  await Account.findByIdAndUpdate(data.accountId, {
+    currentBalance: runningBalance,
+  });
+
+  const populated = await transaction.populate('accountId', 'name');
+  return successResponse(populated.toObject(), 201, 'Transaction recorded successfully');
 };
 
 // =============================================

@@ -21,6 +21,7 @@ export function useCreateAccountTransaction() {
     errorMessage: 'Failed to record transaction',
     onSuccess: () => {
       // Invalidate separately, not merged into one key
+      queryClient.invalidateQueries({ queryKey: ['account-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['account-summary'] });
     },

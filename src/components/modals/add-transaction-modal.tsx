@@ -80,13 +80,13 @@ export default function AddTransactionModal({
       const num = parseFloat(formData.amount);
       if (isNaN(num) || num <= 0) {
         newErrors.amount = "Amount must be greater than 0";
-      } else if (num > 999999999.99) {
+      } else if (num > 10000000) {
         newErrors.amount = "Amount is too large";
       }
     }
 
-    if (formData.note.length > 500) {
-      newErrors.note = "Note cannot exceed 500 characters";
+    if (formData.note.length > 50) {
+      newErrors.note = "Note cannot exceed 50 characters";
     }
 
     if (formData.billUrl.trim()) {
@@ -179,7 +179,7 @@ export default function AddTransactionModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Type Selection */}
           <div className="space-y-2">
-            <Label>Transaction Type</Label>
+            <Label>Transaction Type <span className="text-destructive">*</span> </Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 type="button"
@@ -255,7 +255,7 @@ export default function AddTransactionModal({
 
           {/* Note */}
           <div className="space-y-2">
-            <Label htmlFor="note">Note</Label>
+            <Label htmlFor="note">Note <span className="text-destructive">*</span> </Label>
             <Textarea
               id="note"
               value={formData.note}
