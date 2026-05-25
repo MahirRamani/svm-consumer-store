@@ -27,9 +27,9 @@ import {
 import { toast } from "sonner";
 import EditStockTransactionModal from "@/components/modals/edit-stock-transaction-modal";
 import type { Category, CategoriesListResponse } from "@/types";
-import type { StockTransaction, StockTransactionsListResponse } from "@/types/stock-transaction";
+import type { StockTransaction, StockTransactionsResponse } from "@/types/stock-transaction";
 
-interface StockTransactionsApiResponse extends StockTransactionsListResponse { }
+// interface StockTransactionsApiResponse extends StockTransactionsListResponse { }
 
 export default function StockTransactionsManagement() {
   // =============================================
@@ -45,32 +45,6 @@ export default function StockTransactionsManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<StockTransaction | null>(null);
 
-  // // =============================================
-  // // QUERIES
-  // // =============================================
-  // const { data: transactionsData, isLoading } = useQuery({
-  //   queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType],
-  //   queryFn: async (): Promise<StockTransactionsApiResponse> => {
-  //     const params = new URLSearchParams({
-  //       page: page.toString(),
-  //       limit: limit.toString(),
-  //       sortBy,
-  //       sortOrder,
-  //     });
-
-  //     if (selectedCategory !== "all") {
-  //       params.append("categoryId", selectedCategory);
-  //     }
-  //     if (selectedType !== "all") {
-  //       params.append("stockType", selectedType);
-  //     }
-
-  //     const response = await fetch(`/api/stock-transactions?${params}`);
-  //     if (!response.ok) throw new Error("Failed to fetch stock transactions");
-  //     return response.json();
-  //   },
-  // });
-
   // Replace search, page, limit state and query
   const [searchTerm, setSearchTerm] = useState("");
   const [committedSearch, setCommittedSearch] = useState(""); // ✅ committed on Enter/button
@@ -80,7 +54,7 @@ export default function StockTransactionsManagement() {
   // Update query key and queryFn
   const { data: transactionsData, isLoading, isFetching } = useQuery({
     queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType, committedSearch],
-    queryFn: async (): Promise<StockTransactionsApiResponse> => {
+    queryFn: async (): Promise<StockTransactionsResponse> => {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -113,8 +87,8 @@ export default function StockTransactionsManagement() {
     },
   });
 
-  // const transactions: StockTransaction[] = transactionsData?.data?.transactions || [];
-  const pagination = transactionsData?.metadata;
+  const pagination = transactionsData?.pagination; // ✅ correct key
+
   // const categories: Category[] = categoriesData || [];
   const categories: Category[] = Array.isArray(categoriesData) ? categoriesData : [];
 
@@ -289,22 +263,6 @@ export default function StockTransactionsManagement() {
       <Card>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            {/* <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">
-                Search
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Product, category, user..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div> */}
-
             {/* Search */}
             <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
@@ -573,7 +531,7 @@ export default function StockTransactionsManagement() {
                     <span className="text-sm text-gray-700">per page</span>
                   </div>
 
-                  {pagination.totalPages > 1 && (
+                  {pagination.totalPages >= 1 && (
                     <div className="flex items-center gap-1">
                       <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={page === 1}>
                         <ChevronsLeft className="w-4 h-4" />

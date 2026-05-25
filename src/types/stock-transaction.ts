@@ -1,6 +1,6 @@
 // types/stock-transaction.ts
 
-import { BaseEntity } from ".";
+import { BaseEntity, PaginationMetadata } from ".";
 
 export interface StockEntryFormData {
   buyingPrice: string;
@@ -61,16 +61,16 @@ export interface CreateStockTransactionInput {
   createdBy?: string;
 }
 
-export interface StockTransactionsResponse {
-  transactions: StockTransaction[];
-  totalCount: number;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-}
+// export interface StockTransactionsResponse {
+//   transactions: StockTransaction[];
+//   totalCount: number;
+//   pagination?: {
+//     page: number;
+//     limit: number;
+//     total: number;
+//     pages: number;
+//   };
+// }
 
 export interface StockTransactionFormData {
   sellingPrice: string;
@@ -143,15 +143,16 @@ export interface StockTransactionFormErrors {
 //   notes?: string; // ✅ Added this
 // }
 
-export interface StockTransactionsListResponse {
+export interface StockTransactionsResponse {
   success: true;
   data: {
     transactions: StockTransaction[];
   };
-  metadata: {
-    page: number;
-    limit: number;
-    totalCount: number;
-    totalPages: number;
-  };
+  pagination: PaginationMetadata;
+  // metadata: {
+  //   page: number;
+  //   limit: number;
+  //   totalCount: number;
+  //   totalPages: number;
+  // };
 }
