@@ -65,7 +65,7 @@ const createCategoryHandler = async (req: Request, authContext: AuthContext) => 
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(getCategoriesHandler);
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getCategoriesHandler));
 
 // Only admin can create categories
-export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(createCategoryHandler));
+export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(createCategoryHandler));

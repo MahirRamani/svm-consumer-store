@@ -219,7 +219,7 @@ export default function EditUserModal({
 }: EditUserModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent aria-describedby={undefined} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Edit User</DialogTitle>
         </DialogHeader>

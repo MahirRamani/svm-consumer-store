@@ -86,6 +86,6 @@ const deleteStockTransactionHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withAuth(getStockTransactionHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getStockTransactionHandler));
 export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateStockTransactionHandler));
 export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteStockTransactionHandler));

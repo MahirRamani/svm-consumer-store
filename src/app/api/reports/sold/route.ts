@@ -35,22 +35,39 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const searchParams = request.nextUrl.searchParams;
 
-    // ── Parse date ────────────────────────────────────────────────────────────
-    const dateParam = searchParams.get("date");
-    const targetDate = dateParam ? new Date(dateParam) : new Date();
+    // // ── Parse date ────────────────────────────────────────────────────────────
+    // const dateParam = searchParams.get("date");
+    // const targetDate = dateParam ? new Date(dateParam) : new Date();
 
-    if (isNaN(targetDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid date parameter. Use YYYY-MM-DD format." },
-        { status: 400 }
-      );
-    }
+    // if (isNaN(targetDate.getTime())) {
+    //   return NextResponse.json(
+    //     { error: "Invalid date parameter. Use YYYY-MM-DD format." },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const dayStart = new Date(targetDate);
-    dayStart.setHours(0, 0, 0, 0);
+    const fromDate = searchParams.get("fromDate");
+const toDate   = searchParams.get("toDate");
+// fallback: if old ?date= is still sent, use it for both
+const date     = searchParams.get("date");
 
-    const dayEnd = new Date(targetDate);
-    dayEnd.setHours(23, 59, 59, 999);
+const resolvedFrom = fromDate ?? date;
+const resolvedTo   = toDate   ?? date;
+
+if (!resolvedFrom || !resolvedTo) {
+  return NextResponse.json({ error: "fromDate and toDate are required" }, { status: 400 });
+}
+
+const start = new Date(`${resolvedFrom}T00:00:00.000Z`);
+const end   = new Date(`${resolvedTo}T23:59:59.999Z`);
+
+    const dayStart = start;
+    // const dayStart = new Date(targetDate);
+    // dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = end;
+    // const dayEnd = new Date(targetDate);
+    // dayEnd.setHours(23, 59, 59, 999);
 
     // ── Optional category filter ───────────────────────────────────────────────
     const categoryIdParam = searchParams.get("categoryId");

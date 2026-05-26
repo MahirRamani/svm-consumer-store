@@ -86,5 +86,5 @@ const createStockTransactionHandler = async (req: Request, authContext: AuthCont
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(getStockTransactionsHandler));
-export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(createStockTransactionHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getStockTransactionsHandler));
+export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(createStockTransactionHandler));

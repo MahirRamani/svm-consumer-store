@@ -51,6 +51,8 @@ export default function StockTransactionsManagement() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20); // ✅ proper state now
 
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
   // Update query key and queryFn
   const { data: transactionsData, isLoading, isFetching } = useQuery({
     queryKey: ["stock-transactions", page, limit, sortBy, sortOrder, selectedCategory, selectedType, committedSearch],
@@ -132,54 +134,128 @@ export default function StockTransactionsManagement() {
     }
   }, []);
 
-  const handleExportTransactions = useCallback(() => {
-    try {
-      const headers = [
-        "Date",
-        "Product",
-        "Category",
-        "Type",
-        "Initial Qty",
-        "Qty Left",
-        "Buying Price",
-        "Selling Price",
-        "Reason",
-        "Created By",
-      ];
+  // const handleExportTransactions = useCallback(() => {
+  //   try {
+  //     const headers = [
+  //       "Date",
+  //       "Product",
+  //       "Category",
+  //       "Type",
+  //       "Initial Qty",
+  //       "Qty Left",
+  //       "Buying Price",
+  //       "Selling Price",
+  //       "Reason",
+  //       "Created By",
+  //     ];
 
-      // const rows = filteredTransactions.map((txn) => [
-      const rows = transactions.map((txn) => [
-        new Date(txn.purchaseDate || txn.date || txn.createdAt).toLocaleDateString(),
-        `"${txn.productId?.name || 'Unknown'}${txn.productId?.size ? ` (${txn.productId.size})` : ""}"`,
-        `"${txn.categoryId?.name || 'N/A'}"`,
-        txn.stockType,
-        txn.initialQuantity,
-        txn.quantityLeft,
-        txn.buyingPrice ? convertToNumber(txn.buyingPrice).toFixed(2) : "N/A",
-        convertToNumber(txn.sellingPrice).toFixed(2),
-        `"${txn.reason || ""}"`,
-        `"${txn.createdBy?.username || 'N/A'}"`,
-      ].join(","));
+  //     // const rows = filteredTransactions.map((txn) => [
+  //     const rows = transactions.map((txn) => [
+  //       new Date(txn.purchaseDate || txn.date || txn.createdAt).toLocaleDateString(),
+  //       `"${txn.productId?.name || 'Unknown'}${txn.productId?.size ? ` (${txn.productId.size})` : ""}"`,
+  //       `"${txn.categoryId?.name || 'N/A'}"`,
+  //       txn.stockType,
+  //       txn.initialQuantity,
+  //       txn.quantityLeft,
+  //       txn.buyingPrice ? convertToNumber(txn.buyingPrice).toFixed(2) : "N/A",
+  //       convertToNumber(txn.sellingPrice).toFixed(2),
+  //       `"${txn.reason || ""}"`,
+  //       `"${txn.createdBy?.username || 'N/A'}"`,
+  //     ].join(","));
 
-      const csvContent = [headers.join(","), ...rows].join("\n");
+  //     const csvContent = [headers.join(","), ...rows].join("\n");
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `stock-transactions-${new Date().toISOString().split("T")[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.download = `stock-transactions-${new Date().toISOString().split("T")[0]}.csv`;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
 
-      toast.success("Transactions exported successfully!");
-    } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Failed to export transactions");
+  //     toast.success("Transactions exported successfully!");
+  //   } catch (error) {
+  //     console.error("Export error:", error);
+  //     toast.error("Failed to export transactions");
+  //   }
+  // }, [filteredTransactions, convertToNumber]);
+
+  const handleExportTransactions = useCallback(async () => {
+  setIsExporting(true);
+  try {
+    // ── Fetch ALL matching records (no pagination limit) ───────────────────
+    const params = new URLSearchParams({
+      page:      "1",
+      limit:     "99999",   // effectively "all" — adjust if your API caps this
+      sortBy,
+      sortOrder,
+      export:    "true",    // optional: lets the backend skip pagination entirely
+    });
+    if (selectedCategory !== "all") params.append("categoryId", selectedCategory);
+    if (selectedType     !== "all") params.append("stockType",  selectedType);
+    if (committedSearch)            params.append("search",     committedSearch);
+ 
+    const response = await fetch(`/api/stock-transactions?${params}`);
+    if (!response.ok) throw new Error("Export fetch failed");
+    const exportData = await response.json();
+    const allTransactions: StockTransaction[] =
+      exportData?.data?.transactions ?? exportData?.transactions ?? [];
+ 
+    if (allTransactions.length === 0) {
+      toast.info("No transactions to export.");
+      return;
     }
-  }, [filteredTransactions, convertToNumber]);
-
+ 
+    // ── Build CSV ─────────────────────────────────────────────────────────
+    const headers = [
+      "Date",
+      "Product",
+      "Category",
+      "Type",
+      "Initial Qty",
+      "Qty Left",
+      "Buying Price",
+      "Selling Price",
+      "Reason",
+      "Created By",
+    ];
+ 
+    const rows = allTransactions.map((txn) => [
+      new Date(txn.purchaseDate || txn.date || txn.createdAt).toLocaleDateString("en-IN"),
+      `"${txn.productId?.name || "Unknown"}${txn.productId?.size ? ` (${txn.productId.size})` : ""}"`,
+      `"${txn.categoryId?.name || "N/A"}"`,
+      txn.stockType,
+      txn.initialQuantity,
+      txn.quantityLeft,
+      txn.buyingPrice ? convertToNumber(txn.buyingPrice).toFixed(2) : "N/A",
+      convertToNumber(txn.sellingPrice).toFixed(2),
+      `"${txn.reason || ""}"`,
+      `"${txn.createdBy?.username || "N/A"}"`,
+    ].join(","));
+ 
+    const csvContent = [headers.join(","), ...rows].join("\n");
+ 
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url  = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href     = url;
+    link.download = `stock-transactions-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+ 
+    toast.success(`Exported ${allTransactions.length} transactions successfully!`);
+  } catch (error) {
+    console.error("Export error:", error);
+    toast.error("Failed to export transactions");
+  } finally {
+    setIsExporting(false);
+  }
+  }, [sortBy, sortOrder, selectedCategory, selectedType, committedSearch, convertToNumber]);
+  
   // =============================================
   // UTILITY FUNCTIONS
   // =============================================
@@ -247,7 +323,7 @@ export default function StockTransactionsManagement() {
         </div>
         <div className="flex space-x-2">
           {/* Export Button */}
-          <Button
+          {/* <Button
             onClick={handleExportTransactions}
             variant="outline"
             // disabled={filteredTransactions.length === 0}
@@ -255,7 +331,18 @@ export default function StockTransactionsManagement() {
           >
             <Download className="w-4 h-4 mr-2" />
             Export
-          </Button>
+          </Button> */}
+
+             <Button
+    onClick={handleExportTransactions}
+    variant="outline"
+    disabled={isExporting || transactions.length === 0}
+  >
+    {isExporting
+      ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Exporting…</>
+      : <><Download className="w-4 h-4 mr-2" />Export</>
+    }
+  </Button>
         </div>
       </div>
 

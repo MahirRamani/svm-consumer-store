@@ -79,6 +79,6 @@ const deleteCategoryHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withAuth(getCategoryHandler));
-export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateCategoryHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getCategoryHandler));
+export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(updateCategoryHandler));
 export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteCategoryHandler));

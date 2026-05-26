@@ -139,6 +139,6 @@ const deleteProductHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withAuth(getProductHandler));
-export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(updateProductHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getProductHandler));
+export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(updateProductHandler));
 export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteProductHandler));

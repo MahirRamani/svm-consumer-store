@@ -186,5 +186,5 @@ const createProductHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(getProductsHandler);
-export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(createProductHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(getProductsHandler));
+export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN', 'SELLER'])(createProductHandler));
