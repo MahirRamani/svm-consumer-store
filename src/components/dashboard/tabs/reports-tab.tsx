@@ -50,7 +50,7 @@ type SortDir = "asc" | "desc";
 
 type SoldSortKey  = "categoryName" | "productName" | "totalQtySold" | "totalRevenue";
 type StockSortKey = "categoryName" | "productName" | "stockStatus" | "totalLeft" | "totalSold" | "newestBatch";
-type StudentSortKey = "rollNumber" | "name" | "standard" | "lastPeriodBalance" | "topupInPeriod" | "expenseInPeriod" | "currentBalance";
+type StudentSortKey = "rollNumber" | "name" | "standard" | "openingBalance" | "topupInPeriod" | "expenseInPeriod" | "currentBalance";
 
 interface SortState<K extends string> {
   key: K;
@@ -69,8 +69,8 @@ interface StudentExpenseRow {
   // Computed from ITransaction in [fromDate, toDate]:
   // topupInPeriod  = sum(totalAmount where type === "Topup")
   // expenseInPeriod = sum(totalAmount where type in ["Purchase","Deduction"])
-  // lastPeriodBalance = currentBalance - topupInPeriod + expenseInPeriod
-  lastPeriodBalance: number;
+  // openingBalance = currentBalance - topupInPeriod + expenseInPeriod
+  openingBalance: number;
   topupInPeriod: number;
   expenseInPeriod: number;
 }
@@ -125,7 +125,7 @@ const quickRangeLabels: Record<QuickRange, string> = {
 };
 
 const formatINR = (n: number): string =>
-  `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `₹${n?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const formatDate = (dt: string | Date): string =>
   new Date(dt).toLocaleDateString("en-GB", {
@@ -561,8 +561,8 @@ export default function InventoryReportDashboard() {
         case "standard":
           cmp = a.standard.localeCompare(b.standard, undefined, { numeric: true });
           break;
-        case "lastPeriodBalance":
-          cmp = a.lastPeriodBalance - b.lastPeriodBalance;
+        case "openingBalance":
+          cmp = a.openingBalance - b.openingBalance;
           break;
         case "topupInPeriod":
           cmp = a.topupInPeriod - b.topupInPeriod;
@@ -694,7 +694,7 @@ export default function InventoryReportDashboard() {
             s.rollNumber,
             s.name,
             s.standard,
-            s.lastPeriodBalance.toFixed(2),
+            s.openingBalance.toFixed(2),
             s.topupInPeriod.toFixed(2),
             s.expenseInPeriod.toFixed(2),
             s.currentBalance.toFixed(2),
@@ -707,7 +707,7 @@ export default function InventoryReportDashboard() {
           headers.join(","),
           ...rows,
           "",
-          `"Total",""," ","${sortedStudents.reduce((a, s) => a + s.lastPeriodBalance, 0).toFixed(2)}","${studentSummary.totalTopup.toFixed(2)}","${studentSummary.totalExpense.toFixed(2)}","${studentSummary.totalBalance.toFixed(2)}",""`,
+          `"Total",""," ","${sortedStudents.reduce((a, s) => a + s.openingBalance, 0).toFixed(2)}","${studentSummary.totalTopup.toFixed(2)}","${studentSummary.totalExpense.toFixed(2)}","${studentSummary.totalBalance.toFixed(2)}",""`,
         ].join("\n");
       }
 
@@ -1156,7 +1156,7 @@ export default function InventoryReportDashboard() {
                     <SortableHeader label="Roll No"           sortKey="rollNumber"       current={studentSort} onSort={handleStudentSort} align="left"   />
                     <SortableHeader label="Name"              sortKey="name"             current={studentSort} onSort={handleStudentSort} align="left"   />
                     <SortableHeader label="Std"               sortKey="standard"         current={studentSort} onSort={handleStudentSort} align="center" />
-                    <SortableHeader label="Last Bal."         sortKey="lastPeriodBalance" current={studentSort} onSort={handleStudentSort} align="right"  />
+                    <SortableHeader label="Last Bal."         sortKey="openingBalance" current={studentSort} onSort={handleStudentSort} align="right"  />
                     <SortableHeader label="Topup (Period)"    sortKey="topupInPeriod"    current={studentSort} onSort={handleStudentSort} align="right"  />
                     <SortableHeader label="Expense (Period)"  sortKey="expenseInPeriod"  current={studentSort} onSort={handleStudentSort} align="right"  />
                     <SortableHeader label="Cur. Balance"      sortKey="currentBalance"   current={studentSort} onSort={handleStudentSort} align="right"  />
@@ -1195,7 +1195,7 @@ export default function InventoryReportDashboard() {
                         </td>
                         {/* Last Period Balance */}
                         <td className="px-6 py-3.5 text-right font-mono text-sm text-gray-600">
-                          {formatINR(row.lastPeriodBalance)}
+                          {formatINR(row.openingBalance)}
                         </td>
                         {/* Topup in period */}
                         <td className="px-6 py-3.5 text-right">
@@ -1242,7 +1242,7 @@ export default function InventoryReportDashboard() {
                         Total ({sortedStudents.length} students)
                       </td>
                       <td className="px-6 py-3.5 text-right text-gray-600 font-mono">
-                        {formatINR(sortedStudents.reduce((a, s) => a + s.lastPeriodBalance, 0))}
+                        {formatINR(sortedStudents.reduce((a, s) => a + s.openingBalance, 0))}
                       </td>
                       <td className="px-6 py-3.5 text-right text-emerald-700 font-mono">
                         +{formatINR(studentSummary.totalTopup)}
