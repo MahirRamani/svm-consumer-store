@@ -6,20 +6,44 @@ import { validateBody } from '@/lib/api/validation-helpers';
 import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
  
 // GET — students without id assigned
+// const getStudentsWithoutIdHandler = async (req: Request) => {
+//   await connectDB();
+ 
+//   const students = await Student.find({
+//     $or: [{ id: null }, { id: '' }, { id: { $exists: false } }],
+//     isActive: true,
+//   })
+//     .select('_id rollNumber name standard year')
+//     .sort({ standard: 1, rollNumber: 1 })
+//     .lean();
+ 
+//   return successResponse(students);
+// };
+ 
+// const getStudentsWithoutIdHandler = async (req: Request) => {
+//   await connectDB();
+ 
+//   // ← removed the { id: null/empty } filter — return all active students
+//   const students = await Student.find({ isActive: true })
+//     .select('_id rollNumber name standard year id')  // ← add `id` to select
+//     .sort({ standard: 1, rollNumber: 1 })
+//     .lean();
+ 
+//   return successResponse(students);
+// };
+
 const getStudentsWithoutIdHandler = async (req: Request) => {
   await connectDB();
  
-  const students = await Student.find({
-    $or: [{ id: null }, { id: '' }, { id: { $exists: false } }],
-    isActive: true,
-  })
-    .select('_id rollNumber name standard year')
-    .sort({ standard: 1, rollNumber: 1 })
+  // ← removed the { id: null/empty } filter — return all active students
+  const students = await Student.find({ isActive: true })
+    .select('_id rollNumber name standard year id')  // ← add `id` to select
+    .collation({ locale: "en", numericOrdering: true }).sort({ rollNumber: 1 })
     .lean();
  
   return successResponse(students);
 };
- 
+
 // POST — bulk assign ids
 // Body: [{ studentMongoId: string, id: string }, ...]
 const bulkAssignIdSchema = z.object({
