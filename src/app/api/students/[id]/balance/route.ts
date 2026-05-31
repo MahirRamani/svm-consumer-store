@@ -59,18 +59,30 @@ const updateBalanceHandler = async (
     performedBy: authContext.user?.id,
   });
 
-  // Update student balance
-  student.balance = newBalance;
-  await student.save();
+  // // Update student balance
+  // student.balance = newBalance;
+  // await student.save();
+
+  const updated = await Student.findByIdAndUpdate(
+    id,
+    { $set: { balance: newBalance } },
+    { new: true, runValidators: true, context: 'query' }
+  );
 
   return successResponse(
-    {
-      student: student.toObject(),
-      transaction: transaction.toObject(),
-    },
+    { student: updated!.toObject(), transaction: transaction.toObject() },
     200,
     `Balance ${type.toLowerCase()} successful`
   );
+
+  // return successResponse(
+  //   {
+  //     student: student.toObject(),
+  //     transaction: transaction.toObject(),
+  //   },
+  //   200,
+  //   `Balance ${type.toLowerCase()} successful`
+  // );
 };
 
 export const PATCH = withErrorHandler(withAuth(updateBalanceHandler));

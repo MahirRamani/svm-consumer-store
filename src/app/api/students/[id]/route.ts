@@ -50,7 +50,7 @@ const updateStudentHandler = async (
 
   const student = await Student.findByIdAndUpdate(id, data, {
     new: true,
-    runValidators: true,
+    runValidators: true, context: 'query'
   });
 
   if (!student) {

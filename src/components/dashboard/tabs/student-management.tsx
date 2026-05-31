@@ -20,7 +20,8 @@ import {
   Eye, 
   EyeOff,
   Wallet,
-  Download
+  Download,
+  Hash
 } from "lucide-react";
 import { toast } from "sonner";
 import AddStudentModal from "@/components/modals/add-student-modal";
@@ -30,6 +31,7 @@ import EditStudentModal from "@/components/modals/edit-student-modal";
 import BalanceReportModal from "@/components/modals/balance-report-modal";
 import { useDeleteStudent, useToggleStudentStatus } from "@/hooks/use-student-mutations";
 import type { Student } from "@/types";
+import BulkStudentIdModal from "@/components/modals/BulkStudentIdModal";
 
 interface StudentApiResponse {
   success: boolean;
@@ -50,6 +52,7 @@ export default function StudentManagement() {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showDeductModal, setShowDeductModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showBulkIdModal, setShowBulkIdModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showBalanceReportModal, setShowBalanceReportModal] = useState(false);
@@ -292,7 +295,7 @@ export default function StudentManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
-                  {[2025, 2024, 2023, 2022, 2021, 2020, 2019].map((year) => (
+                  {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
                     </SelectItem>
@@ -321,12 +324,31 @@ export default function StudentManagement() {
       {/* Students List */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          {/* <CardTitle className="text-lg font-semibold text-gray-900">
             Student Accounts
             {filteredStudents.length > 0 && (
               <span className="ml-2 text-sm font-normal text-gray-500">({filteredStudents.length} students)</span>
             )}
-          </CardTitle>
+            <> </>
+          </CardTitle> */}
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center justify-between">
+  <div className="flex items-center">
+    Student Accounts
+    {filteredStudents.length > 0 && (
+      <span className="ml-2 text-sm font-normal text-gray-500">
+        ({filteredStudents.length} students)
+      </span>
+    )}
+  </div>
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={() => setShowBulkIdModal(true)}
+  >
+    <Hash className="w-4 h-4 mr-2" />
+    Assign IDs
+  </Button>
+</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filteredStudents.length === 0 ? (
@@ -488,6 +510,7 @@ export default function StudentManagement() {
         students={students}
         preSelectedStudentId={balanceReportStudentId}
       />
+      <BulkStudentIdModal open={showBulkIdModal} onOpenChange={setShowBulkIdModal} />
     </div>
   );
 }

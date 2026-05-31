@@ -38,7 +38,7 @@ interface FormErrors {
 type FormField = keyof FormData;
 
 const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
-const YEARS = [2024, 2023, 2022, 2021, 2020, 2019];
+const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
 
 export default function AddStudentModal({ open, onOpenChange }: AddStudentModalProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -296,7 +296,7 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
                 <SelectContent>
                   {STANDARDS.map((std) => (
                     <SelectItem key={std} value={std}>
-                      {std} Standard
+                      {std}
                     </SelectItem>
                   ))}
                 </SelectContent>
