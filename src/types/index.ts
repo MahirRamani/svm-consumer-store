@@ -294,6 +294,7 @@ export interface BulkStockRequest {
 export interface Student extends BaseEntity {
   _id: string
   rollNumber: string
+  id: number
   name: string
   standard: string
   year: number
@@ -304,6 +305,7 @@ export interface Student extends BaseEntity {
 
 export interface CreateStudentDto {
   rollNumber: string
+  id: number
   name: string
   mobileNo?: string
   standard: string
@@ -314,6 +316,7 @@ export interface CreateStudentDto {
 export interface UpdateStudentDto {
   _id: string
   rollNumber?: string
+  id?: number
   name?: string
   mobileNo?: string
   standard?: string

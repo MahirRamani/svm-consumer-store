@@ -1,4 +1,3 @@
-// components/modals/edit-student-modal.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -24,6 +23,7 @@ interface FormData {
   standard: string;
   year: string;
   mobileNo: string;
+  id: string;
 }
 
 interface FormErrors {
@@ -32,6 +32,7 @@ interface FormErrors {
   standard?: string;
   year?: string;
   mobileNo?: string;
+  id?: string;
 }
 
 type FormField = keyof FormData;
@@ -39,110 +40,71 @@ type FormField = keyof FormData;
 const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
 const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
 
+const UNTOUCHED: Record<FormField, boolean> = {
+  name: false, rollNumber: false, standard: false,
+  year: false, mobileNo: false,  id: false,
+};
+
 export default function EditStudentModal({ open, onOpenChange, student }: EditStudentModalProps) {
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    rollNumber: "",
-    standard: "",
-    year: "",
-    mobileNo: "",
+    name: "", rollNumber: "", standard: "", year: "", mobileNo: "", id: "",
   });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Record<FormField, boolean>>({
-    name: false,
-    rollNumber: false,
-    standard: false,
-    year: false,
-    mobileNo: false,
-  });
+  const [errors,  setErrors]  = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<FormField, boolean>>(UNTOUCHED);
 
   const updateMutation = useUpdateStudent();
 
-  // Populate form when student changes
+  // Populate when student changes
   useEffect(() => {
     if (student && open) {
       setFormData({
-        name: student.name || "",
-        rollNumber: student.rollNumber || "",
-        standard: student.standard || "",
-        year: student.year ? student.year.toString() : "",
-        mobileNo: student.mobileNo || "",
+        name:       student.name        || "",
+        rollNumber: student.rollNumber  || "",
+        standard:   student.standard    || "",
+        year:       student.year        ? student.year.toString() : "",
+        mobileNo:   student.mobileNo    || "",
+        id:         student.id          ? student.id.toString() : "",
       });
-      
       setErrors({});
-      setTouched({
-        name: false,
-        rollNumber: false,
-        standard: false,
-        year: false,
-        mobileNo: false,
-      });
+      setTouched(UNTOUCHED);
     }
   }, [student, open]);
 
-  // Reset form when modal closes
+  // Reset on close
   useEffect(() => {
     if (!open) {
-      setFormData({
-        name: "",
-        rollNumber: "",
-        standard: "",
-        year: "",
-        mobileNo: "",
-      });
+      setFormData({ name: "", rollNumber: "", standard: "", year: "", mobileNo: "", id: "" });
       setErrors({});
-      setTouched({
-        name: false,
-        rollNumber: false,
-        standard: false,
-        year: false,
-        mobileNo: false,
-      });
+      setTouched(UNTOUCHED);
     }
   }, [open]);
 
   const validateField = useCallback((name: FormField, value: string): string | undefined => {
     switch (name) {
       case "name":
-        if (!value.trim()) {
-          return "Student name is required";
-        }
-        if (value.trim().length < 2) {
-          return "Name must be at least 2 characters";
-        }
-        if (value.trim().length > 100) {
-          return "Name must be less than 100 characters";
-        }
-        if (!/^[a-zA-Z\s.]+$/.test(value)) {
-          return "Name can only contain letters, spaces, and dots";
-        }
+        if (!value.trim())                           return "Student name is required";
+        if (value.trim().length < 2)                 return "Name must be at least 2 characters";
+        if (value.trim().length > 100)               return "Name must be less than 100 characters";
+        if (!/^[a-zA-Z\s.]+$/.test(value))           return "Name can only contain letters, spaces, and dots";
         break;
       case "rollNumber":
-        if (!value.trim()) {
-          return "Roll number is required";
-        }
-        if (value.trim().length < 3) {
-          return "Roll number must be at least 3 characters";
-        }
-        if (value.trim().length > 50) {
-          return "Roll number must be less than 50 characters";
-        }
+        if (!value.trim())                           return "Roll number is required";
+        if (value.trim().length < 3)                 return "Roll number must be at least 3 characters";
+        if (value.trim().length > 50)                return "Roll number must be less than 50 characters";
         break;
       case "standard":
-        if (!value.trim()) {
-          return "Standard is required";
-        }
+        if (!value.trim())                           return "Standard is required";
         break;
       case "year":
-        if (!value.trim()) {
-          return "Year is required";
-        }
+        if (!value.trim())                           return "Year is required";
         break;
       case "mobileNo":
-        if (value.trim() && !/^[0-9]{10}$/.test(value.trim())) {
-          return "Mobile number must be 10 digits";
-        }
+        if (value.trim() && !/^[0-9]{10}$/.test(value.trim()))
+                                                     return "Mobile number must be 10 digits";
+        break;
+      case "id":
+        if (!value.trim())                           return "Student ID is required";
+        if (!/^\d+$/.test(value.trim()))             return "ID must be numbers only";
         break;
     }
     return undefined;
@@ -150,107 +112,66 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
 
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
-
-    Object.keys(formData).forEach((key) => {
-      const field = key as FormField;
+    (Object.keys(formData) as FormField[]).forEach((field) => {
       const error = validateField(field, formData[field]);
       if (error) newErrors[field] = error;
     });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData, validateField]);
 
-  const handleChange = useCallback(
-    (field: FormField, value: string) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange = useCallback((field: FormField, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
+  }, [validateField]);
 
-      // Mark as touched when value changes
-      setTouched((prev) => ({ ...prev, [field]: true }));
+  const handleBlur = useCallback((field: FormField) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setErrors((prev) => ({ ...prev, [field]: validateField(field, formData[field]) }));
+  }, [formData, validateField]);
 
-      // Real-time validation
-      const error = validateField(field, value);
-      setErrors((prev) => ({ ...prev, [field]: error }));
-    },
-    [validateField]
-  );
-
-  const handleBlur = useCallback(
-    (field: FormField) => {
-      setTouched((prev) => ({ ...prev, [field]: true }));
-      const error = validateField(field, formData[field]);
-      setErrors((prev) => ({ ...prev, [field]: error }));
-    },
-    [formData, validateField]
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!student?._id) return;
-
-      // Mark all fields as touched
-      setTouched({
-        name: true,
-        rollNumber: true,
-        standard: true,
-        year: true,
-        mobileNo: true,
-      });
-
-      if (!validateForm()) {
-        toast.error("Please fix the form errors before submitting");
-        return;
-      }
-
-      const updateData: UpdateStudentDto = {
-        _id: student._id,
-        name: formData.name.trim(),
-        rollNumber: formData.rollNumber.trim(),
-        standard: formData.standard,
-        year: Number(formData.year),
-        ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }),
-      };
-
-      updateMutation.mutate(updateData, {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      });
-    },
-    [student, formData, validateForm, updateMutation, onOpenChange]
-  );
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!student?._id) return;
+    setTouched({ name: true, rollNumber: true, standard: true, year: true, mobileNo: true, id: true });
+    if (!validateForm()) {
+      toast.error("Please fix the form errors before submitting");
+      return;
+    }
+    const updateData: UpdateStudentDto = {
+      _id:        student._id,
+      name:       formData.name.trim(),
+      rollNumber: formData.rollNumber.trim(),
+      standard:   formData.standard,
+      year:       Number(formData.year),
+      id:         Number(formData.id),                                          // mandatory number
+      ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }), // optional
+    };
+    updateMutation.mutate(updateData, { onSuccess: () => onOpenChange(false) });
+  }, [student, formData, validateForm, updateMutation, onOpenChange]);
 
   const handleClose = useCallback(() => {
-    if (!updateMutation.isPending) {
-      onOpenChange(false);
-    }
+    if (!updateMutation.isPending) onOpenChange(false);
   }, [updateMutation.isPending, onOpenChange]);
 
-  // Check if form has any changes from original student
   const hasChanges = useCallback((): boolean => {
     if (!student) return false;
-
     return (
-      formData.name.trim() !== student.name ||
-      formData.rollNumber.trim() !== student.rollNumber ||
-      formData.standard !== student.standard ||
-      Number(formData.year) !== student.year ||
-      formData.mobileNo.trim() !== (student.mobileNo || "")
+      formData.name.trim()      !== student.name                  ||
+      formData.rollNumber.trim() !== student.rollNumber           ||
+      formData.standard          !== student.standard             ||
+      Number(formData.year)      !== student.year                 ||
+      formData.mobileNo.trim()   !== (student.mobileNo || "")    ||
+      Number(formData.id)        !== student.id
     );
   }, [student, formData]);
 
   const isFormValid =
-    formData.name.trim() &&
-    formData.rollNumber.trim() &&
-    formData.standard &&
-    formData.year &&
-    !errors.name &&
-    !errors.rollNumber &&
-    !errors.standard &&
-    !errors.year &&
-    !errors.mobileNo;
+    formData.name.trim() && formData.rollNumber.trim() &&
+    formData.standard    && formData.year              && formData.id.trim() &&
+    !errors.name && !errors.rollNumber && !errors.standard &&
+    !errors.year && !errors.mobileNo   && !errors.id;
 
   const canSubmit = isFormValid && hasChanges() && !updateMutation.isPending;
 
@@ -265,10 +186,10 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">
-              Student Name <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="name">Student Name <span className="text-destructive">*</span></Label>
             <Input
               id="name"
               value={formData.name}
@@ -281,70 +202,68 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
             {errors.name && touched.name && <p className="text-sm text-destructive">{errors.name}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="rollNumber">
-              Roll Number <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="rollNumber"
-              value={formData.rollNumber}
-              onChange={(e) => handleChange("rollNumber", e.target.value)}
-              onBlur={() => handleBlur("rollNumber")}
-              placeholder="Enter roll number"
-              disabled={updateMutation.isPending}
-              className={errors.rollNumber && touched.rollNumber ? "border-destructive" : ""}
-            />
-            {errors.rollNumber && touched.rollNumber && <p className="text-sm text-destructive">{errors.rollNumber}</p>}
-          </div>
-
+          {/* Roll Number + ID side by side */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="standard">
-                Standard <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={formData.standard}
-                onValueChange={(value) => handleChange("standard", value)}
+              <Label htmlFor="rollNumber">Roll Number <span className="text-destructive">*</span></Label>
+              <Input
+                id="rollNumber"
+                value={formData.rollNumber}
+                onChange={(e) => handleChange("rollNumber", e.target.value)}
+                onBlur={() => handleBlur("rollNumber")}
+                placeholder="Enter roll number"
                 disabled={updateMutation.isPending}
-              >
+                className={errors.rollNumber && touched.rollNumber ? "border-destructive" : ""}
+              />
+              {errors.rollNumber && touched.rollNumber && <p className="text-sm text-destructive">{errors.rollNumber}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="id">Student ID <span className="text-destructive">*</span></Label>
+              <Input
+                id="id"
+                value={formData.id}
+                onChange={(e) => handleChange("id", e.target.value.replace(/\D/g, ""))}
+                onBlur={() => handleBlur("id")}
+                placeholder="Numeric ID"
+                inputMode="numeric"
+                disabled={updateMutation.isPending}
+                className={errors.id && touched.id ? "border-destructive" : ""}
+              />
+              {errors.id && touched.id && <p className="text-sm text-destructive">{errors.id}</p>}
+            </div>
+          </div>
+
+          {/* Standard + Year */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="standard">Standard <span className="text-destructive">*</span></Label>
+              <Select value={formData.standard} onValueChange={(v) => handleChange("standard", v)} disabled={updateMutation.isPending}>
                 <SelectTrigger className={errors.standard && touched.standard ? "border-destructive" : ""}>
                   <SelectValue placeholder="Select standard" />
                 </SelectTrigger>
                 <SelectContent>
-                  {STANDARDS.map((std) => (
-                    <SelectItem key={std} value={std}>
-                      {std}
-                    </SelectItem>
-                  ))}
+                  {STANDARDS.map((std) => <SelectItem key={std} value={std}>{std}</SelectItem>)}
                 </SelectContent>
               </Select>
               {errors.standard && touched.standard && <p className="text-sm text-destructive">{errors.standard}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year">
-                Year <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={formData.year}
-                onValueChange={(value) => handleChange("year", value)}
-                disabled={updateMutation.isPending}
-              >
+              <Label htmlFor="year">Year <span className="text-destructive">*</span></Label>
+              <Select value={formData.year} onValueChange={(v) => handleChange("year", v)} disabled={updateMutation.isPending}>
                 <SelectTrigger className={errors.year && touched.year ? "border-destructive" : ""}>
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {YEARS.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
+                  {YEARS.map((year) => <SelectItem key={year} value={year.toString()}>{year}</SelectItem>)}
                 </SelectContent>
               </Select>
               {errors.year && touched.year && <p className="text-sm text-destructive">{errors.year}</p>}
             </div>
           </div>
 
+          {/* Mobile */}
           <div className="space-y-2">
             <Label htmlFor="mobileNo">Mobile Number</Label>
             <Input
@@ -361,21 +280,19 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
             {errors.mobileNo && touched.mobileNo && <p className="text-sm text-destructive">{errors.mobileNo}</p>}
           </div>
 
-          <div className="flex space-x-3 pt-4">
+          {/* Buttons */}
+          <div className="flex space-x-3 pt-2">
             <Button type="button" variant="outline" onClick={handleClose} disabled={updateMutation.isPending} className="flex-1">
               Cancel
             </Button>
             <Button type="submit" disabled={!canSubmit} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white">
-              {updateMutation.isPending ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating...
-                </span>
-              ) : (
-                "Update Student"
-              )}
+              {updateMutation.isPending
+                ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Updating...</span>
+                : "Update Student"
+              }
             </Button>
           </div>
+
         </form>
       </DialogContent>
     </Dialog>

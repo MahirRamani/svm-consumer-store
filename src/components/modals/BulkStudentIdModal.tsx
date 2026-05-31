@@ -231,7 +231,7 @@ export default function BulkStudentIdModal({
                                             <td className="px-4 py-2.5 font-mono text-sm font-semibold text-gray-600 truncate">
                                                 {student.rollNumber}
                                             </td>
-                                            <td className="px-4 py-2.5 font-medium text-gray-900 truncate">
+                                            <td className="px-4 py-2.5 font-medium text-gray-900 whitespace-normal break-words">
                                                 {student.name}
                                             </td>
                                             <td className="px-4 py-2.5">
