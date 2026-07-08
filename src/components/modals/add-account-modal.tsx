@@ -24,7 +24,7 @@ import {
 import { Loader2, Wallet, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateAccount } from "@/hooks/use-account-mutations";
-import type { AccountFormErrors } from "@/types/account";
+import type { AccountFormErrors } from "@/types/admin/account";
 
 interface AddAccountModalProps {
   open: boolean;

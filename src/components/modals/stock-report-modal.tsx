@@ -32,7 +32,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-import type { Product } from "@/types/product";
+import type { Product } from "@/types/seller/product";
 
 type ReportType = "today" | "specific" | "range" | "all";
 type ExportFormat = "csv" | "pdf" | "excel";
@@ -336,8 +336,8 @@ export default function StockReportModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              {categoryId 
-                ? "Showing products from selected category only" 
+              {categoryId
+                ? "Showing products from selected category only"
                 : "Leave as 'All Products' to include all stock entries"}
             </p>
           </div>

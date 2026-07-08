@@ -145,8 +145,11 @@ export function withErrorHandler<T extends unknown[]>(
         //   return acc;
         // }, {} as Record<string, string>);
 
+          const firstMessage = error.issues[0]?.message ?? "Validation failed";
+
         return errorResponse(
-          'Validation failed',
+          // 'Validation failed',
+          firstMessage,
           400,
           'VALIDATION_ERROR',
           details
@@ -221,18 +224,19 @@ export function withErrorHandler<T extends unknown[]>(
 
         if (error.name === 'CastError') {
           return errorResponse(
-            'Invalid ID format',
+            'Invalid ID',
             400,
             'INVALID_ID'
           );
         }
       }
+ const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Generic error
       return errorResponse(
-        'An unexpected error occurred',
+        errorMessage || 'Unexpected error occurred',
         500,
-        'INTERNAL_ERROR'
+        'INTERNAL_ERROR',
       );
     }
   };

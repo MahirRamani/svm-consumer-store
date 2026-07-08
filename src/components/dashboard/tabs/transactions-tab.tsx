@@ -372,10 +372,10 @@ export default function TransactionsTab() {
 
     // Create properly formatted transaction object for the modal
     const formattedTransaction: RevertTransaction = {
-      id: apiTransaction.id || apiTransaction._id,
+      _id: apiTransaction._id,
       student: {
         name: apiTransaction.student?.name || "Unknown",
-        rollNumber: apiTransaction.student?.rollNumber || "N/A",
+        rollNumber: apiTransaction.student?.rollNumber,
       },
       items: revertItems,
       totalAmount: Number(apiTransaction.totalAmount),

@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import type { 
   StockEntryFormData, 
   StockEntryFormErrors 
-} from "@/types/stock-transaction";
+} from "@/types/seller/stock-transaction";
 
 interface AddStockEntryModalProps {
   open: boolean;

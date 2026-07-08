@@ -10,6 +10,9 @@ import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateStudent } from "@/hooks/use-student-mutations";
 import type { CreateStudentDto } from "@/types";
+import { STANDARDS, YEARS } from "@/lib/config/constants";
+import { createStudentSchema } from "@/lib/validations/student";
+import z from "zod";
 
 interface AddStudentModalProps {
   open: boolean;
@@ -36,9 +39,6 @@ interface FormErrors {
 
 type FormField = keyof FormData;
 
-const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
-const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
-
 const EMPTY_FORM: FormData = {
   name: "",
   rollNumber: "",
@@ -59,8 +59,8 @@ const UNTOUCHED: Record<FormField, boolean> = {
 
 export default function AddStudentModal({ open, onOpenChange }: AddStudentModalProps) {
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
-  const [errors,   setErrors]   = useState<FormErrors>({});
-  const [touched,  setTouched]  = useState<Record<FormField, boolean>>(UNTOUCHED);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<FormField, boolean>>(UNTOUCHED);
 
   const createMutation = useCreateStudent();
 
@@ -72,46 +72,81 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
     }
   }, [open]);
 
-  const validateField = useCallback((name: FormField, value: string): string | undefined => {
-    switch (name) {
-      case "name":
-        if (!value.trim())                           return "Student name is required";
-        if (value.trim().length < 2)                 return "Name must be at least 2 characters";
-        if (value.trim().length > 100)               return "Name must be less than 100 characters";
-        if (!/^[a-zA-Z\s.]+$/.test(value))           return "Name can only contain letters, spaces, and dots";
-        break;
-      case "rollNumber":
-        if (!value.trim())                           return "Roll number is required";
-        if (value.trim().length < 3)                 return "Roll number must be at least 3 characters";
-        if (value.trim().length > 50)                return "Roll number must be less than 50 characters";
-        break;
-      case "standard":
-        if (!value.trim())                           return "Standard is required";
-        break;
-      case "year":
-        if (!value.trim())                           return "Year is required";
-        break;
-      case "mobileNo":
-        if (value.trim() && !/^[0-9]{10}$/.test(value.trim()))
-                                                     return "Mobile number must be 10 digits";
-        break;
-      case "id":
-        if (!value.trim())                           return "Student ID is required";
-        if (!/^\d+$/.test(value.trim()))             return "ID must be numbers only";
-        break;
-    }
-    return undefined;
+  // const validateField = useCallback((name: FormField, value: string): string | undefined => {
+  //   switch (name) {
+  //     case "name":
+  //       if (!value.trim())                           return "Student name is required";
+  //       if (value.trim().length < 2)                 return "Name must be at least 2 characters";
+  //       if (value.trim().length > 100)               return "Name must be less than 100 characters";
+  //       if (!/^[a-zA-Z\s.]+$/.test(value))           return "Name can only contain letters, spaces, and dots";
+  //       break;
+  //     case "rollNumber":
+  //       if (!value.trim())                           return "Roll number is required";
+  //       if (value.trim().length < 3)                 return "Roll number must be at least 3 characters";
+  //       if (value.trim().length > 50)                return "Roll number must be less than 50 characters";
+  //       break;
+  //     case "standard":
+  //       if (!value.trim())                           return "Standard is required";
+  //       break;
+  //     case "year":
+  //       if (!value.trim())                           return "Year is required";
+  //       break;
+  //     case "mobileNo":
+  //       if (value.trim() && !/^[0-9]{10}$/.test(value.trim()))
+  //                                                    return "Mobile number must be 10 digits";
+  //       break;
+  //     case "id":
+  //       if (!value.trim())                           return "Student ID is required";
+  //       if (!/^\d+$/.test(value.trim()))             return "ID must be numbers only";
+  //       break;
+  //   }
+  //   return undefined;
+  // }, []);
+
+  // const validateForm = useCallback((): boolean => {
+  //   const newErrors: FormErrors = {};
+  //   (Object.keys(formData) as FormField[]).forEach((field) => {
+  //     const error = validateField(field, formData[field]);
+  //     if (error) newErrors[field] = error;
+  //   });
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // }, [formData, validateField]);
+  const NUMERIC_FIELDS = ["id", "rollNumber", "standard"] as const;
+
+  const validateField = useCallback((field: FormField, value: string) => {
+    const payload = (NUMERIC_FIELDS as readonly string[]).includes(field)
+      ? { [field]: value === "" ? value : Number(value) }
+      : { [field]: value };
+    const fieldSchema = createStudentSchema.pick({ [field]: true } as any);
+    const result = fieldSchema.safeParse(payload);
+    return result.success ? undefined : result.error.issues[0]?.message;
   }, []);
+  function zodToFormErrors(error: z.ZodError): FormErrors {
+    const out: FormErrors = {};
+
+    for (const iss of error.issues) {
+      const key = iss.path[0];
+      if (typeof key === "string" && out[key as keyof FormErrors] == null) {
+        out[key as keyof FormErrors] = iss.message;
+      }
+    }
+
+    return out;
+  }
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-    (Object.keys(formData) as FormField[]).forEach((field) => {
-      const error = validateField(field, formData[field]);
-      if (error) newErrors[field] = error;
-    });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, validateField]);
+    const coerced = {
+      ...formData,
+      id: Number(formData.id),
+      rollNumber: Number(formData.rollNumber),
+      standard: Number(formData.standard),
+    };
+    const result = createStudentSchema.safeParse(coerced);
+    if (!result.success) { setErrors(zodToFormErrors(result.error)); return false; }
+    setErrors({});
+    return true;
+  }, [formData]);
 
   const handleChange = useCallback((field: FormField, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -133,12 +168,12 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
       return;
     }
     const createData: CreateStudentDto = {
-      name:       formData.name.trim(),
-      rollNumber: formData.rollNumber.trim(),
-      standard:   formData.standard,
-      year:       Number(formData.year),
-      id:         Number(formData.id),                                          // mandatory number
-      ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }), // optional
+      name: formData.name.trim(),
+      rollNumber: Number(formData.rollNumber),  // ← was .trim() string
+      standard: Number(formData.standard),    // ← was string
+      year: formData.year,
+      id: Number(formData.id),
+      ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }),
     };
     createMutation.mutate(createData, { onSuccess: () => onOpenChange(false) });
   }, [formData, validateForm, createMutation, onOpenChange]);
@@ -148,10 +183,10 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
   }, [createMutation.isPending, onOpenChange]);
 
   const isFormValid =
-    formData.name.trim() && formData.rollNumber.trim() &&
-    formData.standard    && formData.year              && formData.id.trim() &&
+    formData.name.trim() && formData.rollNumber &&
+    formData.standard && formData.year.trim() && formData.id &&
     !errors.name && !errors.rollNumber && !errors.standard &&
-    !errors.year && !errors.mobileNo   && !errors.id;
+    !errors.year && !errors.mobileNo && !errors.id;
 
   const canSubmit = isFormValid && !createMutation.isPending;
 
@@ -189,7 +224,12 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
               <Input
                 id="rollNumber"
                 value={formData.rollNumber}
-                onChange={(e) => handleChange("rollNumber", e.target.value)}
+                // onChange={(e) => handleChange("rollNumber", e.target.value)}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "");
+                  const normalized = digits.replace(/^0+(?=\d)/, "");
+                  handleChange("rollNumber", normalized);
+                }}
                 onBlur={() => handleBlur("rollNumber")}
                 placeholder="e.g., STD2021045"
                 disabled={createMutation.isPending}
@@ -203,7 +243,12 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
               <Input
                 id="id"
                 value={formData.id}
-                onChange={(e) => handleChange("id", e.target.value.replace(/\D/g, ""))}
+                // onChange={(e) => handleChange("id", e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "");
+                  const normalized = digits.replace(/^0+(?=\d)/, "");
+                  handleChange("id", normalized);
+                }}
                 onBlur={() => handleBlur("id")}
                 placeholder="Numeric ID"
                 inputMode="numeric"
@@ -223,7 +268,7 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
                   <SelectValue placeholder="Select standard" />
                 </SelectTrigger>
                 <SelectContent>
-                  {STANDARDS.map((std) => <SelectItem key={std} value={std}>{std}</SelectItem>)}
+                  {STANDARDS.map((std) => <SelectItem key={std} value={std.toString()}>{std}</SelectItem>)}
                 </SelectContent>
               </Select>
               {errors.standard && touched.standard && <p className="text-sm text-destructive">{errors.standard}</p>}
@@ -250,7 +295,11 @@ export default function AddStudentModal({ open, onOpenChange }: AddStudentModalP
               id="mobileNo"
               type="tel"
               value={formData.mobileNo}
-              onChange={(e) => handleChange("mobileNo", e.target.value)}
+              // onChange={(e) => handleChange("mobileNo", e.target.value)}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "");
+                handleChange("mobileNo", digits);  // no leading zero strip — mobile nos can start with 0
+              }}
               onBlur={() => handleBlur("mobileNo")}
               placeholder="10-digit mobile number"
               disabled={createMutation.isPending}

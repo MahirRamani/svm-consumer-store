@@ -1,6 +1,6 @@
 // hooks/use-account-mutations.ts
 import { useCreate, useUpdate, useDelete } from './use-mutations';
-import type { Account, CreateAccountInput, UpdateAccountInput } from '@/types/account';
+import type { Account, CreateAccountInput, UpdateAccountInput } from '@/types/admin/account';
 
 const ENDPOINT = '/api/accounts';
 const QUERY_KEY = ['accounts'];

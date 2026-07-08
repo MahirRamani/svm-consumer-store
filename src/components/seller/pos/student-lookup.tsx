@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
-import type { Student } from "@/types/pos";
+import type { Student } from "@/types/seller/pos";
 import { ApiResponse } from "@/lib/api/base-handler";
 
 interface StudentLookupProps {
@@ -87,7 +87,13 @@ export default function StudentLookup({ selectedStudent, onStudentSelect }: Stud
             <Input
               placeholder="Enter roll number"
               value={rollNumber}
-              onChange={(e) => setRollNumber(e.target.value)}
+              // onChange={(e) => setRollNumber(e.target.value)}
+              onChange={(e) => {
+                // const onlyDigits = e.target.value.replace(/\D/g, '');
+                const digits = e.target.value.replace(/\D/g, "");
+                  const normalized = digits.replace(/^0+(?=\d)/, "");
+                setRollNumber(normalized);
+              }}
               onKeyDown={handleKeyDown}
               className="flex-1 text-lg pr-10"
               disabled={isSearching}

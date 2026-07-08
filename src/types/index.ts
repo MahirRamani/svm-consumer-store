@@ -293,35 +293,33 @@ export interface BulkStockRequest {
 
 export interface Student extends BaseEntity {
   _id: string
-  rollNumber: string
   id: number
+  rollNumber: number
   name: string
-  standard: string
-  year: number
+  standard: number
+  year: string
   balance: number
   mobileNo?: string
   isActive: boolean
 }
 
 export interface CreateStudentDto {
-  rollNumber: string
   id: number
+  rollNumber: number
   name: string
+  standard: number
+  year: string
   mobileNo?: string
-  standard: string
-  year: number
-  balance?: number
 }
 
 export interface UpdateStudentDto {
   _id: string
-  rollNumber?: string
   id?: number
+  rollNumber?: number
   name?: string
+  standard?: number
+  year?: string
   mobileNo?: string
-  standard?: string
-  year?: number
-  balance?: number
   isActive?: boolean
 }
 
@@ -498,7 +496,7 @@ export interface SubProductFilters extends PaginationParams {
 export interface StudentFilters extends PaginationParams {
   search?: string
   standard?: string
-  year?: number
+  year?: string
   isActive?: boolean
 }
 
@@ -556,222 +554,12 @@ export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclu
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
   }[Keys]
 
-
-// // types/index.ts
-// export interface Category {
-//   id: string;
-//   name: string;
-//   description?: string;
-//   priority?: number;
-//   isActive: boolean;
-//   createdAt: Date | string;
-//   updatedAt: Date | string;
-// }
-
-// export interface Product {
-//   id: string;
-//   name: string;
-//   description?: string;
-//   categoryId: string;
-//   category?: Category | { id: string; name: string };
-//   priority?: number;
-//   isActive: boolean;
-//   hasVariants: boolean;
-//   variantCount?: number;
-//   variants?: SubProduct[];
-//   createdAt: Date | string;
-//   updatedAt: Date | string;
-// }
-
-// export interface SubProduct {
-//   id: string;
-//   productId: string;
-//   parentProduct?: Product;
-//   name: string;
-//   description?: string;
-//   size?: string;
-//   price?: number;
-//   stock?: number;
-//   lowStockThreshold: number;
-//   weight?: string;
-//   volume?: string;
-//   barcode?: string;
-//   imageURL?: string;
-//   isActive: boolean;
-//   createdAt: Date | string;
-//   updatedAt: Date | string;
-// }
-
-// export interface Student {
-//   id: string;
-//   name: string;
-//   rollNumber: string;
-//   balance: number;
-//   mobileNo?: string;
-//   standard: string;
-//   year: number;
-//   isActive: boolean;
-//   createdAt: Date | string;
-//   updatedAt: Date | string;
-// }
-
-// // API Response Types
-// export interface ApiResponse<T> {
-//   success: boolean;
-//   data?: T;
-//   message?: string;
-//   error?: {
-//     code: string;
-//     message: string;
-//     details?: Record<string, unknown>;
-//   };
-//   metadata?: ApiPaginationMetadata;
-// }
-
-// export interface ApiPaginationMetadata {
-//   page: number;
-//   limit: number;
-//   totalCount: number;
-//   totalPages: number;
-// }
-
-// export interface CategoriesResponse {
-//   categories: Category[];
-//   totalCount?: number;
-//   activeCount?: number;
-//   inactiveCount?: number;
-// }
-
-// export interface ProductsResponse {
-//   products: Product[];
-//   pagination?: PaginationMetadata;
-// }
-
-// export interface SubProductsResponse {
-//   subProducts: SubProduct[];
-//   pagination?: PaginationMetadata;
-// }
-
-// // Dashboard Types
-// export interface DashboardStats {
-//   totalSales: number;
-//   totalSalesChange: number;
-//   lowStockCount: number;
-//   lowStockProducts: Array<{
-//     id: string;
-//     name: string;
-//     category: string;
-//     price: number;
-//     stock: number;
-//   }>;
-//   topSoldProduct: {
-//     id: string;
-//     name: string;
-//     quantitySold: number;
-//     revenue: number;
-//   } | null;
-//   todaysSoldProducts: Array<{
-//     id: string;
-//     name: string;
-//     quantity: number;
-//     revenue: number;
-//   }>;
-//   todaysProfit: number;
-//   todaysProfitMargin: number;
-//   yesterdayProfit: number;
-// }
-
-// // Form Data Types
-// export interface CreateCategoryInput {
-//   name: string;
-//   description?: string;
-//   priority?: number;
-// }
-
-// export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {
-//   id: string;
-//   isActive?: boolean;
-// }
-
-// export interface CreateProductInput {
-//   name: string;
-//   description?: string;
-//   categoryId: string;
-//   priority?: number;
-// }
-
-// export interface UpdateProductInput extends Partial<CreateProductInput> {
-//   isActive?: boolean;
-//   hasVariants?: boolean;
-// }
-
-// export interface CreateSubProductInput {
-//   productId: string;
-//   name: string;
-//   size?: string;
-//   weight?: string;
-//   volume?: string;
-//   barcode?: string;
-//   description?: string;
-//   image?: string;
-//   lowStockThreshold?: number;
-// }
-
-// export interface UpdateSubProductInput extends Partial<CreateSubProductInput> {
-//   isActive?: boolean;
-// }
-
-// // // Cart Types
-// // export interface CartItem {
-// //   itemKey: string;
-// //   productId?: string;
-// //   subProductId?: string;
-// //   name: string;
-// //   quantity: number;
-// //   stock: number;
-// //   itemType: 'subproduct';
-// // }
-
-// // types/index.ts - Update the CartItem interface
-
-// export interface CartItem {
-//   itemKey: string;
-//   productId?: string;
-//   subProductId?: string;
-//   name: string;
-//   price?: number; // Add this
-//   quantity: number;
-//   stock: number;
-//   itemType: 'subproduct';
-//   stockTransactionId?: string; // Add this
-// }
-
-// // types/index.ts
-// import type { TabId } from '@/lib/config/tabs-registry';
-// import type { AppRole } from '@/lib/config/rolesConfig';
-
-// // User type for client-side (no password)
-// export interface User {
-//   _id: string;
-//   username: string;
-//   role: AppRole;
-//   allowedTabs: TabId[];
-//   isActive: boolean;
-//   createdAt: string;
-//   updatedAt: string;
-// }
-
-// // User type with password (for server-side only)
-// export interface UserWithPassword extends User {
-//   password: string;
-// }
-
 export interface CreateStudentInput {
+  id: number;
+  rollNumber: number;
   name: string;
-  rollNumber: string;
-  standard: string;
-  year: number;
-  balance?: number;
+  standard: number;
+  year: string;
   mobileNo?: string;
 }
 
@@ -785,135 +573,6 @@ export interface BalanceUpdateInput {
   amount: number;
   reason?: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // // types/index.ts
-// // import type { TabId } from '@/lib/config/tabs-registry';
-// // import type { AppRole } from '@/lib/config/rolesConfig';
-
-// // // ============================================================================
-// // // CORE ENTITY TYPES
-// // // ============================================================================
-
-// // export interface Category {
-// //   id: string;
-// //   name: string;
-// //   description?: string;
-// //   priority?: number;
-// //   isActive: boolean;
-// //   createdAt: Date | string;
-// //   updatedAt: Date | string;
-// // }
-
-// // export interface Product {
-// //   id: string;
-// //   name: string;
-// //   description?: string;
-// //   categoryId: string;
-// //   category?: Category | { id: string; name: string };
-// //   priority?: number;
-// //   isActive: boolean;
-// //   hasVariants: boolean;
-// //   variantCount?: number;
-// //   variants?: SubProduct[];
-// //   createdAt: Date | string;
-// //   updatedAt: Date | string;
-// // }
-
-// // export interface SubProduct {
-// //   id: string;
-// //   productId: string;
-// //   parentProduct?: Product;
-// //   name: string;
-// //   description?: string;
-// //   size?: string;
-// //   price?: number;
-// //   stock?: number;
-// //   lowStockThreshold: number;
-// //   weight?: string;
-// //   volume?: string;
-// //   barcode?: string;
-// //   imageURL?: string;
-// //   isActive: boolean;
-// //   createdAt: Date | string;
-// //   updatedAt: Date | string;
-// // }
-
-// // export interface Student {
-// //   id: string;
-// //   name: string;
-// //   rollNumber: string;
-// //   balance: number;
-// //   mobileNo?: string;
-// //   standard: string;
-// //   year: number;
-// //   isActive: boolean;
-// //   createdAt: Date | string;
-// //   updatedAt: Date | string;
-// // }
-
-// // export interface User {
-// //   _id: string;
-// //   username: string;
-// //   role: AppRole;
-// //   allowedTabs: TabId[];
-// //   isActive: boolean;
-// //   createdAt: string;
-// //   updatedAt: string;
-// // }
-
-// // export interface UserWithPassword extends User {
-// //   password: string;
-// // }
-
-// // ============================================================================
-// // TRANSACTION TYPES
-// // ============================================================================
-
-// export interface TransactionItem {
-//   categoryId?: string;
-//   productId?: string;
-//   subProductId?: string;
-//   stockTransactionId?: string;
-//   quantity: number;
-//   price: number;
-//   totalPrice: number;
-//   name?: string; // For display purposes
-// }
-
-// export interface Transaction {
-//   id: string;
-//   studentId: string;
-//   student?: {
-//     id: string;
-//     name: string;
-//     rollNumber: string;
-//     standard?: string;
-//   };
-//   userId?: string;
-//   items: TransactionItem[];
-//   totalAmount: number;
-//   status: "Pending" | "Completed" | "Cancelled";
-//   transactionType: "Purchase" | "Topup" | "Deduction";
-//   reason?: string;
-//   performedBy?: string;
-//   createdAt: Date | string;
-//   updatedAt: Date | string;
-// }
 
 // // // ============================================================================
 // // // PAGINATION & API RESPONSE TYPES
@@ -930,176 +589,9 @@ export interface PaginationMetadata {
   endIndex: number;
 }
 
-// // export interface ApiResponse<T> {
-// //   success: boolean;
-// //   data?: T;
-// //   message?: string;
-// //   error?: {
-// //     code: string;
-// //     message: string;
-// //     details?: Record<string, unknown>;
-// //   };
-// //   metadata?: PaginationMetadata;
-// // }
-
-// // export interface CategoriesResponse {
-// //   categories: Category[];
-// //   totalCount?: number;
-// //   activeCount?: number;
-// //   inactiveCount?: number;
-// // }
-
-// // export interface ProductsResponse {
-// //   products: Product[];
-// //   pagination?: PaginationMetadata;
-// // }
-
-// // export interface SubProductsResponse {
-// //   subProducts: SubProduct[];
-// //   pagination?: PaginationMetadata;
-// // }
-
 export interface TransactionsResponse {
   data: Transaction[];
   pagination: PaginationMetadata;
 }
-
-// export interface StudentsResponse {
-//   students: Student[];
-//   pagination?: PaginationMetadata;
-// }
-
-// // // ============================================================================
-// // // FORM INPUT TYPES
-// // // ============================================================================
-
-// // export interface CreateCategoryInput {
-// //   name: string;
-// //   description?: string;
-// //   priority?: number;
-// // }
-
-// // export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {
-// //   id: string;
-// //   isActive?: boolean;
-// // }
-
-// // export interface CreateProductInput {
-// //   name: string;
-// //   description?: string;
-// //   categoryId: string;
-// //   priority?: number;
-// // }
-
-// // export interface UpdateProductInput extends Partial<CreateProductInput> {
-// //   id: string;
-// //   isActive?: boolean;
-// //   hasVariants?: boolean;
-// // }
-
-// // export interface CreateSubProductInput {
-// //   productId: string;
-// //   name: string;
-// //   size?: string;
-// //   weight?: string;
-// //   volume?: string;
-// //   barcode?: string;
-// //   description?: string;
-// //   image?: string;
-// //   lowStockThreshold?: number;
-// // }
-
-// // export interface UpdateSubProductInput extends Partial<CreateSubProductInput> {
-// //   id: string;
-// //   isActive?: boolean;
-// // }
-
-// // export interface CreateStudentInput {
-// //   name: string;
-// //   rollNumber: string;
-// //   standard: string;
-// //   year: number;
-// //   balance?: number;
-// //   mobileNo?: string;
-// // }
-
-// // export interface UpdateStudentInput extends Partial<CreateStudentInput> {
-// //   id: string;
-// //   isActive?: boolean;
-// // }
-
-// // export interface BalanceUpdateInput {
-// //   studentId: string;
-// //   amount: number;
-// //   reason?: string;
-// // }
-
-// // // ============================================================================
-// // // CART TYPES
-// // // ============================================================================
-
-// // export interface CartItem {
-// //   itemKey: string;
-// //   productId?: string;
-// //   subProductId?: string;
-// //   name: string;
-// //   quantity: number;
-// //   stock: number;
-// //   price?: number;
-// //   itemType: 'subproduct';
-// // }
-
-// // // ============================================================================
-// // // DASHBOARD TYPES
-// // // ============================================================================
-
-// // export interface DashboardStats {
-// //   totalSales: number;
-// //   totalSalesChange: number;
-// //   lowStockCount: number;
-// //   lowStockProducts: Array<{
-// //     id: string;
-// //     name: string;
-// //     category: string;
-// //     price: number;
-// //     stock: number;
-// //   }>;
-// //   topSoldProduct: {
-// //     id: string;
-// //     name: string;
-// //     quantitySold: number;
-// //     revenue: number;
-// //   } | null;
-// //   todaysSoldProducts: Array<{
-// //     id: string;
-// //     name: string;
-// //     quantity: number;
-// //     revenue: number;
-// //   }>;
-// //   todaysProfit: number;
-// //   todaysProfitMargin: number;
-// //   yesterdayProfit: number;
-// // }
-
-type StockType = 'Buy' | 'Sell' | 'Adjustment';
-
-// export interface StockTransaction {
-//   _id: string;
-//   productId: Product;
-//   subProductId: string;
-//   categoryId: Category;
-//   transactionType: TransactionType;
-//   initialQuantity: number;
-//   quantityLeft: number;
-//   buyingPrice?: number;
-//   sellingPrice: number;
-//   date: string;
-//   reason?: string;
-//   notes?: string;
-//   createdBy: User;
-//   updatedBy?: User;
-//   createdAt: string;
-//   updatedAt: string;
-// }
 
 export type { Category }

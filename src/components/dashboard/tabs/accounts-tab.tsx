@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import EditAccountModal from "@/components/modals/edit-account-modal";
 import AddTransactionModal from "@/components/modals/add-transaction-modal";
 import { useDeleteAccount, useUpdateAccount } from "@/hooks/use-account-mutations";
-import type { Account, AccountsPaginatedResponse, PaginationMetadata } from "@/types/account";
+import type { Account, AccountsPaginatedResponse, PaginationMetadata } from "@/types/admin/account";
 
 export interface AccountsTabProps {
   onSelectAccount?: (account: Account) => void;
@@ -315,9 +315,8 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
                         {/* Name */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                              account.isActive ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
-                            }`}>
+                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${account.isActive ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
+                              }`}>
                               {account.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
@@ -344,11 +343,10 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 
                         {/* Balance */}
                         <td className="px-4 py-3 text-right whitespace-nowrap">
-                          <span className={`font-bold tabular-nums ${
-                            account.currentBalance < 0 ? "text-red-600"
+                          <span className={`font-bold tabular-nums ${account.currentBalance < 0 ? "text-red-600"
                               : account.currentBalance === 0 ? "text-gray-400"
-                              : "text-green-600"
-                          }`}>
+                                : "text-green-600"
+                            }`}>
                             {fmt(account.currentBalance)}
                           </span>
                         </td>

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCategory } from "@/hooks/use-category-mutations";
-import type { CategoryFormData, CategoryFormErrors } from "@/types/category";
+import type { CategoryFormData, CategoryFormErrors } from "@/types/seller/category";
 
 interface AddCategoryModalProps {
   open: boolean;

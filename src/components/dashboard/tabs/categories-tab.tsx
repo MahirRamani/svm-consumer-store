@@ -14,11 +14,11 @@ import { toast } from "sonner";
 import AddCategoryModal from "@/components/modals/add-category-modal";
 import EditCategoryModal from "@/components/modals/edit-category-modal";
 
-import type { 
-  Category, 
-  CategoriesResponse, 
-  CategoryFilterState 
-} from "@/types/category";
+import type {
+  Category,
+  CategoriesResponse,
+  CategoryFilterState
+} from "@/types/seller/category";
 import { ApiResponse } from "@/lib/api/base-handler";
 
 export default function CategoriesTab() {
@@ -51,7 +51,7 @@ export default function CategoriesTab() {
       }
 
       const data: ApiResponse<CategoriesResponse> = await response.json();
-      
+
       if (!data.success || !data.data) {
         throw new Error(data.error?.message || "Failed to fetch categories");
       }
@@ -75,13 +75,13 @@ export default function CategoriesTab() {
       const response = await fetch(`/api/categories/${categoryId}`, {
         method: "DELETE",
       });
-      
+
       const result: ApiResponse<null> = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.error?.message || `Failed to delete category: ${response.status}`);
       }
-      
+
       return result;
     },
     onSuccess: () => {
@@ -96,8 +96,8 @@ export default function CategoriesTab() {
 
   // Toggle category status mutation - using _id
   const toggleCategoryMutation = useMutation<
-    ApiResponse<Category>, 
-    Error, 
+    ApiResponse<Category>,
+    Error,
     { categoryId: string; isActive: boolean }
   >({
     mutationFn: async ({ categoryId, isActive }) => {
@@ -106,13 +106,13 @@ export default function CategoriesTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive }),
       });
-      
+
       const result: ApiResponse<Category> = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.error?.message || `Failed to update category: ${response.status}`);
       }
-      
+
       return result;
     },
     onSuccess: () => {
@@ -196,10 +196,10 @@ export default function CategoriesTab() {
 
         const updatedDate = category.updatedAt
           ? new Date(category.updatedAt).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
           : "N/A";
 
         return [
@@ -375,17 +375,15 @@ export default function CategoriesTab() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${
-                              category.isActive ? "bg-blue-100" : "bg-gray-200"
-                            }`}
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${category.isActive ? "bg-blue-100" : "bg-gray-200"
+                              }`}
                           >
                             📦
                           </div>
                           <div className="ml-3">
                             <p
-                              className={`text-sm font-medium ${
-                                category.isActive ? "text-gray-900" : "text-gray-500"
-                              }`}
+                              className={`text-sm font-medium ${category.isActive ? "text-gray-900" : "text-gray-500"
+                                }`}
                             >
                               {category.name}
                             </p>

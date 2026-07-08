@@ -2,10 +2,11 @@
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
 import { Student } from '@/models/Student';
-import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
+import { withErrorHandler, successResponse, ApiError, errorResponse } from '@/lib/api/base-handler';
 import { validateBody, validateParams, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withAuth, withRole, type AuthContext } from '@/lib/api/auth-helpers';
 import { updateStudentSchema, type UpdateStudentDto } from '@/lib/validations/student';
+import { YearConfig } from '@/models';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -13,6 +14,11 @@ type RouteContext = { params: Promise<{ id: string }> };
 const idParamsSchema = z.object({
   id: z.string().min(1, 'Roll number is required'),
 });
+
+interface YearConfigLean {
+  currentYear: string;
+  isActive: boolean;
+}
 
 // =============================================
 // GET - Single Student
@@ -25,11 +31,21 @@ const getStudentHandler = async (
   await connectDB();
 
   const { id } = validateParams(await routeContext!.params, idParamsSchema);
+
+  const yearConfig = await YearConfig.findOne({ isActive: true })
+    .select('currentYear isActive')
+    .lean<YearConfigLean | null>();
+
   // const student = await Student.findById(id).lean();
-  const student = await Student.findOne({ rollNumber: id }).lean();
+  const student = await Student.findOne({ rollNumber: id, year: yearConfig?.currentYear, isActive: true }).lean();
 
   if (!student) {
-    throw new ApiError('Student not found', 404);
+    // return Response.json(
+    //   { message: 'Student not found' },
+    //   { status: 404 }
+    // );
+    return errorResponse('Student not founddd', 404);
+    // throw new ApiError('Student not found', 404);
   }
 
   return successResponse(student);

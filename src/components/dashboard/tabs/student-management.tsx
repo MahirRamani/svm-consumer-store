@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  PlusCircle, 
-  Edit, 
-  History, 
-  Search, 
-  Trash2, 
-  Minus, 
-  Eye, 
+import {
+  Plus,
+  PlusCircle,
+  Edit,
+  History,
+  Search,
+  Trash2,
+  Minus,
+  Eye,
   EyeOff,
   Wallet,
   Download,
@@ -31,7 +31,7 @@ import EditStudentModal from "@/components/modals/edit-student-modal";
 import BalanceReportModal from "@/components/modals/balance-report-modal";
 import { useDeleteStudent, useToggleStudentStatus } from "@/hooks/use-student-mutations";
 import type { Student } from "@/types";
-import BulkStudentIdModal from "@/components/modals/BulkStudentIdModal";
+import BulkStudentUpdateModal from "@/components/modals/manage-student-bulk-modal";
 
 interface StudentApiResponse {
   success: boolean;
@@ -52,7 +52,7 @@ export default function StudentManagement() {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showDeductModal, setShowDeductModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showBulkIdModal, setShowBulkIdModal] = useState(false);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showBalanceReportModal, setShowBalanceReportModal] = useState(false);
@@ -87,12 +87,12 @@ export default function StudentManagement() {
   // =============================================
   const filteredStudents = useMemo(() => {
     if (!Array.isArray(students)) return [];
-    
+
     return students.filter((student: Student) => {
       const matchesSearch =
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStandard = selectedStandard === "all" || student.standard === selectedStandard;
+        student.rollNumber.toString().includes(searchTerm.toLowerCase());
+      const matchesStandard = selectedStandard === "all" || student.standard.toString() === selectedStandard;
       const matchesYear = selectedYear === "all" || student.year?.toString() === selectedYear;
 
       return matchesSearch && matchesStandard && matchesYear;
@@ -152,6 +152,7 @@ export default function StudentManagement() {
   const handleExportStudents = useCallback(() => {
     try {
       const headers = [
+        "ID",
         "Name",
         "Roll Number",
         "Standard",
@@ -162,6 +163,7 @@ export default function StudentManagement() {
       ];
 
       const rows = filteredStudents.map((student) => [
+        `"${student.id}"`,
         `"${student.name}"`,
         `"${student.rollNumber}"`,
         `"${student.standard}"`,
@@ -245,8 +247,8 @@ export default function StudentManagement() {
           </Button>
 
           {/* Add Student Button */}
-          <Button 
-            onClick={() => setShowAddModal(true)} 
+          <Button
+            onClick={() => setShowAddModal(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -332,23 +334,23 @@ export default function StudentManagement() {
             <> </>
           </CardTitle> */}
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center justify-between">
-  <div className="flex items-center">
-    Student Accounts
-    {filteredStudents.length > 0 && (
-      <span className="ml-2 text-sm font-normal text-gray-500">
-        ({filteredStudents.length} students)
-      </span>
-    )}
-  </div>
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={() => setShowBulkIdModal(true)}
-  >
-    <Hash className="w-4 h-4 mr-2" />
-    Assign IDs
-  </Button>
-</CardTitle>
+            <div className="flex items-center">
+              Student Accounts
+              {filteredStudents.length > 0 && (
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({filteredStudents.length} students)
+                </span>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBulkUpdateModal(true)}
+            >
+              <Hash className="w-4 h-4 mr-2" />
+              Bulk Manage
+            </Button>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filteredStudents.length === 0 ? (
@@ -460,10 +462,10 @@ export default function StudentManagement() {
                             </Button>
 
                             {/* View History */}
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-50" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-50"
                               title="View History"
                             >
                               <History className="w-4 h-4" />
@@ -497,7 +499,7 @@ export default function StudentManagement() {
       <TopUpModal open={showTopUpModal} onOpenChange={setShowTopUpModal} studentId={selectedStudentId} />
       <DeductBalanceModal open={showDeductModal} onOpenChange={setShowDeductModal} studentId={selectedStudentId} />
       <EditStudentModal open={showEditModal} onOpenChange={handleEditModalClose} student={selectedStudent} />
-      
+
       {/* Balance Report Modal */}
       <BalanceReportModal
         open={showBalanceReportModal}
@@ -510,7 +512,7 @@ export default function StudentManagement() {
         students={students}
         preSelectedStudentId={balanceReportStudentId}
       />
-      <BulkStudentIdModal open={showBulkIdModal} onOpenChange={setShowBulkIdModal} />
+      <BulkStudentUpdateModal open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal} />
     </div>
   );
 }

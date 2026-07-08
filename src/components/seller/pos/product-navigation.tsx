@@ -44,8 +44,8 @@ import type {
   StockFIFOResponse,
   CategoryRef,
   SearchResult,
-} from "@/types/pos";
-import type { Category, CategoriesResponse } from "@/types/category";
+} from "@/types/seller/pos";
+import type { Category, CategoriesResponse } from "@/types/seller/category";
 import { ApiResponse } from "@/lib/api/base-handler";
 
 // =============================================

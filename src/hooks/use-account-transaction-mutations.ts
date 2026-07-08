@@ -5,7 +5,7 @@ import type {
   AccountTransaction,
   CreateAccountTransactionInput,
   UpdateAccountTransactionInput,
-} from '@/types/accountTransaction';
+} from '@/types/admin/accountTransaction';
 import { toast } from 'sonner';
 
 const ENDPOINT = '/api/account-transactions';
@@ -48,7 +48,7 @@ export function useDeleteAccountTransaction() {
 // ✅ New: Cancel transaction (POST /api/account-transactions/[id]/cancel)
 export function useCancelAccountTransaction() {
   const queryClient = useQueryClient();
- 
+
   return useMutation({
     mutationFn: async (transactionId: string) => {
       const res = await fetch(`/api/account-transactions/${transactionId}/cancel`, {

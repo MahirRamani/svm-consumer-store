@@ -11,6 +11,7 @@ export async function validateBody<T extends z.ZodType>(
 ): Promise<z.infer<T>> {
   try {
     const body = await req.json();
+    console.log("🚀 ~ validateBody ~ body:", body)
     return schema.parse(body);
   } catch (error) {
     if (error instanceof z.ZodError) {

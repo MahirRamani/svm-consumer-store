@@ -23,13 +23,13 @@ import {
 import { toast } from "sonner";
 import AddTransactionModal from "@/components/modals/add-transaction-modal";
 import { useCancelAccountTransaction } from "@/hooks/use-account-transaction-mutations";
-import type { Account } from "@/types/account";
+import type { Account } from "@/types/admin/account";
 import type {
   AccountTransaction,
   AccountTransactionsPaginatedResponse,
   AccountTransactionSummary,
   PaginationMetadata,
-} from "@/types/accountTransaction";
+} from "@/types/admin/accountTransaction";
 
 type DateRangeType = "today" | "week" | "month" | "custom" | "all";
 type TransactionTypeFilter = "all" | "CREDIT" | "DEBIT";

@@ -12,13 +12,13 @@ import { toast } from "sonner";
 import SuccessModal from "@/components/modals/success-modal";
 import ConfirmationModal from "@/components/modals/confirmation-modal";
 
-import type { 
-  Student, 
-  CartItem, 
+import type {
+  Student,
+  CartItem,
   TransactionItem,
   TransactionData,
   TransactionApiResponse
-} from "@/types/pos";
+} from "@/types/seller/pos";
 import { WILD_ROLL_NUMBERS } from "@/lib/constant";
 import { ObjectId } from "mongoose";
 import { useSession } from "next-auth/react";
@@ -58,9 +58,9 @@ export default function ShoppingCart({
   const queryClient = useQueryClient();
 
   const processTransactionMutation = useMutation<
-  ApiResponse<TransactionApiResponse>,
-  Error,
-  CreateTransactionPayload
+    ApiResponse<TransactionApiResponse>,
+    Error,
+    CreateTransactionPayload
   >({
     mutationFn: async (payload) => {
       const response = await fetch("/api/transactions", {
@@ -105,7 +105,7 @@ export default function ShoppingCart({
       // toast.success(`₹${totalAmount.toFixed(2)} deducted from ${selectedStudent.name}'s account`);
       setToastMessage(`₹${totalAmount.toFixed(2)} deducted from ${selectedStudent.name}'s account`);
       setShowBottomToast(true);
-  
+
       // Auto hide after 2 seconds
       setTimeout(() => setShowBottomToast(false), 2000);
     },
@@ -114,7 +114,7 @@ export default function ShoppingCart({
       setShowConfirmationModal(false);
     },
   });
-  
+
   const total = useMemo(() => {
     return cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [cartItems]);
@@ -130,7 +130,7 @@ export default function ShoppingCart({
     if (selectedStudent && WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber)) {
       return false;
     }
-    return selectedStudent && cartItems.length > 0 && selectedStudent.balance < total ;
+    return selectedStudent && cartItems.length > 0 && selectedStudent.balance < total;
   }, [selectedStudent, cartItems, total]);
 
   useEffect(() => {
@@ -195,7 +195,7 @@ export default function ShoppingCart({
   const handleQuantityBlur = useCallback((item: CartItem) => {
     const itemId = getItemId(item);
     const newQuantity = parseInt(editingValue) || 1;
-    
+
     if (newQuantity < 1) {
       toast.error("Quantity must be at least 1");
       setEditingValue(item.quantity.toString());
@@ -206,7 +206,7 @@ export default function ShoppingCart({
     } else {
       onUpdateQuantity(itemId, newQuantity);
     }
-    
+
     setEditingItemId(null);
   }, [editingValue, getItemId, onUpdateQuantity]);
 
@@ -221,7 +221,7 @@ export default function ShoppingCart({
 
   return (
     <div className="h-full flex flex-col">
-      <Card className="shadow-lg h-full flex flex-col">   
+      <Card className="shadow-lg h-full flex flex-col">
         <CardHeader className="shrink-0">
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
             <ShoppingCartIcon className="w-5 h-5 mr-2" />
@@ -245,7 +245,7 @@ export default function ShoppingCart({
                 cartItems.map((item) => {
                   const itemId = getItemId(item);
                   const isEditing = editingItemId === itemId;
-                  
+
                   return (
                     <div
                       key={itemId}
@@ -253,8 +253,8 @@ export default function ShoppingCart({
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {item.imageURL ? (
-                          <img 
-                            src={item.imageURL} 
+                          <img
+                            src={item.imageURL}
                             alt={item.name}
                             className="w-10 h-10 rounded object-cover shrink-0"
                             onError={(e) => {
@@ -288,7 +288,7 @@ export default function ShoppingCart({
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
-                        
+
                         {isEditing ? (
                           <Input
                             type="text"
@@ -300,7 +300,7 @@ export default function ShoppingCart({
                             autoFocus
                           />
                         ) : (
-                          <span 
+                          <span
                             className="text-sm font-medium w-8 text-center cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5"
                             onClick={() => handleQuantityClick(item)}
                             title="Click to edit quantity"
@@ -308,7 +308,7 @@ export default function ShoppingCart({
                             {item.quantity}
                           </span>
                         )}
-                        
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -350,9 +350,8 @@ export default function ShoppingCart({
                 <div className="flex justify-between text-sm">
                   <span>After Transaction:</span>
                   <span
-                    className={`font-medium ${
-                      selectedStudent.balance >= total ? "text-green-500" : "text-red-500"
-                    }`}
+                    className={`font-medium ${selectedStudent.balance >= total ? "text-green-500" : "text-red-500"
+                      }`}
                   >
                     ₹{(selectedStudent.balance - total).toFixed(2)}
                   </span>
@@ -380,12 +379,12 @@ export default function ShoppingCart({
               </Button>
 
               {!canCheckout && hasInsufficientBalance && selectedStudent && (
-                  <div className="text-center">
-                    <Badge variant="destructive" className="text-xs">
-                      Insufficient Balance (Need ₹{(total - selectedStudent.balance).toFixed(2)} more)
-                    </Badge>
-                  </div>
-                )}
+                <div className="text-center">
+                  <Badge variant="destructive" className="text-xs">
+                    Insufficient Balance (Need ₹{(total - selectedStudent.balance).toFixed(2)} more)
+                  </Badge>
+                </div>
+              )}
 
               <Button
                 variant="outline"
@@ -425,14 +424,14 @@ export default function ShoppingCart({
       />
 
       {showBottomToast && (
-      <div className="fixed bottom-4 right-4 z-75 animate-in slide-in-from-bottom">
-        <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <span>{toastMessage}</span>
+        <div className="fixed bottom-4 right-4 z-75 animate-in slide-in-from-bottom">
+          <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>{toastMessage}</span>
+          </div>
         </div>
-      </div>
       )}
     </div>
   );

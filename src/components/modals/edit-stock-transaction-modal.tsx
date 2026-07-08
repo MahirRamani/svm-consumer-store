@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Edit, Loader2, Package, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors, StockTransactionReason } from "@/types/stock-transaction";
+import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors, StockTransactionReason } from "@/types/seller/stock-transaction";
 
 interface EditStockTransactionModalProps {
   open: boolean;

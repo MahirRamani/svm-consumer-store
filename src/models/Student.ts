@@ -1,11 +1,11 @@
 import mongoose, { Schema, type Document } from "mongoose"
 
 export interface IStudent extends Document {
-  rollNumber: string
-  id: string
+  rollNumber: number
+  id: number
   name: string
   mobileNo?: string
-  standard: string
+  standard: number
   year: string
   balance: number
   isActive: boolean
@@ -15,13 +15,13 @@ export interface IStudent extends Document {
 
 const StudentSchema = new Schema<IStudent>(
   {
-    rollNumber: {
-      type: String,
+    id: {
+      type: Number,
       required: true,
       trim: true,
     },
-    id: {
-      type: String,
+    rollNumber: {
+      type: Number,
       required: true,
       trim: true,
     },
@@ -35,7 +35,7 @@ const StudentSchema = new Schema<IStudent>(
       trim: true,
     },
     standard: {
-      type: String,
+      type: Number,
       required: true,
       trim: true,
     },
@@ -59,8 +59,12 @@ const StudentSchema = new Schema<IStudent>(
 )
 
 // Create indexes
-// StudentSchema.index({ rollNumber: 1 })
-// StudentSchema.index({ name: 1 })
+// ✅ rollNo unique within a year (can repeat across years)
+StudentSchema.index({ rollNumber: 1, year: 1 }, { unique: true, partialFilterExpression: { isActive: true } })
+
+// ✅ id unique within a year (can repeat across years when student leaves)
+StudentSchema.index({ id: 1, year: 1 }, { unique: true, partialFilterExpression: { isActive: true } })
+
 StudentSchema.index({ isActive: 1 })
 StudentSchema.index({ standard: 1 })
 StudentSchema.index({ year: 1 })

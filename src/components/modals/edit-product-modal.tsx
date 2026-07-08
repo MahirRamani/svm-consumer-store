@@ -3,21 +3,21 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -25,16 +25,16 @@ import { toast } from "sonner";
 import { X, ImageIcon, Loader2, FileText, Edit } from "lucide-react";
 import { useUpdateProduct } from "@/hooks/use-product-mutations";
 
-import type { 
+import type {
   Product,
-  ProductFormData, 
+  ProductFormData,
   ProductFormErrors,
   ImageUploadResponse,
 } from "@/lib/types/product";
-import type { 
-  Category, 
-  CategoriesResponse 
-} from "@/types/category";
+import type {
+  Category,
+  CategoriesResponse
+} from "@/types/seller/category";
 import { ApiResponse } from "@/lib/api/base-handler";
 
 interface EditProductModalProps {
@@ -48,7 +48,7 @@ const validateImageFile = (
 ): { isValid: boolean; error?: string } => {
   const maxSize = 5 * 1024 * 1024;
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-  
+
   if (!allowedTypes.includes(file.type)) {
     return { isValid: false, error: 'Invalid image format' };
   }
@@ -58,10 +58,10 @@ const validateImageFile = (
   return { isValid: true };
 };
 
-export default function EditProductModal({ 
-  open, 
-  onOpenChange, 
-  product 
+export default function EditProductModal({
+  open,
+  onOpenChange,
+  product
 }: EditProductModalProps) {
   const updateMutation = useUpdateProduct();
 
@@ -77,7 +77,7 @@ export default function EditProductModal({
     barcode: "",
     lowStockThreshold: "10",
   });
-  
+
   const [isActive, setIsActive] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageName, setImageName] = useState("");
@@ -85,12 +85,12 @@ export default function EditProductModal({
   const [currentImageUrl, setCurrentImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<ProductFormErrors>({});
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch categories
   const { data: categoriesResponse } = useQuery<
-    ApiResponse<CategoriesResponse>, 
+    ApiResponse<CategoriesResponse>,
     Error
   >({
     queryKey: ["categories"],
@@ -121,7 +121,7 @@ export default function EditProductModal({
         lowStockThreshold: product.lowStockThreshold?.toString() || "10",
       });
       setIsActive(product.isActive);
-      
+
       if (product.imageURL) {
         setImagePreview(product.imageURL);
         setCurrentImageUrl(product.imageURL);
@@ -129,7 +129,7 @@ export default function EditProductModal({
         setImagePreview("");
         setCurrentImageUrl("");
       }
-      
+
       setErrors({});
     }
   }, [product, open]);
@@ -145,7 +145,7 @@ export default function EditProductModal({
   }, [open]);
 
   const validateField = useCallback((
-    name: keyof ProductFormData, 
+    name: keyof ProductFormData,
     value: string
   ): string | undefined => {
     switch (name) {
@@ -169,19 +169,19 @@ export default function EditProductModal({
 
   const validateForm = useCallback((): boolean => {
     const newErrors: ProductFormErrors = {};
-    
+
     const nameErr = validateField("name", formData.name);
     if (nameErr) newErrors.name = nameErr;
-    
+
     const catErr = validateField("categoryId", formData.categoryId);
     if (catErr) newErrors.categoryId = catErr;
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData, validateField]);
 
   const handleChange = useCallback((
-    field: keyof ProductFormData, 
+    field: keyof ProductFormData,
     value: string
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -248,7 +248,7 @@ export default function EditProductModal({
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm() || !product?._id) return;
 
     let imageUrl = currentImageUrl || undefined;
@@ -268,8 +268,8 @@ export default function EditProductModal({
         name: formData.name.trim(),
         categoryId: formData.categoryId,
         description: formData.description.trim() || undefined,
-        priority: formData.priority.trim() 
-          ? Number(formData.priority) 
+        priority: formData.priority.trim()
+          ? Number(formData.priority)
           : undefined,
         isActive,
         imageURL: imageUrl,
@@ -277,8 +277,8 @@ export default function EditProductModal({
         weight: formData.weight.trim() || undefined,
         volume: formData.volume.trim() || undefined,
         barcode: formData.barcode.trim() || undefined,
-        lowStockThreshold: formData.lowStockThreshold.trim() 
-          ? Number(formData.lowStockThreshold) 
+        lowStockThreshold: formData.lowStockThreshold.trim()
+          ? Number(formData.lowStockThreshold)
           : undefined,
       },
       {
@@ -369,7 +369,7 @@ export default function EditProductModal({
           {/* Image Upload */}
           <div className="space-y-3">
             <Label>Product Image</Label>
-            
+
             {imagePreview && (
               <div className="relative inline-block">
                 <img

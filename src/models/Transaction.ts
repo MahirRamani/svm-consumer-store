@@ -17,6 +17,8 @@ export interface ITransactionItem {
 
 export interface ITransaction extends Document {
   studentId: mongoose.Types.ObjectId;
+  year: string;
+  rollNumber: string;
   items?: ITransactionItem[];
   totalAmount: number;
   status: "Pending" | "Completed" | "Cancelled";
@@ -77,6 +79,16 @@ const TransactionSchema = new Schema<ITransaction>(
       required: true,
       index: true,
     },
+    year: {
+      type: String,
+      required: true,               // ← snapshot from YearConfig.currentYear at txn time
+      index: true,
+    },
+    rollNumber: {
+      type: String,
+      required: true,               // ← snapshot of student's rollNo at txn time
+      trim: true,
+    },
     items: {
       type: [TransactionItemSchema],
       required: false,
@@ -124,6 +136,7 @@ const TransactionSchema = new Schema<ITransaction>(
 // INDEXES
 // ============================================================================
 
+TransactionSchema.index({ rollNumber: 1, year: 1 })   // seller search by roll + year
 TransactionSchema.index({ studentId: 1, createdAt: -1 });
 TransactionSchema.index({ performedBy: 1, createdAt: -1 });
 TransactionSchema.index({ status: 1, type: 1 });

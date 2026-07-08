@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2, CreditCard, X, ShoppingCart } from "lucide-react";
-import type { Student, CartItem } from "@/types/pos";
+import type { Student, CartItem } from "@/types/seller/pos";
 import { WILD_ROLL_NUMBERS } from "@/lib/constant";
 
 interface ConfirmationModalProps {
@@ -100,9 +100,8 @@ export default function ConfirmationModal({
             <div className="flex justify-between items-center">
               <span className="text-sm text-green-700">Remaining Balance:</span>
               <span
-                className={`text-sm font-medium ${
-                  remainingBalance >= 0 ? "text-green-600" : "text-red-600"
-                }`}
+                className={`text-sm font-medium ${remainingBalance >= 0 ? "text-green-600" : "text-red-600"
+                  }`}
               >
                 ₹{remainingBalance.toFixed(2)}
               </span>
@@ -120,7 +119,7 @@ export default function ConfirmationModal({
           )}
 
           {/* Insufficient balance warning */}
-          {remainingBalance < 0 && !WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber) &&(
+          {remainingBalance < 0 && !WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber) && (
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-700">

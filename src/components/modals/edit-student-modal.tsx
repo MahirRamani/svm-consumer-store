@@ -9,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Edit, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateStudent } from "@/hooks/use-student-mutations";
+import z from "zod";
+import { createStudentSchema, updateStudentSchema } from "@/lib/validations/student";
 import type { Student, UpdateStudentDto } from "@/types";
+import { STANDARDS, YEARS } from "@/lib/config/constants";
 
 interface EditStudentModalProps {
   open: boolean;
@@ -18,12 +21,12 @@ interface EditStudentModalProps {
 }
 
 interface FormData {
-  name: string;
+  id: string;
   rollNumber: string;
+  name: string;
   standard: string;
   year: string;
   mobileNo: string;
-  id: string;
 }
 
 interface FormErrors {
@@ -37,19 +40,16 @@ interface FormErrors {
 
 type FormField = keyof FormData;
 
-const STANDARDS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
-const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
-
 const UNTOUCHED: Record<FormField, boolean> = {
   name: false, rollNumber: false, standard: false,
-  year: false, mobileNo: false,  id: false,
+  year: false, mobileNo: false, id: false,
 };
 
 export default function EditStudentModal({ open, onOpenChange, student }: EditStudentModalProps) {
   const [formData, setFormData] = useState<FormData>({
     name: "", rollNumber: "", standard: "", year: "", mobileNo: "", id: "",
   });
-  const [errors,  setErrors]  = useState<FormErrors>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<FormField, boolean>>(UNTOUCHED);
 
   const updateMutation = useUpdateStudent();
@@ -58,12 +58,12 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
   useEffect(() => {
     if (student && open) {
       setFormData({
-        name:       student.name        || "",
-        rollNumber: student.rollNumber  || "",
-        standard:   student.standard    || "",
-        year:       student.year        ? student.year.toString() : "",
-        mobileNo:   student.mobileNo    || "",
-        id:         student.id          ? student.id.toString() : "",
+        id: student.id?.toString() || "",
+        rollNumber: student.rollNumber?.toString() || "",
+        name: student.name || "",
+        standard: student.standard?.toString() || "",
+        year: student.year || "",
+        mobileNo: student.mobileNo || "",
       });
       setErrors({});
       setTouched(UNTOUCHED);
@@ -79,46 +79,100 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
     }
   }, [open]);
 
-  const validateField = useCallback((name: FormField, value: string): string | undefined => {
-    switch (name) {
-      case "name":
-        if (!value.trim())                           return "Student name is required";
-        if (value.trim().length < 2)                 return "Name must be at least 2 characters";
-        if (value.trim().length > 100)               return "Name must be less than 100 characters";
-        if (!/^[a-zA-Z\s.]+$/.test(value))           return "Name can only contain letters, spaces, and dots";
-        break;
-      case "rollNumber":
-        if (!value.trim())                           return "Roll number is required";
-        if (value.trim().length < 3)                 return "Roll number must be at least 3 characters";
-        if (value.trim().length > 50)                return "Roll number must be less than 50 characters";
-        break;
-      case "standard":
-        if (!value.trim())                           return "Standard is required";
-        break;
-      case "year":
-        if (!value.trim())                           return "Year is required";
-        break;
-      case "mobileNo":
-        if (value.trim() && !/^[0-9]{10}$/.test(value.trim()))
-                                                     return "Mobile number must be 10 digits";
-        break;
-      case "id":
-        if (!value.trim())                           return "Student ID is required";
-        if (!/^\d+$/.test(value.trim()))             return "ID must be numbers only";
-        break;
-    }
-    return undefined;
+  // const validateField = useCallback((name: FormField, value: string): string | undefined => {
+  //   switch (name) {
+  //     case "name":
+  //       if (!value.trim())                           return "Student name is required";
+  //       if (value.trim().length < 2)                 return "Name must be at least 2 characters";
+  //       if (value.trim().length > 100)               return "Name must be less than 100 characters";
+  //       if (!/^[a-zA-Z\s.]+$/.test(value))           return "Name can only contain letters, spaces, and dots";
+  //       break;
+  //     case "rollNumber":
+  //       if (!value.trim())                           return "Roll number is required";
+  //       if (value.trim().length < 3)                 return "Roll number must be at least 3 characters";
+  //       if (value.trim().length > 50)                return "Roll number must be less than 50 characters";
+  //       break;
+  //     case "standard":
+  //       if (!value.trim())                           return "Standard is required";
+  //       break;
+  //     case "year":
+  //       if (!value.trim())                           return "Year is required";
+  //       break;
+  //     case "mobileNo":
+  //       if (value.trim() && !/^[0-9]{10}$/.test(value.trim()))
+  //                                                    return "Mobile number must be 10 digits";
+  //       break;
+  //     case "id":
+  //       if (!value.trim())                           return "Student ID is required";
+  //       if (!/^\d+$/.test(value.trim()))             return "ID must be numbers only";
+  //       break;
+  //   }
+  //   return undefined;
+  // }, []);
+  // const validateField = useCallback((field: FormField, value: string) => {
+  //   const fieldSchema = createStudentSchema.pick({ [field]: true } as any);
+  //   const result = fieldSchema.safeParse({ [field]: value });
+
+  //   if (result.success) return undefined;
+
+  //   return result.error.issues[0]?.message;
+  // }, []);
+  const NUMERIC_FIELDS = ["id", "rollNumber", "standard"] as const;
+
+  const validateField = useCallback((field: FormField, value: string) => {
+    const payload = (NUMERIC_FIELDS as readonly string[]).includes(field)
+      ? { [field]: value === "" ? value : Number(value) }
+      : { [field]: value };
+    const fieldSchema = createStudentSchema.pick({ [field]: true } as any);
+    const result = fieldSchema.safeParse(payload);
+    return result.success ? undefined : result.error.issues[0]?.message;
   }, []);
+  function zodToFormErrors(error: z.ZodError): FormErrors {
+    const out: FormErrors = {};
+
+    for (const iss of error.issues) {
+      const key = iss.path[0];
+      if (typeof key === "string" && out[key as keyof FormErrors] == null) {
+        out[key as keyof FormErrors] = iss.message;
+      }
+    }
+
+    return out;
+  }
+  // const validateForm = useCallback((): boolean => {
+  //   const newErrors: FormErrors = {};
+  //   (Object.keys(formData) as FormField[]).forEach((field) => {
+  //     const error = validateField(field, formData[field]);
+  //     if (error) newErrors[field] = error;
+  //   });
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // }, [formData, validateField]);
+
+  // const validateForm = useCallback((): boolean => {
+  // const result = createStudentSchema.safeParse(formData);
+
+  // if (!result.success) {
+  //   setErrors(zodToFormErrors(result.error));
+  //   return false;
+  // }
+
+  // setErrors({});
+  // return true;
+  // }, [formData]);
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-    (Object.keys(formData) as FormField[]).forEach((field) => {
-      const error = validateField(field, formData[field]);
-      if (error) newErrors[field] = error;
-    });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, validateField]);
+    const coerced = {
+      ...formData,
+      id: Number(formData.id),
+      rollNumber: Number(formData.rollNumber),
+      standard: Number(formData.standard),
+    };
+    const result = updateStudentSchema.safeParse(coerced);
+    if (!result.success) { setErrors(zodToFormErrors(result.error)); return false; }
+    setErrors({});
+    return true;
+  }, [formData]);
 
   const handleChange = useCallback((field: FormField, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -140,13 +194,20 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
       return;
     }
     const updateData: UpdateStudentDto = {
-      _id:        student._id,
-      name:       formData.name.trim(),
-      rollNumber: formData.rollNumber.trim(),
-      standard:   formData.standard,
-      year:       Number(formData.year),
-      id:         Number(formData.id),                                          // mandatory number
-      ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }), // optional
+      // _id:        student._id,
+      // name:       formData.name.trim(),
+      // rollNumber: formData.rollNumber.trim(),
+      // standard:   formData.standard,
+      // year:       formData.year,
+      // id:         Number(formData.id),                                          // mandatory number
+      // ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }), // optional
+      _id: student._id,
+      name: formData.name.trim(),
+      rollNumber: Number(formData.rollNumber),   // ← was .trim() string
+      standard: Number(formData.standard),     // ← was string
+      year: formData.year,                 // string, unchanged
+      id: Number(formData.id),           // already was Number()
+      ...(formData.mobileNo.trim() && { mobileNo: formData.mobileNo.trim() }),
     };
     updateMutation.mutate(updateData, { onSuccess: () => onOpenChange(false) });
   }, [student, formData, validateForm, updateMutation, onOpenChange]);
@@ -155,23 +216,34 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
     if (!updateMutation.isPending) onOpenChange(false);
   }, [updateMutation.isPending, onOpenChange]);
 
+  // const hasChanges = useCallback((): boolean => {
+  //   if (!student) return false;
+  //   return (
+  //     formData.name.trim()      !== student.name                  ||
+  //     formData.rollNumber.trim() !== student.rollNumber           ||
+  //     formData.standard          !== student.standard             ||
+  //     formData.year      !== student.year                 ||
+  //     formData.mobileNo.trim()   !== (student.mobileNo || "")    ||
+  //     Number(formData.id)        !== student.id
+  //   );
+  // }, [student, formData]);
   const hasChanges = useCallback((): boolean => {
     if (!student) return false;
     return (
-      formData.name.trim()      !== student.name                  ||
-      formData.rollNumber.trim() !== student.rollNumber           ||
-      formData.standard          !== student.standard             ||
-      Number(formData.year)      !== student.year                 ||
-      formData.mobileNo.trim()   !== (student.mobileNo || "")    ||
-      Number(formData.id)        !== student.id
+      formData.name.trim() !== student.name ||
+      Number(formData.rollNumber) !== student.rollNumber ||
+      Number(formData.standard) !== student.standard ||
+      formData.year !== student.year ||
+      formData.mobileNo.trim() !== (student.mobileNo || "") ||
+      Number(formData.id) !== student.id
     );
   }, [student, formData]);
 
   const isFormValid =
     formData.name.trim() && formData.rollNumber.trim() &&
-    formData.standard    && formData.year              && formData.id.trim() &&
+    formData.standard && formData.year && formData.id.trim() &&
     !errors.name && !errors.rollNumber && !errors.standard &&
-    !errors.year && !errors.mobileNo   && !errors.id;
+    !errors.year && !errors.mobileNo && !errors.id;
 
   const canSubmit = isFormValid && hasChanges() && !updateMutation.isPending;
 
@@ -209,7 +281,13 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
               <Input
                 id="rollNumber"
                 value={formData.rollNumber}
-                onChange={(e) => handleChange("rollNumber", e.target.value)}
+                onChange={(e) =>
+                // handleChange("rollNumber", e.target.value)
+                {
+                  const digits = e.target.value.replace(/\D/g, "");
+                  handleChange("rollNumber", digits);
+                }
+                }
                 onBlur={() => handleBlur("rollNumber")}
                 placeholder="Enter roll number"
                 disabled={updateMutation.isPending}
@@ -223,7 +301,12 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
               <Input
                 id="id"
                 value={formData.id}
-                onChange={(e) => handleChange("id", e.target.value.replace(/\D/g, ""))}
+                // onChange={(e) => handleChange("id", e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "");
+                  const normalized = digits.replace(/^0+(?=\d)/, "");
+                  handleChange("id", normalized);
+                }}
                 onBlur={() => handleBlur("id")}
                 placeholder="Numeric ID"
                 inputMode="numeric"
@@ -243,7 +326,7 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
                   <SelectValue placeholder="Select standard" />
                 </SelectTrigger>
                 <SelectContent>
-                  {STANDARDS.map((std) => <SelectItem key={std} value={std}>{std}</SelectItem>)}
+                  {STANDARDS.map((std) => <SelectItem key={std} value={std.toString()}>{std}</SelectItem>)}
                 </SelectContent>
               </Select>
               {errors.standard && touched.standard && <p className="text-sm text-destructive">{errors.standard}</p>}
@@ -270,7 +353,12 @@ export default function EditStudentModal({ open, onOpenChange, student }: EditSt
               id="mobileNo"
               type="tel"
               value={formData.mobileNo}
-              onChange={(e) => handleChange("mobileNo", e.target.value)}
+              // onChange={(e) => handleChange("mobileNo", e.target.value)}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "");
+                const normalized = digits.replace(/^0+(?=\d)/, "");
+                handleChange("mobileNo", normalized);
+              }}
               onBlur={() => handleBlur("mobileNo")}
               placeholder="10-digit mobile number"
               disabled={updateMutation.isPending}

@@ -32,11 +32,11 @@ export interface RevertTransactionItem {
 
 export interface StudentInfo {
   name: string;
-  rollNumber: string;
+  rollNumber: number;
 }
 
 export interface RevertTransaction {
-  id: string;
+  _id: string;
   student: StudentInfo;
   items: RevertTransactionItem[];
   totalAmount: number;
@@ -176,7 +176,7 @@ export default function RevertTransactionModal({
       console.log("🚀 ~ RevertTransactionModal ~ itemsToRevert:", itemsToRevert)
 
       revertMutation.mutate({
-        transactionId: transaction.id,
+        transactionId: transaction._id,
         revertType,
         reason: reason.trim(),
         items: itemsToRevert,

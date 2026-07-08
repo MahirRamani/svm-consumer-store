@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Edit } from "lucide-react";
 import { useUpdateCategory } from "@/hooks/use-category-mutations";
-import type { Category, CategoryFormData, CategoryFormErrors } from "@/types/category";
+import type { Category, CategoryFormData, CategoryFormErrors } from "@/types/seller/category";
 
 interface EditCategoryModalProps {
   open: boolean;

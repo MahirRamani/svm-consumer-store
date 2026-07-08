@@ -1,6 +1,6 @@
 // types/stock-transaction.ts
 
-import { BaseEntity, PaginationMetadata } from ".";
+import { BaseEntity, PaginationMetadata } from "..";
 
 export interface StockEntryFormData {
   buyingPrice: string;
@@ -18,7 +18,7 @@ export interface StockEntryFormErrors {
   notes?: string;
 }
 
-export type StockTransactionReason = 'Adjustment' | 'Return' | 'Damage' | 'Expired'| 'Loss';
+export type StockTransactionReason = 'Adjustment' | 'Return' | 'Damage' | 'Expired' | 'Loss';
 
 export interface StockTransaction extends BaseEntity {
   productId: {
@@ -89,7 +89,7 @@ export interface StockTransactionFormErrors {
   reason?: string;
   notes?: string;
 }
- 
+
 // // types/stock-transaction.ts
 
 // import type { ApiResponse } from './category';

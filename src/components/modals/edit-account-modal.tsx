@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateAccount } from "@/hooks/use-account-mutations";
-import type { Account } from "@/types/account";
+import type { Account } from "@/types/admin/account";
 
 interface EditAccountModalProps {
   open: boolean;
@@ -34,10 +34,10 @@ interface FormErrors {
   description?: string;
 }
 
-export default function EditAccountModal({ 
-  open, 
-  onOpenChange, 
-  account 
+export default function EditAccountModal({
+  open,
+  onOpenChange,
+  account
 }: EditAccountModalProps) {
   const updateMutation = useUpdateAccount();
 
@@ -126,7 +126,7 @@ export default function EditAccountModal({
   const isSubmitting = updateMutation.isPending;
   const isFormValid = formData.name.trim() && !errors.name;
 
-  const formatCurrency = (amount: number) => 
+  const formatCurrency = (amount: number) =>
     `₹${amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
   return (
@@ -191,9 +191,8 @@ export default function EditAccountModal({
           {/* Balance Display */}
           <div className="bg-muted/50 rounded-lg p-3">
             <p className="text-sm text-muted-foreground">Current Balance</p>
-            <p className={`text-xl font-bold ${
-              account.currentBalance >= 0 ? "text-green-600" : "text-red-600"
-            }`}>
+            <p className={`text-xl font-bold ${account.currentBalance >= 0 ? "text-green-600" : "text-red-600"
+              }`}>
               {formatCurrency(account.currentBalance)}
             </p>
           </div>

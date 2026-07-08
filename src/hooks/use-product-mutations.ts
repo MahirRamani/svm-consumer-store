@@ -1,10 +1,10 @@
 // hooks/use-product-mutations.ts
 import { useCreate, useUpdate, useDelete } from "./use-mutations";
-import type { 
-  Product, 
-  CreateProductInput, 
-  UpdateProductInput 
-} from "@/types/product";
+import type {
+  Product,
+  CreateProductInput,
+  UpdateProductInput
+} from "@/types/seller/product";
 
 const ENDPOINT = "/api/products";
 const QUERY_KEY = ["products"];

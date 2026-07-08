@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, TrendingUp, TrendingDown, Link2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateAccountTransaction } from "@/hooks/use-account-transaction-mutations";
-import type { Account } from "@/types/account";
+import type { Account } from "@/types/admin/account";
 
 interface AddTransactionModalProps {
   open: boolean;
@@ -184,11 +184,10 @@ export default function AddTransactionModal({
               <Button
                 type="button"
                 variant={formData.type === "CREDIT" ? "default" : "outline"}
-                className={`h-14 flex flex-col gap-1 ${
-                  formData.type === "CREDIT"
+                className={`h-14 flex flex-col gap-1 ${formData.type === "CREDIT"
                     ? "bg-green-500 hover:bg-green-600"
                     : "hover:bg-green-50 hover:border-green-300"
-                }`}
+                  }`}
                 onClick={() => handleChange("type", "CREDIT")}
               >
                 <TrendingUp className="w-5 h-5" />
@@ -197,11 +196,10 @@ export default function AddTransactionModal({
               <Button
                 type="button"
                 variant={formData.type === "DEBIT" ? "default" : "outline"}
-                className={`h-14 flex flex-col gap-1 ${
-                  formData.type === "DEBIT"
+                className={`h-14 flex flex-col gap-1 ${formData.type === "DEBIT"
                     ? "bg-red-500 hover:bg-red-600"
                     : "hover:bg-red-50 hover:border-red-300"
-                }`}
+                  }`}
                 onClick={() => handleChange("type", "DEBIT")}
               >
                 <TrendingDown className="w-5 h-5" />
@@ -309,9 +307,8 @@ export default function AddTransactionModal({
                 </div>
                 <div className="border-t pt-2 flex justify-between">
                   <span className="font-medium">New Balance</span>
-                  <span className={`font-bold text-lg ${
-                    previewBalance >= 0 ? "text-green-600" : "text-red-600"
-                  }`}>
+                  <span className={`font-bold text-lg ${previewBalance >= 0 ? "text-green-600" : "text-red-600"
+                    }`}>
                     {formatCurrency(previewBalance)}
                   </span>
                 </div>
@@ -324,11 +321,10 @@ export default function AddTransactionModal({
             <Button
               type="submit"
               disabled={isSubmitting || !isFormValid}
-              className={`flex-1 ${
-                formData.type === "CREDIT"
+              className={`flex-1 ${formData.type === "CREDIT"
                   ? "bg-green-500 hover:bg-green-600"
                   : "bg-red-500 hover:bg-red-600"
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <>

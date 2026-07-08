@@ -37,7 +37,6 @@ const getStudentsHandler = async (req: Request) => {
     filter.$or = [
       { name: { $regex: search, $options: 'i' } },
       { rollNumber: { $regex: search, $options: 'i' } },
-      { mobileNo: { $regex: search, $options: 'i' } },
     ];
   }
 

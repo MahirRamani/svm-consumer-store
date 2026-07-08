@@ -1,10 +1,10 @@
 // hooks/use-category-mutations.ts
 import { useCreate, useUpdate, useDelete } from "./use-mutations";
-import type { 
-  Category, 
-  CreateCategoryInput, 
-  UpdateCategoryInput 
-} from "@/types/category";
+import type {
+  Category,
+  CreateCategoryInput,
+  UpdateCategoryInput
+} from "@/types/seller/category";
 
 const ENDPOINT = "/api/categories";
 const QUERY_KEY = ["categories"];

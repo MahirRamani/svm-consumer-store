@@ -1,18 +1,32 @@
 // lib/validations/student.ts
 import { z } from 'zod';
+import { STANDARDS, YEARS } from '@/lib/config/constants';
 
 export const createStudentSchema = z.object({
-  rollNumber: z.string().trim().min(0, 'Roll number is required'),
-  id: z.coerce.number().int().positive(),
+  rollNumber: z.number()
+  .refine((n) => Number.isInteger(n), { error: "Roll number must be an integer" })
+  .refine((n) => n >= 100 && n <= 9999, { error: "Roll number must be 3 to 4 digits" }),
+  id: z.number()
+  .refine((n) => Number.isInteger(n), { error: "ID must be an integer" })
+  .refine((n) => n > 0, { error: "ID must be greater than 0" }),
   name: z.string().trim().min(1, 'Name is required'),
-  mobileNo: z.string().trim().optional(),
-  standard: z.string().trim().min(1, 'Standard is required'),
-  year: z.coerce.number().int().min(2000).max(2100),
-  balance: z.coerce.number().min(0).default(0),
+  standard: z.number()
+  .refine((n) => STANDARDS.includes(n as (typeof STANDARDS)[number]), {
+    error: "Invalid standard selected",
+  }),
+  year: z.string()
+    .trim()
+    .min(1, "Year is required")
+    .refine((val) => YEARS.includes(val), {
+      error: "Invalid year selected",
+    }),
   isActive: z.boolean().default(true),
+  mobileNo: z.string().trim().optional().refine((val) => !val || /^[0-9]{10}$/.test(val), {
+    error: "Mobile number must be 10 digits",
+  }),
 });
 
-export const updateStudentSchema = createStudentSchema.partial().omit({ rollNumber: true, balance: true });;
+export const updateStudentSchema = createStudentSchema.partial().extend({ isActive: z.boolean().optional() });;
 
 export const getStudentsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

@@ -3,36 +3,36 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { X, ImageIcon, Loader2, FileText } from "lucide-react";
 import { useCreateProduct } from "@/hooks/use-product-mutations";
 
-import type { 
-  ProductFormData, 
+import type {
+  ProductFormData,
   ProductFormErrors,
   ImageUploadResponse,
 } from "@/lib/types/product";
-import type { 
-  Category, 
-  CategoriesResponse 
-} from "@/types/category";
+import type {
+  Category,
+  CategoriesResponse
+} from "@/types/seller/category";
 import { ApiResponse } from "@/lib/api/base-handler";
 
 interface AddProductModalProps {
@@ -46,26 +46,26 @@ const validateImageFile = (
 ): { isValid: boolean; error?: string } => {
   const maxSize = 5 * 1024 * 1024; // 5MB
   const allowedTypes = [
-    'image/jpeg', 
-    'image/jpg', 
-    'image/png', 
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
     'image/webp'
   ];
-  
+
   if (!allowedTypes.includes(file.type)) {
-    return { 
-      isValid: false, 
-      error: 'Please select a valid image file (JPEG, PNG, WebP, or GIF)' 
+    return {
+      isValid: false,
+      error: 'Please select a valid image file (JPEG, PNG, WebP, or GIF)'
     };
   }
-  
+
   if (file.size > maxSize) {
-    return { 
-      isValid: false, 
-      error: 'Image size should be less than 5MB' 
+    return {
+      isValid: false,
+      error: 'Image size should be less than 5MB'
     };
   }
-  
+
   return { isValid: true };
 };
 
@@ -82,9 +82,9 @@ const initialFormData: ProductFormData = {
   lowStockThreshold: "10",
 };
 
-export default function AddProductModal({ 
-  open, 
-  onOpenChange 
+export default function AddProductModal({
+  open,
+  onOpenChange
 }: AddProductModalProps) {
   const createMutation = useCreateProduct();
 
@@ -95,12 +95,12 @@ export default function AddProductModal({
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<ProductFormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch categories
   const { data: categoriesResponse } = useQuery<
-    ApiResponse<CategoriesResponse>, 
+    ApiResponse<CategoriesResponse>,
     Error
   >({
     queryKey: ["categories"],
@@ -133,7 +133,7 @@ export default function AddProductModal({
   }, [open]);
 
   const validateField = useCallback((
-    name: keyof ProductFormData, 
+    name: keyof ProductFormData,
     value: string
   ): string | undefined => {
     switch (name) {
@@ -178,7 +178,7 @@ export default function AddProductModal({
 
   // const validateForm = useCallback((): boolean => {
   //   const newErrors: ProductFormErrors = {};
-    
+
   //   (Object.keys(formData) as Array<keyof ProductFormData>).forEach((field) => {
   //     const error = validateField(field, formData[field]);
   //     if (error) newErrors[field] = error;
@@ -200,49 +200,49 @@ export default function AddProductModal({
   // }, [formData, imageFile, imageName, validateField]);
 
   // ✅ BETTER: Validate only the fields that need it
-const validateForm = useCallback((): boolean => {
-  const newErrors: ProductFormErrors = {};
+  const validateForm = useCallback((): boolean => {
+    const newErrors: ProductFormErrors = {};
 
-  // Required field validations
-  if (!formData.name.trim()) {
-    newErrors.name = "Product name is required";
-  } else if (formData.name.length > 150) {
-    newErrors.name = "Product name cannot exceed 150 characters";
-  }
-
-  if (!formData.categoryId) {
-    newErrors.categoryId = "Category is required";
-  }
-
-  // Optional field validations
-  if (formData.description.length > 1000) {
-    newErrors.description = "Description cannot exceed 1000 characters";
-  }
-
-  if (formData.priority.trim()) {
-    const num = Number(formData.priority);
-    if (isNaN(num) || num < 0) {
-      newErrors.priority = "Priority must be a positive number";
+    // Required field validations
+    if (!formData.name.trim()) {
+      newErrors.name = "Product name is required";
+    } else if (formData.name.length > 150) {
+      newErrors.name = "Product name cannot exceed 150 characters";
     }
-  }
 
-  if (formData.lowStockThreshold.trim()) {
-    const num = Number(formData.lowStockThreshold);
-    if (isNaN(num) || num < 0) {
-      newErrors.lowStockThreshold = "Threshold must be a positive number";
+    if (!formData.categoryId) {
+      newErrors.categoryId = "Category is required";
     }
-  }
 
-  if (formData.barcode.length > 100) {
-    newErrors.barcode = "Barcode cannot exceed 100 characters";
-  }
+    // Optional field validations
+    if (formData.description.length > 1000) {
+      newErrors.description = "Description cannot exceed 1000 characters";
+    }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-}, [formData]);
-  
+    if (formData.priority.trim()) {
+      const num = Number(formData.priority);
+      if (isNaN(num) || num < 0) {
+        newErrors.priority = "Priority must be a positive number";
+      }
+    }
+
+    if (formData.lowStockThreshold.trim()) {
+      const num = Number(formData.lowStockThreshold);
+      if (isNaN(num) || num < 0) {
+        newErrors.lowStockThreshold = "Threshold must be a positive number";
+      }
+    }
+
+    if (formData.barcode.length > 100) {
+      newErrors.barcode = "Barcode cannot exceed 100 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
   const handleChange = useCallback((
-    field: keyof ProductFormData, 
+    field: keyof ProductFormData,
     value: string
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -271,7 +271,7 @@ const validateForm = useCallback((): boolean => {
     }
 
     setImageFile(file);
-    
+
     if (!imageName.trim()) {
       const fileName = file.name.split('.').slice(0, -1).join('.');
       setImageName(fileName);
@@ -323,7 +323,7 @@ const validateForm = useCallback((): boolean => {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Mark all as touched
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
@@ -352,16 +352,16 @@ const validateForm = useCallback((): boolean => {
         name: formData.name.trim(),
         categoryId: formData.categoryId,
         description: formData.description.trim() || undefined,
-        priority: formData.priority.trim() 
-          ? Number(formData.priority) 
+        priority: formData.priority.trim()
+          ? Number(formData.priority)
           : undefined,
         imageURL: imageUrl,
         size: formData.size.trim() || undefined,
         weight: formData.weight.trim() || undefined,
         volume: formData.volume.trim() || undefined,
         barcode: formData.barcode.trim() || undefined,
-        lowStockThreshold: formData.lowStockThreshold.trim() 
-          ? Number(formData.lowStockThreshold) 
+        lowStockThreshold: formData.lowStockThreshold.trim()
+          ? Number(formData.lowStockThreshold)
           : undefined,
       },
       {
@@ -377,9 +377,9 @@ const validateForm = useCallback((): boolean => {
   }, [createMutation.isPending, isUploading, onOpenChange]);
 
   const isSubmitting = createMutation.isPending || isUploading;
-  const isFormValid = formData.name.trim() && 
-    formData.categoryId && 
-    !errors.name && 
+  const isFormValid = formData.name.trim() &&
+    formData.categoryId &&
+    !errors.name &&
     !errors.categoryId;
 
   return (
@@ -401,7 +401,7 @@ const validateForm = useCallback((): boolean => {
               value={formData.categoryId}
               onValueChange={(v) => handleChange("categoryId", v)}
             >
-              <SelectTrigger 
+              <SelectTrigger
                 className={errors.categoryId ? "border-destructive" : ""}
               >
                 <SelectValue placeholder="Select category" />
@@ -451,7 +451,7 @@ const validateForm = useCallback((): boolean => {
           {/* Image Upload */}
           <div className="space-y-3">
             <Label>Product Image (Optional)</Label>
-            
+
             {imagePreview && (
               <div className="relative inline-block">
                 <img
@@ -652,9 +652,9 @@ const validateForm = useCallback((): boolean => {
 // import { Textarea } from "@/components/ui/textarea";
 // import { useCreateProduct } from "@/hooks/use-product-mutations";
 
-// import type { 
-//   ProductFormData, 
-//   ProductFormErrors 
+// import type {
+//   ProductFormData,
+//   ProductFormErrors
 // } from "@/types/product";
 // import type { ApiResponse, Category, CategoriesResponse } from "@/types/category";
 

@@ -1,10 +1,10 @@
 // hooks/use-stock-transaction-mutations.ts
 import { CreateStockTransactionDto } from "@/lib/validations/stockTransaction";
 import { useCreate, useUpdate, useDelete } from "./use-mutations";
-import type { 
-  StockTransaction, 
-  CreateStockTransactionInput 
-} from "@/types/stock-transaction";
+import type {
+  StockTransaction,
+  CreateStockTransactionInput
+} from "@/types/seller/stock-transaction";
 
 const ENDPOINT = "/api/stock-transactions";
 const QUERY_KEY = ["stock-transactions"];
