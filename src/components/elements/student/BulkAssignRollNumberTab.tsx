@@ -520,7 +520,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
                         <Input
                           value={row.newRollNumber}
                           onChange={(e) => handleRollChange(student._id, "newRollNumber", e.target.value)}
-                          placeholder={`keep: ${student.rollNumber}`}
+                          placeholder="-"
                           inputMode="numeric"
                           disabled={isPending || swapMode}
                           className={`h-8 text-sm font-mono
@@ -536,7 +536,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
                       <Input
                         value={row.newStandard}
                         onChange={(e) => handleRollChange(student._id, "newStandard", e.target.value)}
-                        placeholder={`keep: ${student.standard}`}
+                        placeholder="-"
                         disabled={isPending || swapMode}
                         className="h-8 text-sm"
                       />

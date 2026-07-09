@@ -264,15 +264,15 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
     //   throw new ApiError(details, 409);
     // }
     if (rollConflicts.length > 0) {
-  const conflicts = rollConflicts
-    .map((s) => `${s.name} (Roll ${s.rollNumber})`)
-    .join(' | ');
+      const conflicts = rollConflicts
+        .map((s) => `${s.name} (Roll ${s.rollNumber})`)
+        .join(' | ');
 
-  throw new ApiError(
-    `These students are already active with conflicting roll numbers: | ${conflicts}`,
-    409
-  );
-}
+      throw new ApiError(
+        `These students are already active with conflicting roll numbers: | ${conflicts}`,
+        409
+      );
+    }
   }
 
   // ── Pre-compute change report ──────────────────────────────────────────────
@@ -314,65 +314,6 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
   session.startTransaction();
 
   try {
-    //     const studentBulkOps = students.map(({ studentMongoId, rollNumber, standard }) => {
-    //       const prev = studentMap.get(studentMongoId)!;
-    //       return {
-    //         updateOne: {
-    //           filter: { _id: studentMongoId },
-    //           update: {
-    //             $set: {
-    //               rollNumber: rollNumber || prev.rollNumber,  // keep existing if blank
-    //               standard:   standard   || prev.standard,
-    //               year:       consumerYear,
-    //               isActive:   true,
-    //             },
-    //           },
-    //         },
-    //       };
-    //     });
-
-    //     await Student.bulkWrite(studentBulkOps, { session, ordered: false });
-
-    //     // Audit logs
-    //     const auditLogs = students.map(({ studentMongoId, rollNumber, standard }) => {
-    //       const prev = studentMap.get(studentMongoId)!;
-    //       return {
-    //         action:      'ROLL_NUMBER_UPDATE',
-    //         entity:      'Student',
-    //         entityId:    studentMongoId,
-    //         before: {
-    //           rollNumber: prev.rollNumber,
-    //           standard:   prev.standard,
-    //           year: prev.year,
-    //           isActive:   prev.isActive,
-    //         },
-    //         after: {
-    //           rollNumber: rollNumber || prev.rollNumber,
-    //           standard:   standard   || prev.standard,
-    //           year:       consumerYear,
-    //           isActive:   true,
-    //         },
-    //         performedBy: authContext.user.id,
-    //         year:        consumerYear,
-    //         reason:      `Roll assignment for ${consumerYear}`,
-    //       };
-    //     });
-
-    //     await AuditLog.insertMany(auditLogs, { session });
-    //     await session.commitTransaction();
-
-    //     // return successResponse(
-    //     //   { updated: students.length, year: consumerYear },
-    //     //   200,
-    //     //   `${students.length} students updated for ${consumerYear}.`
-    //     // );
-    //     return successResponse(
-    //   { updated: students.length, year: consumerYear, report: changeReport },
-    //   200,
-    //   `${students.length} students processed for ${consumerYear}.`
-    // );
-
-    // ── Filter truly unchanged ───────────────────────────────────────────────
     const trulyUnchangedIds = new Set(
       students
         .filter(({ studentMongoId, rollNumber, standard }) => {
@@ -451,19 +392,47 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
       'writeErrors' in err &&
       'result' in err;
 
-    if (isBulkWriteError) {
-      const bulkErr = err as { writeErrors: Array<{ err?: { code?: number; errmsg?: string } }> };
+    // if (isBulkWriteError) {
+    //   const bulkErr = err as { writeErrors: Array<{ err?: { code?: number; errmsg?: string } }> };
 
-      const messages = bulkErr.writeErrors
+    //   const messages = bulkErr.writeErrors
+    //     .map((e) => {
+    //       if (e.err?.code !== 11000) return null;
+    //       return parseCollisionMessage(e.err.errmsg ?? '');
+    //     })
+    //     .filter((m): m is string => m !== null);
+
+    //   throw new ApiError(
+    //     messages.length
+    //       ? `Duplicate roll number — ${messages.join('; ')}`
+    //       : 'Duplicate roll number collision.',
+    //     409
+    //   );
+    // }
+
+    if (isBulkWriteError) {
+      const bulkErr = err as {
+        writeErrors: Array<{ err?: { code?: number; errmsg?: string; op?: { rollNumber?: number } } }>
+      };
+
+      const conflicts = bulkErr.writeErrors
+        .filter((e) => e.err?.code === 11000)
         .map((e) => {
-          if (e.err?.code !== 11000) return null;
-          return parseCollisionMessage(e.err.errmsg ?? '');
+          // Extract rollNumber from the failed operation directly
+          const rollNumber = e.err?.op?.rollNumber;
+          // Find student name from studentMap using rollNumber
+          const student = [...studentMap.values()].find(
+            (s) => s.rollNumber === rollNumber
+          );
+          return student
+            ? `${student.name} (Roll ${rollNumber})`
+            : `Roll ${rollNumber}`;
         })
-        .filter((m): m is string => m !== null);
+        .filter(Boolean);
 
       throw new ApiError(
-        messages.length
-          ? `Duplicate roll number — ${messages.join('; ')}`
+        conflicts.length
+          ? `These roll numbers already exist in ${consumerYear} | ${conflicts.join(' | ')}`
           : 'Duplicate roll number collision.',
         409
       );

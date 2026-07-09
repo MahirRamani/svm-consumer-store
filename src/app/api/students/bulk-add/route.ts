@@ -107,7 +107,7 @@ if (rollConflicts.length > 0) {
 
   // ── 4. ID conflicts against any existing student ───────────────────────────
   if (ids.length > 0) {
-    const idConflicts = await Student.find({ id: { $in: ids } })
+    const idConflicts = await Student.find({ id: { $in: ids }, isActive: true })
       .select('id name')
       .lean<ExistingConflict[]>();
 
