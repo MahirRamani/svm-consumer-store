@@ -1,8 +1,8 @@
 // FILE: validations/user.ts
 
-import { z } from "zod";
-import { ALL_TAB_IDS } from "@/lib/config/tabs-registry";
-import { ROLES } from "@/lib/config/rolesConfig";
+import { z } from 'zod';
+import { ALL_TAB_IDS } from '@/lib/config/tabs-registry';
+import { ROLES } from '@/lib/config/rolesConfig';
 
 const roleIds = Object.values(ROLES).map(r => r.id.toUpperCase()) as [string, ...string[]];
 

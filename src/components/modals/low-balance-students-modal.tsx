@@ -1,11 +1,11 @@
 // components/modals/low-balance-students-modal.tsx
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Wallet, AlertTriangle, Phone, Users } from "lucide-react"
-import type { LowBalanceStudent } from "@/types/dashboard/overview"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Wallet, AlertTriangle, Phone, Users } from 'lucide-react'
+import type { LowBalanceStudent } from '@/types/dashboard/overview'
 
 interface LowBalanceStudentsModalProps {
   open: boolean
@@ -13,10 +13,10 @@ interface LowBalanceStudentsModalProps {
   students: LowBalanceStudent[]
 }
 
-export default function LowBalanceStudentsModal({ 
-  open, 
-  onOpenChange, 
-  students 
+export default function LowBalanceStudentsModal({
+  open,
+  onOpenChange,
+  students
 }: LowBalanceStudentsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,19 +58,18 @@ export default function LowBalanceStudentsModal({
                     <div className="text-right">
                       <div className="flex items-center gap-1 justify-end">
                         <AlertTriangle className="w-4 h-4 text-orange-600" />
-                        <span className={`font-bold ${
-                          student.balance < 0 
-                            ? 'text-red-600' 
-                            : student.balance < 100 
-                            ? 'text-orange-600' 
-                            : 'text-yellow-600'
-                        }`}>
+                        <span className={`font-bold ${student.balance < 0
+                            ? 'text-red-600'
+                            : student.balance < 100
+                              ? 'text-orange-600'
+                              : 'text-yellow-600'
+                          }`}>
                           ₹{student.balance.toFixed(2)}
                         </span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        {student.balance < 0 
-                          ? 'Negative balance' 
+                        {student.balance < 0
+                          ? 'Negative balance'
                           : 'Low balance'}
                       </p>
                     </div>

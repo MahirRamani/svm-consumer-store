@@ -1,6 +1,6 @@
 // app/api/sub-products/upload-image/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
+import { NextRequest, NextResponse } from 'next/server';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -63,9 +63,9 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: "No image file provided" 
+          error: "No image file provided"
         },
         { status: 400 }
       );
@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: "Invalid file type. Please upload JPEG, PNG, WebP, or GIF." 
+          error: "Invalid file type. Please upload JPEG, PNG, WebP, or GIF."
         },
         { status: 400 }
       );
@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: "File size too large. Maximum size is 5MB." 
+          error: "File size too large. Maximum size is 5MB."
         },
         { status: 400 }
       );
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     let baseFileName: string;
-    
+
     if (customImageName?.trim()) {
       // Sanitize custom name
       baseFileName = customImageName
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       // Use original filename without extension
       baseFileName = file.name.replace(/\.[^/.]+$/, "");
     }
-    
+
     // Add timestamp to ensure uniqueness
     const timestamp = Date.now();
     const publicId = `${baseFileName}_${timestamp}`;
@@ -131,15 +131,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Image upload error:", error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
+
+    const errorMessage = error instanceof Error
+      ? error.message
       : "Failed to upload image. Please try again.";
-    
+
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: errorMessage 
+        error: errorMessage
       },
       { status: 500 }
     );

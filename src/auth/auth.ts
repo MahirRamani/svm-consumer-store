@@ -4,7 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { User } from '@/models/User';
+import { User } from '@/models';
 import connectDB from '@/lib/config/db';
 import type { AppRole } from '@/lib/config/rolesConfig';
 import type { TabId } from '@/lib/config/tabs-registry';
@@ -15,7 +15,7 @@ import type { TabId } from '@/lib/config/tabs-registry';
 async function getUserByUsername(username: string) {
   try {
     await connectDB();
-    
+
     const user = await User.findOne({
       username: username,
       isActive: true,
@@ -120,45 +120,45 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       }
       return session;
     },
-      // async authorized({ auth, request: { nextUrl } }) {
-      //   const isLoggedIn = !!auth?.user;
-      //   const isOnAdmin = nextUrl.pathname.startsWith('/admin');
-      //   const isOnApi = nextUrl.pathname.startsWith('/api');
-      //   const isOnAuth = nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/auth');
-      //   const isPublic = nextUrl.pathname === '/';
+    // async authorized({ auth, request: { nextUrl } }) {
+    //   const isLoggedIn = !!auth?.user;
+    //   const isOnAdmin = nextUrl.pathname.startsWith('/admin');
+    //   const isOnApi = nextUrl.pathname.startsWith('/api');
+    //   const isOnAuth = nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/auth');
+    //   const isPublic = nextUrl.pathname === '/';
 
-      //   // Allow public routes
-      //   if (isPublic) return true;
+    //   // Allow public routes
+    //   if (isPublic) return true;
 
-      //   // Redirect logged-in users away from auth pages
-      //   if (isLoggedIn && isOnAuth) {
-      //     return Response.redirect(new URL('/admin/dashboard', nextUrl));
-      //   }
+    //   // Redirect logged-in users away from auth pages
+    //   if (isLoggedIn && isOnAuth) {
+    //     return Response.redirect(new URL('/admin/dashboard', nextUrl));
+    //   }
 
-      //   // Protect admin routes
-      //   if (isOnAdmin) {
-      //     if (!isLoggedIn) return false;
+    //   // Protect admin routes
+    //   if (isOnAdmin) {
+    //     if (!isLoggedIn) return false;
 
-      //     // Check if user is still active
-      //     if (!auth.user.isActive) {
-      //       return Response.redirect(new URL('/account-disabled', nextUrl));
-      //     }
+    //     // Check if user is still active
+    //     if (!auth.user.isActive) {
+    //       return Response.redirect(new URL('/account-disabled', nextUrl));
+    //     }
 
-      //     return true;
-      //   }
+    //     return true;
+    //   }
 
-      //   // Allow API routes (they handle their own auth)
-      //   if (isOnApi) {
-      //     return true;
-      //   }
+    //   // Allow API routes (they handle their own auth)
+    //   if (isOnApi) {
+    //     return true;
+    //   }
 
-      //   // Allow auth pages for non-logged-in users
-      //   if (!isLoggedIn && isOnAuth) {
-      //     return true;
-      //   }
+    //   // Allow auth pages for non-logged-in users
+    //   if (!isLoggedIn && isOnAuth) {
+    //     return true;
+    //   }
 
-      //   return true;
-      // },
+    //   return true;
+    // },
   },
   events: {
     async signIn({ user }) {

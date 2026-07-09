@@ -13,11 +13,11 @@
 //   closingBalance = currentBalance - topupAfterPeriod + expenseAfterPeriod
 //   openingBalance = closingBalance - topupInPeriod    + expenseInPeriod
 
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/config/db";
-import {Student} from "@/models/Student";
-import {Transaction} from "@/models/Transaction";
-import mongoose from "mongoose";
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/config/db';
+import { Student } from '@/models';
+import { Transaction } from '@/models';
+import mongoose from 'mongoose';
 
 interface StudentLean {
   _id: mongoose.Types.ObjectId;
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const fromDate = searchParams.get("fromDate");
-    const toDate   = searchParams.get("toDate");
+    const toDate = searchParams.get("toDate");
 
     if (!fromDate || !toDate) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     // IST offset (+05:30) so midnight means midnight India time, not UTC
     const periodStart = new Date(`${fromDate}T00:00:00+05:30`);
-    const periodEnd   = new Date(`${toDate}T23:59:59+05:30`);
+    const periodEnd = new Date(`${toDate}T23:59:59+05:30`);
 
     // ── 1. Fetch all active students ──────────────────────────────────────
     const students = await Student.find({ isActive: true })
@@ -73,9 +73,9 @@ export async function GET(req: NextRequest) {
     const aggregation = await Transaction.aggregate([
       {
         $match: {
-          studentId:  { $in: studentObjectIds },
-          status:     "Completed",
-          createdAt:  { $gte: periodStart },   // everything from period start onwards
+          studentId: { $in: studentObjectIds },
+          status: "Completed",
+          createdAt: { $gte: periodStart },   // everything from period start onwards
         },
       },
       {
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
               $cond: [
                 {
                   $and: [
-                    { $eq:  ["$type", "Topup"] },
+                    { $eq: ["$type", "Topup"] },
                     { $lte: ["$createdAt", periodEnd] },
                   ],
                 },
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
               $cond: [
                 {
                   $and: [
-                    { $in:  ["$type", ["Purchase", "Deduction"]] },
+                    { $in: ["$type", ["Purchase", "Deduction"]] },
                     { $lte: ["$createdAt", periodEnd] },
                   ],
                 },
@@ -147,17 +147,17 @@ export async function GET(req: NextRequest) {
 
     // ── 3. Lookup map: _id string → aggregated buckets ────────────────────
     type TxnBuckets = {
-      topupInPeriod:     number;
-      expenseInPeriod:   number;
-      topupAfterPeriod:  number;
+      topupInPeriod: number;
+      expenseInPeriod: number;
+      topupAfterPeriod: number;
       expenseAfterPeriod: number;
     };
     const txnMap = new Map<string, TxnBuckets>();
     for (const row of aggregation) {
       txnMap.set(String(row._id), {
-        topupInPeriod:      row.topupInPeriod      ?? 0,
-        expenseInPeriod:    row.expenseInPeriod    ?? 0,
-        topupAfterPeriod:   row.topupAfterPeriod   ?? 0,
+        topupInPeriod: row.topupInPeriod ?? 0,
+        expenseInPeriod: row.expenseInPeriod ?? 0,
+        topupAfterPeriod: row.topupAfterPeriod ?? 0,
         expenseAfterPeriod: row.expenseAfterPeriod ?? 0,
       });
     }
@@ -166,9 +166,9 @@ export async function GET(req: NextRequest) {
     const data = students.map((s) => {
       const idStr = String(s._id);
       const {
-        topupInPeriod     = 0,
-        expenseInPeriod   = 0,
-        topupAfterPeriod  = 0,
+        topupInPeriod = 0,
+        expenseInPeriod = 0,
+        topupAfterPeriod = 0,
         expenseAfterPeriod = 0,
       } = txnMap.get(idStr) ?? {};
 
@@ -183,23 +183,23 @@ export async function GET(req: NextRequest) {
       const round = (n: number) => Math.round(n * 100) / 100;
 
       return {
-        studentId:       s.id ?? idStr,
-        rollNumber:      s.rollNumber,
-        name:            s.name,
-        standard:        s.standard,
-        currentBalance:  round(currentBalance),
-        closingBalance:  round(closingBalance),   // balance at end of toDate
-        openingBalance:  round(openingBalance),   // balance at start of fromDate
-        topupInPeriod:   round(topupInPeriod),
+        studentId: s.id ?? idStr,
+        rollNumber: s.rollNumber,
+        name: s.name,
+        standard: s.standard,
+        currentBalance: round(currentBalance),
+        closingBalance: round(closingBalance),   // balance at end of toDate
+        openingBalance: round(openingBalance),   // balance at start of fromDate
+        topupInPeriod: round(topupInPeriod),
         expenseInPeriod: round(expenseInPeriod),
       };
     });
 
     const summary = {
-      totalStudents:  data.length,
-      totalTopup:     data.reduce((a, r) => a + r.topupInPeriod,   0),
-      totalExpense:   data.reduce((a, r) => a + r.expenseInPeriod, 0),
-      totalClosing:   data.reduce((a, r) => a + r.closingBalance,  0),
+      totalStudents: data.length,
+      totalTopup: data.reduce((a, r) => a + r.topupInPeriod, 0),
+      totalExpense: data.reduce((a, r) => a + r.expenseInPeriod, 0),
+      totalClosing: data.reduce((a, r) => a + r.closingBalance, 0),
     };
 
     return NextResponse.json({ data, summary });
@@ -215,11 +215,11 @@ export async function GET(req: NextRequest) {
 
 // // app/api/reports/student-expense/route.ts
 
-// import { NextRequest, NextResponse } from "next/server";
-// import dbConnect from "@/lib/config/db";
-// import {Student} from "@/models/Student";
-// import {Transaction} from "@/models/Transaction";
-// import mongoose from "mongoose";
+// import { NextRequest, NextResponse } from 'next/server';
+// import dbConnect from '@/lib/config/db';
+// import {Student} from '@/models';
+// import {Transaction} from '@/models';
+// import mongoose from 'mongoose';
 
 // interface StudentLean {
 //   _id: mongoose.Types.ObjectId;

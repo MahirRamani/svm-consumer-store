@@ -1,9 +1,9 @@
 // app/api/products/top-selling/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/config/db";
-import { Transaction } from "@/models/Transaction";
-import { Product } from "@/models/Product";
-import mongoose from "mongoose";
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/config/db';
+import { Transaction } from '@/models';
+import { Product } from '@/models';
+import mongoose from 'mongoose';
 
 // =============================================
 // Type Definitions

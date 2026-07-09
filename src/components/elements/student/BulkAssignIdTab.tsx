@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, AlertCircle, Users, Pencil, X } from "lucide-react";
-import { EmptyState } from "./shared-ui";
-import type { StudentRow, IdRowState, IdRowStatus } from "@/types/manage-student/manage-student-bulk";
+import { useState, useCallback, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Check, AlertCircle, Users, Pencil, X } from 'lucide-react';
+import { EmptyState } from './shared-ui';
+import type { StudentRow, IdRowState, IdRowStatus } from '@/types/manage-student/manage-student-bulk';
 
 interface Props {
   students?: StudentRow[];
@@ -37,7 +37,7 @@ export function AssignIdsTab({ students, studentsLoading, onMutated, onClose }: 
 
   const saveIdMutation = useMutation({
     mutationFn: async ({ studentMongoId, id }: { studentMongoId: string; id: number }) => {
-      const res = await fetch("/api/students/bulk-id", {
+      const res = await fetch("/api/students/bulk-assign-id", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assignments: [{ studentMongoId, id }] }),
@@ -161,9 +161,8 @@ export function AssignIdsTab({ students, studentsLoading, onMutated, onClose }: 
                 return (
                   <tr
                     key={student._id}
-                    className={`transition-colors ${
-                      isSaved ? "bg-emerald-50/40" : isError ? "bg-red-50/40" : "hover:bg-gray-50/60"
-                    }`}
+                    className={`transition-colors ${isSaved ? "bg-emerald-50/40" : isError ? "bg-red-50/40" : "hover:bg-gray-50/60"
+                      }`}
                   >
                     <td className="px-4 py-2.5 font-mono text-sm font-semibold text-gray-600 truncate">
                       {student.rollNumber}

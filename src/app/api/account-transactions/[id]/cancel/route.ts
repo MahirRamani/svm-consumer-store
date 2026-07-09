@@ -1,8 +1,8 @@
 // app/api/account-transactions/[id]/cancel/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { AccountTransaction } from '@/models/AccountTransaction';
-import { Account } from '@/models/Account';
+import { AccountTransaction } from '@/models';
+import { Account } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateParams, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';

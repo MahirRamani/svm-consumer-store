@@ -2,16 +2,16 @@
 // API Response Types
 // =============================================
 
-import { Category } from "@/lib/types/category"
-import { Product } from "@/lib/types/product"
+import { Category } from '@/lib/types/category'
+import { Product } from '@/lib/types/product'
 
-export type TransactionType = 
-  | "Purchase" 
-  | "Topup" 
-  | "Deduction" 
-  | "Partial Reverted" 
-  | "Partial Revert" 
-  | "Reverted" 
+export type TransactionType =
+  | "Purchase"
+  | "Topup"
+  | "Deduction"
+  | "Partial Reverted"
+  | "Partial Revert"
+  | "Reverted"
   | "Revert";
 
 export interface ApiSuccessResponse<T = unknown> {
@@ -334,7 +334,7 @@ export type StudentResponse = ApiSuccessResponse<Student>
 // User Types
 // =============================================
 
-export type UserRole = 'SUPERUSER'| 'ADMIN' | 'ACCOUNTANT' | 'SELLER'
+export type UserRole = 'SUPERUSER' | 'ADMIN' | 'ACCOUNTANT' | 'SELLER'
 
 export interface User extends BaseEntity {
   username: string
@@ -387,7 +387,7 @@ export interface Transaction extends BaseEntity {
   items?: TransactionItem[]
   totalAmount: number
   status: 'Pending' | 'Completed' | 'Cancelled'
-  type: TransactionType; 
+  type: TransactionType;
   reason?: string
   performedBy?: string
 }

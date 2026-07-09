@@ -1,14 +1,14 @@
 // components/dashboard/tabs/student-management.tsx
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import {
   Plus,
   PlusCircle,
@@ -23,15 +23,15 @@ import {
   Download,
   Hash
 } from "lucide-react";
-import { toast } from "sonner";
-import AddStudentModal from "@/components/modals/add-student-modal";
-import TopUpModal from "@/components/modals/top-up-modal";
-import DeductBalanceModal from "@/components/modals/deduct-balance-modal";
-import EditStudentModal from "@/components/modals/edit-student-modal";
-import BalanceReportModal from "@/components/modals/balance-report-modal";
-import { useDeleteStudent, useToggleStudentStatus } from "@/hooks/use-student-mutations";
-import type { Student } from "@/types";
-import BulkStudentUpdateModal from "@/components/modals/manage-student-bulk-modal";
+import { toast } from 'sonner';
+import AddStudentModal from '@/components/modals/add-student-modal';
+import TopUpModal from '@/components/modals/top-up-modal';
+import DeductBalanceModal from '@/components/modals/deduct-balance-modal';
+import EditStudentModal from '@/components/modals/edit-student-modal';
+import BalanceReportModal from '@/components/modals/balance-report-modal';
+import { useDeleteStudent, useToggleStudentStatus } from '@/hooks/use-student-mutations';
+import type { Student } from '@/types';
+import BulkStudentUpdateModal from '@/components/modals/manage-student-bulk-modal';
 
 interface StudentApiResponse {
   success: boolean;

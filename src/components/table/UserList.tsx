@@ -1,25 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { User, AppRole } from "@/types/user";
-import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { User, AppRole } from '@/types/user';
+import { TABS_REGISTRY } from '@/lib/config/tabs-registry';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table, TableBody, TableCell, TableHead,
   TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Edit, Trash2, Users,
   Crown, ShieldCheck, Calculator, Tag,
 } from "lucide-react";
-import EditUserModal from "@/components/modals/edit-user-modal";
-import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ApiResponse } from "@/lib/api/base-handler";
+import EditUserModal from '@/components/modals/edit-user-modal';
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ApiResponse } from '@/lib/api/base-handler';
 
 interface UserListProps {
   users: User[];

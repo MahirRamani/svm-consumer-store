@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
+import { useState, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -20,11 +20,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import EditAccountModal from "@/components/modals/edit-account-modal";
-import AddTransactionModal from "@/components/modals/add-transaction-modal";
-import { useDeleteAccount, useUpdateAccount } from "@/hooks/use-account-mutations";
-import type { Account, AccountsPaginatedResponse, PaginationMetadata } from "@/types/admin/account";
+import { toast } from 'sonner';
+import EditAccountModal from '@/components/modals/edit-account-modal';
+import AddTransactionModal from '@/components/modals/add-transaction-modal';
+import { useDeleteAccount, useUpdateAccount } from '@/hooks/use-account-mutations';
+import type { Account, AccountsPaginatedResponse, PaginationMetadata } from '@/types/admin/account';
 
 export interface AccountsTabProps {
   onSelectAccount?: (account: Account) => void;
@@ -344,8 +344,8 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
                         {/* Balance */}
                         <td className="px-4 py-3 text-right whitespace-nowrap">
                           <span className={`font-bold tabular-nums ${account.currentBalance < 0 ? "text-red-600"
-                              : account.currentBalance === 0 ? "text-gray-400"
-                                : "text-green-600"
+                            : account.currentBalance === 0 ? "text-gray-400"
+                              : "text-green-600"
                             }`}>
                             {fmt(account.currentBalance)}
                           </span>
@@ -491,13 +491,13 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 
 // "use client";
 
-// import { useState, useCallback } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
-// import { Badge } from "@/components/ui/badge";
-// import { Label } from "@/components/ui/label";
+// import { useState, useCallback } from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Input } from '@/components/ui/input';
+// import { Button } from '@/components/ui/button';
+// import { Badge } from '@/components/ui/badge';
+// import { Label } from '@/components/ui/label';
 // import {
 //   Select,
 //   SelectContent,
@@ -540,11 +540,11 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 //   AlertDialogHeader,
 //   AlertDialogTitle,
 // } from "@/components/ui/alert-dialog";
-// import { toast } from "sonner";
-// import AddAccountModal from "@/components/modals/add-account-modal";
-// import EditAccountModal from "@/components/modals/edit-account-modal";
-// import { useDeleteAccount } from "@/hooks/use-account-mutations";
-// import type { Account, AccountsPaginatedResponse, PaginationMetadata } from "@/types/account";
+// import { toast } from 'sonner';
+// import AddAccountModal from '@/components/modals/add-account-modal';
+// import EditAccountModal from '@/components/modals/edit-account-modal';
+// import { useDeleteAccount } from '@/hooks/use-account-mutations';
+// import type { Account, AccountsPaginatedResponse, PaginationMetadata } from '@/types/account';
 
 // interface AccountsTabProps {
 //   onSelectAccount?: (account: Account) => void;
@@ -1142,13 +1142,13 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // //----------- // components/tabs/accounts-tab.tsx
 // // "use client";
 
-// // import { useState, useCallback } from "react";
-// // import { useQuery } from "@tanstack/react-query";
-// // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // import { Input } from "@/components/ui/input";
-// // import { Label } from "@/components/ui/label";
-// // import { Button } from "@/components/ui/button";
-// // import { Badge } from "@/components/ui/badge";
+// // import { useState, useCallback } from 'react';
+// // import { useQuery } from '@tanstack/react-query';
+// // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // import { Input } from '@/components/ui/input';
+// // import { Label } from '@/components/ui/label';
+// // import { Button } from '@/components/ui/button';
+// // import { Badge } from '@/components/ui/badge';
 // // import {
 // //   Select,
 // //   SelectContent,
@@ -1167,7 +1167,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // //   ChevronsRight,
 // //   ArrowRight,
 // // } from "lucide-react";
-// // import type { Account, AccountsPaginatedResponse } from "@/types/account";
+// // import type { Account, AccountsPaginatedResponse } from '@/types/account';
 
 // // interface FilterState {
 // //   includeInactive: boolean;
@@ -1547,13 +1547,13 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // // // // components/tabs/accounts-tab.tsx
 // // // "use client";
 
-// // // import { useState, useCallback } from "react";
-// // // import { useQuery } from "@tanstack/react-query";
-// // // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // // import { Input } from "@/components/ui/input";
-// // // import { Label } from "@/components/ui/label";
-// // // import { Button } from "@/components/ui/button";
-// // // import { Badge } from "@/components/ui/badge";
+// // // import { useState, useCallback } from 'react';
+// // // import { useQuery } from '@tanstack/react-query';
+// // // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // // import { Input } from '@/components/ui/input';
+// // // import { Label } from '@/components/ui/label';
+// // // import { Button } from '@/components/ui/button';
+// // // import { Badge } from '@/components/ui/badge';
 // // // import {
 // // //   Select,
 // // //   SelectContent,
@@ -1575,11 +1575,11 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // // //   ChevronsRight,
 // // //   ArrowRight,
 // // // } from "lucide-react";
-// // // import { useDeleteAccount } from "@/hooks/use-account-mutations";
-// // // import AddAccountModal from "@/components/modals/add-account-modal";
-// // // import EditAccountModal from "@/components/modals/edit-account-modal";
-// // // import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
-// // // import type { Account, AccountsPaginatedResponse } from "@/types/account";
+// // // import { useDeleteAccount } from '@/hooks/use-account-mutations';
+// // // import AddAccountModal from '@/components/modals/add-account-modal';
+// // // import EditAccountModal from '@/components/modals/edit-account-modal';
+// // // import ConfirmDialog from '@/components/dialogs/ConfirmDialog';
+// // // import type { Account, AccountsPaginatedResponse } from '@/types/account';
 
 // // // interface FilterState {
 // // //   includeInactive: boolean;
@@ -2087,13 +2087,13 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // // // // // components/tabs/accounts-tab.tsx
 // // // // "use client";
 
-// // // // import { useState, useCallback } from "react";
-// // // // import { useQuery } from "@tanstack/react-query";
-// // // // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // // // import { Input } from "@/components/ui/input";
-// // // // import { Label } from "@/components/ui/label";
-// // // // import { Button } from "@/components/ui/button";
-// // // // import { Badge } from "@/components/ui/badge";
+// // // // import { useState, useCallback } from 'react';
+// // // // import { useQuery } from '@tanstack/react-query';
+// // // // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // // // import { Input } from '@/components/ui/input';
+// // // // import { Label } from '@/components/ui/label';
+// // // // import { Button } from '@/components/ui/button';
+// // // // import { Badge } from '@/components/ui/badge';
 // // // // import {
 // // // //   Select,
 // // // //   SelectContent,
@@ -2115,11 +2115,11 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
 // // // //   ChevronsRight,
 // // // //   ArrowRight,
 // // // // } from "lucide-react";
-// // // // import { useDeleteAccount } from "@/hooks/use-account-mutations";
-// // // // import AddAccountModal from "@/components/modals/add-account-modal";
-// // // // import EditAccountModal from "@/components/modals/edit-account-modal";
-// // // // import type { Account, AccountsPaginatedResponse } from "@/types/account";
-// // // // import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
+// // // // import { useDeleteAccount } from '@/hooks/use-account-mutations';
+// // // // import AddAccountModal from '@/components/modals/add-account-modal';
+// // // // import EditAccountModal from '@/components/modals/edit-account-modal';
+// // // // import type { Account, AccountsPaginatedResponse } from '@/types/account';
+// // // // import ConfirmDialog from '@/components/dialogs/ConfirmDialog';
 
 // // // // interface FilterState {
 // // // //   includeInactive: boolean;

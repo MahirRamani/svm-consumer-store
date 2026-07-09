@@ -1,8 +1,8 @@
 // app/api/account-transactions/summary/route.ts
 import mongoose from 'mongoose';
 import connectDB from '@/lib/config/db';
-import { AccountTransaction } from '@/models/AccountTransaction';
-import { Account } from '@/models/Account';
+import { AccountTransaction } from '@/models';
+import { Account } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateQuery } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
@@ -101,8 +101,8 @@ export const GET = withErrorHandler(withAuth(getAccountTransactionsSummaryHandle
 // // app/api/account-transactions/summary/route.ts
 // import mongoose from 'mongoose';
 // import connectDB from '@/lib/config/db';
-// import { AccountTransaction } from '@/models/AccountTransaction';
-// import { Account } from '@/models/Account';
+// import { AccountTransaction } from '@/models';
+// import { Account } from '@/models';
 // import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 // import { validateQuery } from '@/lib/api/validation-helpers';
 // import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';

@@ -1,7 +1,7 @@
 // app/api/account-transactions/balance/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { Account } from '@/models/Account';
+import { Account } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateQuery, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
@@ -51,7 +51,7 @@ export const GET = withErrorHandler(withAuth(getBalanceHandler));
 // // app/api/account-transactions/balance/route.ts
 // import { z } from 'zod';
 // import connectDB from '@/lib/config/db';
-// import { Account } from '@/models/Account';
+// import { Account } from '@/models';
 // import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 // import { validateQuery, objectIdSchema } from '@/lib/api/validation-helpers';
 // import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';

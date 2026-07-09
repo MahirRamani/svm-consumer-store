@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Loader2, AlertCircle, GraduationCap, Download, Upload, FileSpreadsheet,
   ChevronDown, Search, ArrowLeftRight, X, CalendarDays,
 } from "lucide-react";
-import { EmptyState, ErrorBlock, ReportView } from "./shared-ui";
-import { parseExcelFile, findCol, downloadExcelTemplate, ID_KEYS, ROLL_KEYS, STD_KEYS } from "@/lib/utils/excel-utils";
-import type { StudentRow, YearConfigEntry, YearRow, YearRowErrors, ExcelStatus, RollsPhase, AssignReport } from "@/types/manage-student/manage-student-bulk";
+import { EmptyState, ErrorBlock, ReportView } from './shared-ui';
+import { parseExcelFile, findCol, downloadExcelTemplate, ID_KEYS, ROLL_KEYS, STD_KEYS } from '@/lib/utils/excel-utils';
+import type { StudentRow, ConsumerYearConfigEntry, YearRow, YearRowErrors, ExcelStatus, RollsPhase, AssignReport } from '@/types/manage-student/manage-student-bulk';
 
 interface Props {
   students?: StudentRow[];
   studentsLoading: boolean;
-  activeYear: YearConfigEntry | null;
+  activeYear: ConsumerYearConfigEntry | null;
   yearLoading: boolean;
   onMutated: () => void;
   onClose: () => void;
@@ -40,7 +40,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
     setYearRows((prev) => {
       const next = { ...prev };
       students.forEach((s) => {
-        if (!next[s._id]) next[s._id] = { newRollNumber: "", newStandard: String(s.standard) };
+        if (!next[s._id]) next[s._id] = { newRollNumber: "", newStandard: "" };
       });
       return next;
     });
@@ -51,7 +51,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
       dryRun: boolean;
       students: Array<{ studentMongoId: string; rollNumber?: number; standard?: number }>;
     }) => {
-      const res = await fetch("/api/students/assign-rolls", {
+      const res = await fetch("/api/students/bulk-assign-roll-number", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -187,39 +187,84 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
     );
   }, [students]);
 
+  // const handleAssignRolls = useCallback(
+  //   (dryRun: boolean) => {
+  //     if (!students) return;
+  //     const errors: Record<string, YearRowErrors> = {};
+
+  //     const filledRolls = students.map((s) => yearRows[s._id]?.newRollNumber?.trim()).filter(Boolean) as string[];
+  //     const dups = filledRolls.filter((r, i) => filledRolls.indexOf(r) !== i);
+
+  //     if (dups.length > 0) {
+  //       students.forEach((s) => {
+  //         if (dups.includes(yearRows[s._id]?.newRollNumber?.trim())) {
+  //           errors[s._id] = { ...errors[s._id], newRollNumber: "Duplicate in batch" };
+  //         }
+  //       });
+  //       setYearRowErrors(errors);
+  //       return;
+  //     }
+
+  //     assignRollsMutation.mutate({
+  //       dryRun,
+  //       students: students.map((s) => {
+  //         const row = yearRows[s._id];
+  //         return {
+  //           studentMongoId: s._id,
+  //           ...(row?.newRollNumber?.trim() ? { rollNumber: Number(row.newRollNumber.trim()) } : {}),
+  //           ...(row?.newStandard?.trim() ? { standard: Number(row.newStandard.trim()) } : {}),
+  //         };
+  //       }),
+  //     });
+  //   },
+  //   [students, yearRows, assignRollsMutation]
+  // );
+
   const handleAssignRolls = useCallback(
-    (dryRun: boolean) => {
-      if (!students) return;
-      const errors: Record<string, YearRowErrors> = {};
+  (dryRun: boolean) => {
+    if (!students) return;
 
-      const filledRolls = students.map((s) => yearRows[s._id]?.newRollNumber?.trim()).filter(Boolean) as string[];
-      const dups = filledRolls.filter((r, i) => filledRolls.indexOf(r) !== i);
-
-      if (dups.length > 0) {
-        students.forEach((s) => {
-          if (dups.includes(yearRows[s._id]?.newRollNumber?.trim())) {
-            errors[s._id] = { ...errors[s._id], newRollNumber: "Duplicate in batch" };
-          }
-        });
-        setYearRowErrors(errors);
-        return;
-      }
-
-      assignRollsMutation.mutate({
-        dryRun,
-        students: students.map((s) => {
-          const row = yearRows[s._id];
-          return {
-            studentMongoId: s._id,
-            ...(row?.newRollNumber?.trim() ? { rollNumber: Number(row.newRollNumber.trim()) } : {}),
-            ...(row?.newStandard?.trim() ? { standard: Number(row.newStandard.trim()) } : {}),
-          };
-        }),
+    // Only students where user explicitly entered a new roll or standard
+    const changedStudents = students.filter((s) => {
+      const row = yearRows[s._id];
+      return row?.newRollNumber?.trim() || row?.newStandard?.trim();
       });
-    },
-    [students, yearRows, assignRollsMutation]
-  );
 
+    if (changedStudents.length === 0) return;
+
+    const errors: Record<string, YearRowErrors> = {};
+
+    const filledRolls = changedStudents
+      .map((s) => yearRows[s._id]?.newRollNumber?.trim())
+      .filter(Boolean) as string[];
+
+    const dups = filledRolls.filter((r, i) => filledRolls.indexOf(r) !== i);
+
+    if (dups.length > 0) {
+      changedStudents.forEach((s) => {
+        if (dups.includes(yearRows[s._id]?.newRollNumber?.trim())) {
+          errors[s._id] = { ...errors[s._id], newRollNumber: "Duplicate in batch" };
+        }
+      });
+      setYearRowErrors(errors);
+      return;
+    }
+
+    assignRollsMutation.mutate({
+      dryRun,
+      students: changedStudents.map((s) => {
+        const row = yearRows[s._id];
+        return {
+          studentMongoId: s._id,                                              // ← from loaded list
+          ...(row?.newRollNumber?.trim() ? { rollNumber: Number(row.newRollNumber.trim()) } : {}),
+          ...(row?.newStandard?.trim()   ? { standard:  Number(row.newStandard.trim())   } : {}),
+        };
+      }),
+    });
+  },
+  [students, yearRows, assignRollsMutation]
+  );
+  
   const totalCount = students?.length ?? 0;
   const rollFilledCount = useMemo(
     () => Object.values(yearRows).filter((r) => r.newRollNumber?.trim()).length,
@@ -249,7 +294,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
               <div className="flex items-center gap-2">
                 <Badge className="text-xs gap-1 bg-indigo-500 text-white">
                   <CalendarDays className="w-3 h-3" />
-                  {activeYear.currentYear}
+                  {activeYear.consumerYear}
                 </Badge>
                 <span className="text-xs text-gray-400">active year</span>
               </div>
@@ -316,9 +361,8 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
             ) : (
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span
-                  className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    swapSelection.length === 0 ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"
-                  }`}
+                  className={`text-xs font-medium px-2 py-1 rounded-full ${swapSelection.length === 0 ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"
+                    }`}
                 >
                   {swapSelection.length === 0 ? "Click 1st student…" : "Click 2nd student…"}
                 </span>
@@ -387,7 +431,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
           <ReportView
             mode="preview"
             report={previewReport}
-            year={activeYear?.currentYear ?? ""}
+            year={activeYear?.consumerYear ?? ""}
             onBack={() => {
               setRollsPhase("edit");
               assignRollsMutation.reset();
@@ -399,7 +443,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
           <ReportView
             mode="done"
             report={assignReport}
-            year={activeYear?.currentYear ?? ""}
+            year={activeYear?.consumerYear ?? ""}
             onReset={() => {
               setRollsPhase("edit");
               setAssignReport(null);
@@ -504,14 +548,13 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
                           disabled={swapSelection.length === 2 && !isSelected}
                           title={isFirst ? "1st selected" : isSecond ? "2nd selected" : "Select for swap"}
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all mx-auto
-                            ${
-                              isFirst
-                                ? "bg-indigo-500 border-indigo-500 text-white"
-                                : isSecond
+                            ${isFirst
+                              ? "bg-indigo-500 border-indigo-500 text-white"
+                              : isSecond
                                 ? "bg-amber-500 border-amber-500 text-white"
                                 : swapSelection.length < 2
-                                ? "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
-                                : "border-gray-200 opacity-40 cursor-not-allowed"
+                                  ? "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
+                                  : "border-gray-200 opacity-40 cursor-not-allowed"
                             }
                           `}
                         >

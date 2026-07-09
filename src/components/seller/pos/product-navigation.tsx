@@ -1,12 +1,12 @@
 // components/admin/pos/product-navigation.tsx
 "use client";
 
-import { useState, useCallback, useMemo, useEffect, JSX } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useCallback, useMemo, useEffect, JSX } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,7 +34,7 @@ import {
   CheckCircle2,
   Eye,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 import type {
   CartItem,
@@ -45,8 +45,8 @@ import type {
   CategoryRef,
   SearchResult,
 } from "@/types/seller/pos";
-import type { Category, CategoriesResponse } from "@/types/seller/category";
-import { ApiResponse } from "@/lib/api/base-handler";
+import type { Category, CategoriesResponse } from '@/types/seller/category';
+import { ApiResponse } from '@/lib/api/base-handler';
 
 // =============================================
 // Types
@@ -1491,12 +1491,12 @@ export default function ProductNavigation({
 // // // components/admin/pos/product-navigation.tsx
 // // "use client";
 
-// // import { useState, useCallback, useMemo, JSX } from "react";
-// // import { useQuery, useQueryClient } from "@tanstack/react-query";
-// // import { Button } from "@/components/ui/button";
-// // import { Input } from "@/components/ui/input";
-// // import { Card, CardContent } from "@/components/ui/card";
-// // import { Badge } from "@/components/ui/badge";
+// // import { useState, useCallback, useMemo, JSX } from 'react';
+// // import { useQuery, useQueryClient } from '@tanstack/react-query';
+// // import { Button } from '@/components/ui/button';
+// // import { Input } from '@/components/ui/input';
+// // import { Card, CardContent } from '@/components/ui/card';
+// // import { Badge } from '@/components/ui/badge';
 // // import {
 // //   Breadcrumb,
 // //   BreadcrumbItem,
@@ -1519,7 +1519,7 @@ export default function ProductNavigation({
 // //   Search,
 // //   X,
 // // } from "lucide-react";
-// // import { toast } from "sonner";
+// // import { toast } from 'sonner';
 
 // // import type {
 // //   ApiResponse,
@@ -1531,7 +1531,7 @@ export default function ProductNavigation({
 // //   CategoryRef,
 // //   SearchResult,
 // // } from "@/types/pos";
-// // import type { Category, CategoriesResponse } from "@/types/category";
+// // import type { Category, CategoriesResponse } from '@/types/category';
 
 // // // =============================================
 // // // Types

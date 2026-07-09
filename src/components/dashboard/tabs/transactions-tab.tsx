@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Search,
   Download,
@@ -20,12 +20,12 @@ import {
   X,
   RotateCcw,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import RevertTransactionModal, {
   type RevertTransaction,
   type RevertTransactionItem,
 } from "@/components/modals/revert-transaction-modal";
-import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata, TransactionType } from "@/types";
+import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata, TransactionType } from '@/types';
 
 type DateRangeType = "today" | "week" | "month" | "custom" | "all";
 type StatusType = "all" | "Completed" | "Pending" | "Cancelled";
@@ -153,7 +153,7 @@ export default function TransactionsTab() {
   // Add this helper
   const getYesterday = () => {
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate()-1);
+    yesterday.setDate(yesterday.getDate() - 1);
     return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
   };
 
@@ -519,7 +519,7 @@ export default function TransactionsTab() {
     const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
 
     const currentPage = filters.currentPage;
-    
+
     const getPageNumbers = (): number[] => {
       const maxVisible = 5;
       const pages: number[] = [];

@@ -1,33 +1,33 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, AlertCircle, CalendarDays, Lock } from "lucide-react";
-import { Field } from "./shared-ui";
-import type { YearConfigEntry, YearConfigForm, YearConfigErrors } from "@/types/manage-student/manage-student-bulk";
+import { useState, useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Check, AlertCircle, CalendarDays, Lock } from 'lucide-react';
+import { Field } from './shared-ui';
+import type { ConsumerYearConfigEntry, ConsumerYearConfigForm, ConsumerYearConfigErrors } from '@/types/manage-student/manage-student-bulk';
 
 interface Props {
-  activeYear: YearConfigEntry | null;
-  yearHistory: YearConfigEntry[];
+  activeYear: ConsumerYearConfigEntry | null;
+  yearHistory: ConsumerYearConfigEntry[];
   onMutated: () => void;
 }
 
-export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
-  const [yearForm, setYearForm] = useState<YearConfigForm>({ currentYear: "", yearStartDate: "", yearEndDate: "" });
-  const [yearFormErrors, setYearFormErrors] = useState<YearConfigErrors>({});
+export function ConsumerYearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
+  const [yearForm, setYearForm] = useState<ConsumerYearConfigForm>({ consumerYear: "", yearStartDate: "", yearEndDate: "" });
+  const [yearFormErrors, setYearFormErrors] = useState<ConsumerYearConfigErrors>({});
   const [yearSaved, setYearSaved] = useState(false);
   const [endConfirm, setEndConfirm] = useState(false);
 
   const yearConfigMutation = useMutation({
-    mutationFn: async (payload: YearConfigForm) => {
-      const res = await fetch("/api/year-config", {
+    mutationFn: async (payload: ConsumerYearConfigForm) => {
+      const res = await fetch("/api/consumer-year-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentYear: payload.currentYear,
+          consumerYear: payload.consumerYear,
           yearStartDate: new Date(payload.yearStartDate).toISOString(),
           yearEndDate: new Date(payload.yearEndDate).toISOString(),
         }),
@@ -43,7 +43,7 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
 
   const endYearMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/year-config/end", { method: "POST" });
+      const res = await fetch("/api/consumer-year-config/end", { method: "POST" });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message ?? "Failed to end year");
       return res.json();
     },
@@ -53,15 +53,15 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
     },
   });
 
-  const handleYearFormChange = useCallback((field: keyof YearConfigForm, val: string) => {
+  const handleYearFormChange = useCallback((field: keyof ConsumerYearConfigForm, val: string) => {
     setYearForm((p) => ({ ...p, [field]: val }));
     setYearFormErrors((p) => ({ ...p, [field]: undefined }));
     setYearSaved(false);
   }, []);
 
   const handleSaveYear = useCallback(() => {
-    const errors: YearConfigErrors = {};
-    if (!yearForm.currentYear.trim()) errors.currentYear = "Required";
+    const errors: ConsumerYearConfigErrors = {};
+    if (!yearForm.consumerYear.trim()) errors.consumerYear = "Required";
     if (!yearForm.yearStartDate) errors.yearStartDate = "Required";
     if (!yearForm.yearEndDate) errors.yearEndDate = "Required";
     if (Object.keys(errors).length) {
@@ -81,13 +81,13 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
             <p className="text-xs text-gray-500 mt-0.5">Creates a new year and marks the previous one inactive.</p>
           </div>
           <div className="space-y-3">
-            <Field label="Academic Year" required error={yearFormErrors.currentYear}>
+            <Field label="Academic Year" required error={yearFormErrors.consumerYear}>
               <Input
-                value={yearForm.currentYear}
-                onChange={(e) => handleYearFormChange("currentYear", e.target.value)}
+                value={yearForm.consumerYear}
+                onChange={(e) => handleYearFormChange("consumerYear", e.target.value)}
                 placeholder="e.g. 2026-27"
                 disabled={yearConfigMutation.isPending}
-                className={`h-9 w-40 text-sm ${yearFormErrors.currentYear ? "border-red-400" : ""}`}
+                className={`h-9 w-40 text-sm ${yearFormErrors.consumerYear ? "border-red-400" : ""}`}
               />
             </Field>
             <Field label="Start Date" required error={yearFormErrors.yearStartDate}>
@@ -138,7 +138,7 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
             <div>
               <h3 className="text-sm font-semibold text-gray-800">End Current Year</h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                Marks <strong>{activeYear.currentYear}</strong> as inactive. Students are not affected.
+                Marks <strong>{activeYear.consumerYear}</strong> as inactive. Students are not affected.
               </p>
             </div>
             {!endConfirm ? (
@@ -148,12 +148,12 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
                 className="gap-1.5 border-red-300 text-red-600 hover:bg-red-50"
                 onClick={() => setEndConfirm(true)}
               >
-                <Lock className="w-4 h-4" /> End Year {activeYear.currentYear}
+                <Lock className="w-4 h-4" /> End Year {activeYear.consumerYear}
               </Button>
             ) : (
               <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-3">
                 <p className="text-sm font-medium text-red-700">
-                  Confirm ending <strong>{activeYear.currentYear}</strong>? Year will be marked inactive.
+                  Confirm ending <strong>{activeYear.consumerYear}</strong>? Year will be marked inactive.
                 </p>
                 {endYearMutation.isError && (
                   <p className="text-xs text-red-600">
@@ -194,7 +194,7 @@ export function YearConfigTab({ activeYear, yearHistory, onMutated }: Props) {
               {yearHistory.map((y) => (
                 <div key={y._id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 bg-white">
                   <div>
-                    <span className="text-sm font-medium text-gray-800">{y.currentYear}</span>
+                    <span className="text-sm font-medium text-gray-800">{y.consumerYear}</span>
                     <p className="text-xs text-gray-400">
                       {new Date(y.yearStartDate).toLocaleDateString()} → {new Date(y.yearEndDate).toLocaleDateString()}
                     </p>

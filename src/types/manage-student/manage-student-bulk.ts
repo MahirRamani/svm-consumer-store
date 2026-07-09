@@ -9,17 +9,17 @@ export interface StudentRow {
   id?: number | null;
 }
 
-export interface YearConfigEntry {
+export interface ConsumerYearConfigEntry {
   _id: string;
-  currentYear: string;
+  consumerYear: string;
   yearStartDate: string;
   yearEndDate: string;
   isActive: boolean;
 }
 
-export interface YearConfigResponse {
-  activeYear: YearConfigEntry | null;
-  history: YearConfigEntry[];
+export interface ConsumerYearConfigResponse {
+  activeYear: ConsumerYearConfigEntry | null;
+  history: ConsumerYearConfigEntry[];
 }
 
 // ── Assign IDs tab ──────────────────────────────────────────────────────────
@@ -64,13 +64,13 @@ export interface AssignReport {
 
 // ── Year Config tab ─────────────────────────────────────────────────────────
 
-export interface YearConfigForm {
-  currentYear: string;
+export interface ConsumerYearConfigForm {
+  consumerYear: string;
   yearStartDate: string;
   yearEndDate: string;
 }
 
-export type YearConfigErrors = Partial<YearConfigForm>;
+export type ConsumerYearConfigErrors = Partial<ConsumerYearConfigForm>;
 
 // ── Add Students tab ────────────────────────────────────────────────────────
 

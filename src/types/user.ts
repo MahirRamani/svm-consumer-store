@@ -1,4 +1,4 @@
-import { ROLES } from "@/lib/config/rolesConfig";
+import { ROLES } from '@/lib/config/rolesConfig';
 
 // Dynamically creates a union type of all possible role IDs (e.g., "employee" | "accountant" | ...)
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]["id"];

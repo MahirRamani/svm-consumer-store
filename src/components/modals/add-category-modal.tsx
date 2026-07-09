@@ -1,14 +1,14 @@
 // components/modals/add-category-modal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateCategory } from "@/hooks/use-category-mutations";
-import type { CategoryFormData, CategoryFormErrors } from "@/types/seller/category";
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateCategory } from '@/hooks/use-category-mutations';
+import type { CategoryFormData, CategoryFormErrors } from '@/types/seller/category';
 
 interface AddCategoryModalProps {
   open: boolean;

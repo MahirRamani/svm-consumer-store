@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import type { TodaysSoldProduct } from "@/types/dashboard/overview"
+import { Badge } from '@/components/ui/badge'
+import type { TodaysSoldProduct } from '@/types/dashboard/overview'
 
 interface TodaysSalesModalProps {
   open: boolean
@@ -30,7 +30,7 @@ export default function TodaysSalesModal({ open, onOpenChange, products }: Today
             Products sold today with quantities and revenue
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-4">

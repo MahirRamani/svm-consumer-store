@@ -1,14 +1,14 @@
 // components/dashboard/tabs/stock-transactions-management.tsx
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import {
   Search,
   Edit,
@@ -24,10 +24,10 @@ import {
   Loader2,
   X
 } from "lucide-react";
-import { toast } from "sonner";
-import EditStockTransactionModal from "@/components/modals/edit-stock-transaction-modal";
-import type { Category, CategoriesListResponse } from "@/types";
-import type { StockTransaction, StockTransactionsResponse } from "@/types/seller/stock-transaction";
+import { toast } from 'sonner';
+import EditStockTransactionModal from '@/components/modals/edit-stock-transaction-modal';
+import type { Category, CategoriesListResponse } from '@/types';
+import type { StockTransaction, StockTransactionsResponse } from '@/types/seller/stock-transaction';
 
 // interface StockTransactionsApiResponse extends StockTransactionsListResponse { }
 

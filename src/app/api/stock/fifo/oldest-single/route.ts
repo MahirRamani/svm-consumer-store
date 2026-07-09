@@ -1,7 +1,7 @@
 // app/api/stock/fifo/oldest-single/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { StockTransaction } from '@/models/StockTransaction';
+import { StockTransaction } from '@/models';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { validateQuery, objectIdSchema } from '@/lib/api/validation-helpers';
 import mongoose from 'mongoose';

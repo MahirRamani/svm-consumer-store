@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { Transaction } from '@/models/Transaction';
+import { Transaction } from '@/models';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { validateQuery, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';

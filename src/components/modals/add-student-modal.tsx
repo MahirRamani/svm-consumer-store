@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, UserPlus } from "lucide-react";
-import { toast } from "sonner";
-import { useCreateStudent } from "@/hooks/use-student-mutations";
-import type { CreateStudentDto } from "@/types";
-import { STANDARDS, YEARS } from "@/lib/config/constants";
-import { createStudentSchema } from "@/lib/validations/student";
-import z from "zod";
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
+import { useCreateStudent } from '@/hooks/use-student-mutations';
+import type { CreateStudentDto } from '@/types';
+import { STANDARDS, YEARS } from '@/lib/config/constants';
+import { createStudentSchema } from '@/lib/validations/student';
+import z from 'zod';
 
 interface AddStudentModalProps {
   open: boolean;

@@ -2,13 +2,13 @@
 
 // components/InventoryReportDashboard.tsx
 
-import React, { useState, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Download,
   Loader2,
@@ -29,7 +29,7 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import type {
   SoldProduct,
   SoldBatch,
@@ -48,7 +48,7 @@ type ActiveTab = "sold" | "stock" | "student";
 type QuickRange = "today" | "this_week" | "this_month" | "last_month" | "custom";
 type SortDir = "asc" | "desc";
 
-type SoldSortKey  = "categoryName" | "productName" | "totalQtySold" | "totalRevenue";
+type SoldSortKey = "categoryName" | "productName" | "totalQtySold" | "totalRevenue";
 type StockSortKey = "categoryName" | "productName" | "stockStatus" | "totalLeft" | "totalSold" | "newestBatch";
 type StudentSortKey = "rollNumber" | "name" | "standard" | "openingBalance" | "topupInPeriod" | "expenseInPeriod" | "currentBalance";
 
@@ -108,7 +108,7 @@ const getQuickRangeDates = (range: QuickRange): { from: string; to: string } => 
     }
     case "last_month": {
       const first = new Date(t.getFullYear(), t.getMonth() - 1, 1);
-      const last  = new Date(t.getFullYear(), t.getMonth(), 0);
+      const last = new Date(t.getFullYear(), t.getMonth(), 0);
       return { from: fmt(first), to: fmt(last) };
     }
     default:
@@ -117,11 +117,11 @@ const getQuickRangeDates = (range: QuickRange): { from: string; to: string } => 
 };
 
 const quickRangeLabels: Record<QuickRange, string> = {
-  today:      "Today",
-  this_week:  "This Week",
+  today: "Today",
+  this_week: "This Week",
   this_month: "This Month",
   last_month: "Last Month",
-  custom:     "Custom",
+  custom: "Custom",
 };
 
 const formatINR = (n: number): string =>
@@ -139,31 +139,31 @@ const formatDate = (dt: string | Date): string =>
 // ─────────────────────────────────────────────────────────────────────────────
 
 const stockStatusLabel: Record<StockStatus, string> = {
-  ok:    "In Stock",
-  low:   "Low Stock",
+  ok: "In Stock",
+  low: "Low Stock",
   empty: "Out of Stock",
 };
 
 const stockStatusOrder: Record<StockStatus, number> = {
   empty: 0,
-  low:   1,
-  ok:    2,
+  low: 1,
+  ok: 2,
 };
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
 const stockStatusBadgeVariant = (status: StockStatus): BadgeVariant => {
   switch (status) {
-    case "ok":    return "default";
-    case "low":   return "secondary";
+    case "ok": return "default";
+    case "low": return "secondary";
     case "empty": return "destructive";
   }
 };
 
 const stockStatusBarColor = (status: StockStatus): string => {
   switch (status) {
-    case "ok":    return "#10b981";
-    case "low":   return "#f59e0b";
+    case "ok": return "#10b981";
+    case "low": return "#f59e0b";
     case "empty": return "#ef4444";
   }
 };
@@ -186,7 +186,7 @@ function SortableHeader<K extends string>({
   const isActive = current.key === sortKey;
   const alignClass =
     align === "center" ? "justify-center" :
-    align === "right"  ? "justify-end"    : "justify-start";
+      align === "right" ? "justify-end" : "justify-start";
   const Icon = isActive
     ? current.dir === "asc" ? ChevronUp : ChevronDown
     : ChevronsUpDown;
@@ -293,9 +293,8 @@ const StockBatchRows = ({ batches }: { batches: StockBatch[] }) => (
           </td>
           <td className="px-6 py-2.5 text-center text-xs font-mono text-slate-500">{b.initialQuantity}</td>
           <td className="px-6 py-2.5 text-center">
-            <span className={`text-xs font-bold font-mono ${
-              b.status === "empty" ? "text-red-500" : b.status === "low" ? "text-amber-600" : "text-emerald-600"
-            }`}>
+            <span className={`text-xs font-bold font-mono ${b.status === "empty" ? "text-red-500" : b.status === "low" ? "text-amber-600" : "text-emerald-600"
+              }`}>
               {b.quantityLeft}
             </span>
           </td>
@@ -336,11 +335,10 @@ const DateRangeControls = ({
           <button
             key={r}
             onClick={() => onQuickRange(r)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              quickRange === r
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${quickRange === r
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             {quickRangeLabels[r]}
           </button>
@@ -380,17 +378,17 @@ const DateRangeControls = ({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function InventoryReportDashboard() {
-  const [activeTab, setActiveTab]       = useState<ActiveTab>("sold");
-  const [quickRange, setQuickRange]     = useState<QuickRange>("today");
-  const [fromDate, setFromDate]         = useState<string>(toDateStr(today));
-  const [toDate, setToDate]             = useState<string>(toDateStr(today));
-  const [searchQuery, setSearchQuery]   = useState<string>("");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("sold");
+  const [quickRange, setQuickRange] = useState<QuickRange>("today");
+  const [fromDate, setFromDate] = useState<string>(toDateStr(today));
+  const [toDate, setToDate] = useState<string>(toDateStr(today));
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [isExporting, setIsExporting]   = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
-  const [soldSort,    setSoldSort]    = useState<SortState<SoldSortKey>>   ({ key: "categoryName", dir: "asc" });
-  const [stockSort,   setStockSort]   = useState<SortState<StockSortKey>>  ({ key: "categoryName", dir: "asc" });
-  const [studentSort, setStudentSort] = useState<SortState<StudentSortKey>>({ key: "rollNumber",   dir: "asc" });
+  const [soldSort, setSoldSort] = useState<SortState<SoldSortKey>>({ key: "categoryName", dir: "asc" });
+  const [stockSort, setStockSort] = useState<SortState<StockSortKey>>({ key: "categoryName", dir: "asc" });
+  const [studentSort, setStudentSort] = useState<SortState<StudentSortKey>>({ key: "rollNumber", dir: "asc" });
 
   // ── Quick range handler ───────────────────────────────────────────────────
   const handleQuickRange = useCallback((range: QuickRange) => {
@@ -465,9 +463,9 @@ export default function InventoryReportDashboard() {
     const rows = soldResponse?.data ?? [];
     const filtered = searchQuery.trim()
       ? rows.filter((r) => {
-          const q = searchQuery.toLowerCase();
-          return r.productName.toLowerCase().includes(q) || r.categoryName.toLowerCase().includes(q);
-        })
+        const q = searchQuery.toLowerCase();
+        return r.productName.toLowerCase().includes(q) || r.categoryName.toLowerCase().includes(q);
+      })
       : rows;
 
     return [...filtered].sort((a, b) => {
@@ -496,9 +494,9 @@ export default function InventoryReportDashboard() {
     const rows = stockResponse?.data ?? [];
     const filtered = searchQuery.trim()
       ? rows.filter((r) => {
-          const q = searchQuery.toLowerCase();
-          return r.productName.toLowerCase().includes(q) || r.categoryName.toLowerCase().includes(q);
-        })
+        const q = searchQuery.toLowerCase();
+        return r.productName.toLowerCase().includes(q) || r.categoryName.toLowerCase().includes(q);
+      })
       : rows;
 
     return [...filtered].sort((a, b) => {
@@ -540,13 +538,13 @@ export default function InventoryReportDashboard() {
     const rows = studentResponse?.data ?? [];
     const filtered = searchQuery.trim()
       ? rows.filter((r) => {
-          const q = searchQuery.toLowerCase();
-          return (
-            r.name.toLowerCase().includes(q) ||
-            r.rollNumber.toLowerCase().includes(q) ||
-            r.standard.toLowerCase().includes(q)
-          );
-        })
+        const q = searchQuery.toLowerCase();
+        return (
+          r.name.toLowerCase().includes(q) ||
+          r.rollNumber.toLowerCase().includes(q) ||
+          r.standard.toLowerCase().includes(q)
+        );
+      })
       : rows;
 
     return [...filtered].sort((a, b) => {
@@ -581,22 +579,22 @@ export default function InventoryReportDashboard() {
   // ── Summaries ─────────────────────────────────────────────────────────────
   const soldSummary = useMemo(() => ({
     totalProducts: sortedSold.length,
-    totalUnits:   sortedSold.reduce((a, b) => a + b.totalQtySold, 0),
+    totalUnits: sortedSold.reduce((a, b) => a + b.totalQtySold, 0),
     totalRevenue: sortedSold.reduce((a, b) => a + b.totalRevenue, 0),
   }), [sortedSold]);
 
   const stockSummary = useMemo(() => ({
     totalProducts: sortedStock.length,
-    totalLeft:     sortedStock.reduce((a, b) => a + b.totalLeft, 0),
-    lowCount:      sortedStock.filter((p) => p.stockStatus === "low").length,
-    emptyCount:    sortedStock.filter((p) => p.stockStatus === "empty").length,
+    totalLeft: sortedStock.reduce((a, b) => a + b.totalLeft, 0),
+    lowCount: sortedStock.filter((p) => p.stockStatus === "low").length,
+    emptyCount: sortedStock.filter((p) => p.stockStatus === "empty").length,
   }), [sortedStock]);
 
   const studentSummary = useMemo(() => ({
-    totalStudents:  sortedStudents.length,
-    totalTopup:     sortedStudents.reduce((a, b) => a + b.topupInPeriod, 0),
-    totalExpense:   sortedStudents.reduce((a, b) => a + b.expenseInPeriod, 0),
-    totalBalance:   sortedStudents.reduce((a, b) => a + b.currentBalance, 0),
+    totalStudents: sortedStudents.length,
+    totalTopup: sortedStudents.reduce((a, b) => a + b.topupInPeriod, 0),
+    totalExpense: sortedStudents.reduce((a, b) => a + b.expenseInPeriod, 0),
+    totalBalance: sortedStudents.reduce((a, b) => a + b.currentBalance, 0),
   }), [sortedStudents]);
 
   // ── Row expand toggle ─────────────────────────────────────────────────────
@@ -712,9 +710,9 @@ export default function InventoryReportDashboard() {
       }
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url  = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href     = url;
+      link.href = url;
       link.download = `${activeTab}-report-${fromDate}${fromDate !== toDate ? `_to_${toDate}` : ""}.csv`;
       document.body.appendChild(link);
       link.click();
@@ -734,16 +732,16 @@ export default function InventoryReportDashboard() {
   // ─────────────────────────────────────────────────────────────────────────
 
   const isFetching =
-    activeTab === "sold"    ? soldFetching    :
-    activeTab === "stock"   ? stockFetching   : studentFetching;
-  const isLoading  =
-    activeTab === "sold"    ? soldLoading     :
-    activeTab === "stock"   ? stockLoading    : studentLoading;
+    activeTab === "sold" ? soldFetching :
+      activeTab === "stock" ? stockFetching : studentFetching;
+  const isLoading =
+    activeTab === "sold" ? soldLoading :
+      activeTab === "stock" ? stockLoading : studentLoading;
 
   const exportDisabled =
     isExporting ||
-    (activeTab === "sold"    ? sortedSold.length === 0    :
-     activeTab === "stock"   ? sortedStock.length === 0   : sortedStudents.length === 0);
+    (activeTab === "sold" ? sortedSold.length === 0 :
+      activeTab === "stock" ? sortedStock.length === 0 : sortedStudents.length === 0);
 
   return (
     <div className="space-y-6">
@@ -771,19 +769,18 @@ export default function InventoryReportDashboard() {
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
         {(
           [
-            ["sold",    TrendingUp,    "Sold Products"  ],
-            ["stock",   Package,       "Stock Report"   ],
+            ["sold", TrendingUp, "Sold Products"],
+            ["stock", Package, "Stock Report"],
             ["student", GraduationCap, "Student Expense"],
           ] as const
         ).map(([key, Icon, label]) => (
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === key
+            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === key
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             <Icon className="w-4 h-4" />
             {label}
@@ -804,7 +801,7 @@ export default function InventoryReportDashboard() {
                 toDate={toDate}
                 onQuickRange={handleQuickRange}
                 onFromDate={(d) => { setFromDate(d); setQuickRange("custom"); }}
-                onToDate={(d)   => { setToDate(d);   setQuickRange("custom"); }}
+                onToDate={(d) => { setToDate(d); setQuickRange("custom"); }}
               />
 
               <div className="flex items-end gap-4">
@@ -849,23 +846,23 @@ export default function InventoryReportDashboard() {
                 </div>
               ) : activeTab === "sold" ? (
                 <>
-                  <StatChip icon={<TrendingUp />}  label="Products"   value={soldSummary.totalProducts}                             accent="#6366f1" />
-                  <StatChip icon={<Layers />}       label="Units Sold" value={soldSummary.totalUnits.toLocaleString("en-IN")}        accent="#8b5cf6" />
-                  <StatChip icon={<BarChart3 />}    label="Revenue"    value={formatINR(soldSummary.totalRevenue)}                    accent="#10b981" />
+                  <StatChip icon={<TrendingUp />} label="Products" value={soldSummary.totalProducts} accent="#6366f1" />
+                  <StatChip icon={<Layers />} label="Units Sold" value={soldSummary.totalUnits.toLocaleString("en-IN")} accent="#8b5cf6" />
+                  <StatChip icon={<BarChart3 />} label="Revenue" value={formatINR(soldSummary.totalRevenue)} accent="#10b981" />
                 </>
               ) : activeTab === "stock" ? (
                 <>
-                  <StatChip icon={<Package />}       label="Products"   value={stockSummary.totalProducts}                           accent="#6366f1" />
-                  <StatChip icon={<Layers />}        label="Remaining"  value={stockSummary.totalLeft.toLocaleString("en-IN")}       accent="#8b5cf6" />
-                  <StatChip icon={<AlertTriangle />} label="Low Stock"  value={stockSummary.lowCount}                                accent="#f59e0b" />
-                  <StatChip icon={<X />}             label="Out of Stock" value={stockSummary.emptyCount}                           accent="#ef4444" />
+                  <StatChip icon={<Package />} label="Products" value={stockSummary.totalProducts} accent="#6366f1" />
+                  <StatChip icon={<Layers />} label="Remaining" value={stockSummary.totalLeft.toLocaleString("en-IN")} accent="#8b5cf6" />
+                  <StatChip icon={<AlertTriangle />} label="Low Stock" value={stockSummary.lowCount} accent="#f59e0b" />
+                  <StatChip icon={<X />} label="Out of Stock" value={stockSummary.emptyCount} accent="#ef4444" />
                 </>
               ) : (
                 <>
-                  <StatChip icon={<Users />}          label="Students"  value={studentSummary.totalStudents}                         accent="#6366f1" />
-                  <StatChip icon={<ArrowUpCircle />}  label="Topup"     value={formatINR(studentSummary.totalTopup)}                 accent="#10b981" />
-                  <StatChip icon={<ArrowDownCircle />}label="Expense"   value={formatINR(studentSummary.totalExpense)}               accent="#ef4444" />
-                  <StatChip icon={<Wallet />}         label="Balance"   value={formatINR(studentSummary.totalBalance)}               accent="#8b5cf6" />
+                  <StatChip icon={<Users />} label="Students" value={studentSummary.totalStudents} accent="#6366f1" />
+                  <StatChip icon={<ArrowUpCircle />} label="Topup" value={formatINR(studentSummary.totalTopup)} accent="#10b981" />
+                  <StatChip icon={<ArrowDownCircle />} label="Expense" value={formatINR(studentSummary.totalExpense)} accent="#ef4444" />
+                  <StatChip icon={<Wallet />} label="Balance" value={formatINR(studentSummary.totalBalance)} accent="#8b5cf6" />
                 </>
               )}
             </div>
@@ -894,10 +891,10 @@ export default function InventoryReportDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <SortableHeader label="Category" sortKey="categoryName" current={soldSort} onSort={handleSoldSort} align="left"   />
-                    <SortableHeader label="Product"  sortKey="productName"  current={soldSort} onSort={handleSoldSort} align="left"   />
+                    <SortableHeader label="Category" sortKey="categoryName" current={soldSort} onSort={handleSoldSort} align="left" />
+                    <SortableHeader label="Product" sortKey="productName" current={soldSort} onSort={handleSoldSort} align="left" />
                     <SortableHeader label="Qty Sold" sortKey="totalQtySold" current={soldSort} onSort={handleSoldSort} align="center" />
-                    <SortableHeader label="Revenue"  sortKey="totalRevenue" current={soldSort} onSort={handleSoldSort} align="right"  />
+                    <SortableHeader label="Revenue" sortKey="totalRevenue" current={soldSort} onSort={handleSoldSort} align="right" />
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
                       Batches
                     </th>
@@ -927,9 +924,8 @@ export default function InventoryReportDashboard() {
                             <td className="px-6 py-3.5 font-medium text-gray-900">
                               <div className="flex items-center gap-2">
                                 <ChevronDown
-                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
-                                    isOpen ? "rotate-180" : ""
-                                  }`}
+                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                    }`}
                                 />
                                 {row.productName}
                               </div>
@@ -1001,15 +997,15 @@ export default function InventoryReportDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <SortableHeader label="Category"     sortKey="categoryName" current={stockSort} onSort={handleStockSort} align="left"   />
-                    <SortableHeader label="Product"      sortKey="productName"  current={stockSort} onSort={handleStockSort} align="left"   />
-                    <SortableHeader label="Status"       sortKey="stockStatus"  current={stockSort} onSort={handleStockSort} align="center" />
+                    <SortableHeader label="Category" sortKey="categoryName" current={stockSort} onSort={handleStockSort} align="left" />
+                    <SortableHeader label="Product" sortKey="productName" current={stockSort} onSort={handleStockSort} align="left" />
+                    <SortableHeader label="Status" sortKey="stockStatus" current={stockSort} onSort={handleStockSort} align="center" />
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
                       Total Stock
                     </th>
-                    <SortableHeader label="Remaining"    sortKey="totalLeft"    current={stockSort} onSort={handleStockSort} align="center" />
-                    <SortableHeader label="Sold"         sortKey="totalSold"    current={stockSort} onSort={handleStockSort} align="center" />
-                    <SortableHeader label="Newest Batch" sortKey="newestBatch"  current={stockSort} onSort={handleStockSort} align="center" />
+                    <SortableHeader label="Remaining" sortKey="totalLeft" current={stockSort} onSort={handleStockSort} align="center" />
+                    <SortableHeader label="Sold" sortKey="totalSold" current={stockSort} onSort={handleStockSort} align="center" />
+                    <SortableHeader label="Newest Batch" sortKey="newestBatch" current={stockSort} onSort={handleStockSort} align="center" />
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
@@ -1023,12 +1019,12 @@ export default function InventoryReportDashboard() {
                     </tr>
                   ) : (
                     sortedStock.map((row) => {
-                      const key    = `stock-${row.productId}`;
+                      const key = `stock-${row.productId}`;
                       const isOpen = !!expandedRows[key];
-                      const pct    = row.totalInitial > 0 ? (row.totalLeft / row.totalInitial) * 100 : 0;
-                      const rowBg  =
+                      const pct = row.totalInitial > 0 ? (row.totalLeft / row.totalInitial) * 100 : 0;
+                      const rowBg =
                         row.stockStatus === "empty" ? "bg-red-50/50" :
-                        row.stockStatus === "low"   ? "bg-amber-50/50" : "";
+                          row.stockStatus === "low" ? "bg-amber-50/50" : "";
 
                       return (
                         <React.Fragment key={row.productId}>
@@ -1042,9 +1038,8 @@ export default function InventoryReportDashboard() {
                             <td className="px-6 py-3.5 font-medium text-gray-900">
                               <div className="flex items-center gap-2">
                                 <ChevronDown
-                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
-                                    isOpen ? "rotate-180" : ""
-                                  }`}
+                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                    }`}
                                 />
                                 {row.productName}
                               </div>
@@ -1062,10 +1057,9 @@ export default function InventoryReportDashboard() {
                             </td>
                             <td className="px-6 py-3.5">
                               <div className="flex flex-col items-center gap-1">
-                                <span className={`font-bold font-mono text-sm ${
-                                  row.stockStatus === "empty" ? "text-red-600" :
-                                  row.stockStatus === "low"   ? "text-amber-600" : "text-emerald-600"
-                                }`}>
+                                <span className={`font-bold font-mono text-sm ${row.stockStatus === "empty" ? "text-red-600" :
+                                    row.stockStatus === "low" ? "text-amber-600" : "text-emerald-600"
+                                  }`}>
                                   {row.totalLeft}
                                 </span>
                                 <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -1153,13 +1147,13 @@ export default function InventoryReportDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <SortableHeader label="Roll No"           sortKey="rollNumber"       current={studentSort} onSort={handleStudentSort} align="left"   />
-                    <SortableHeader label="Name"              sortKey="name"             current={studentSort} onSort={handleStudentSort} align="left"   />
-                    <SortableHeader label="Std"               sortKey="standard"         current={studentSort} onSort={handleStudentSort} align="center" />
-                    <SortableHeader label="Last Bal."         sortKey="openingBalance" current={studentSort} onSort={handleStudentSort} align="right"  />
-                    <SortableHeader label="Topup (Period)"    sortKey="topupInPeriod"    current={studentSort} onSort={handleStudentSort} align="right"  />
-                    <SortableHeader label="Expense (Period)"  sortKey="expenseInPeriod"  current={studentSort} onSort={handleStudentSort} align="right"  />
-                    <SortableHeader label="Cur. Balance"      sortKey="currentBalance"   current={studentSort} onSort={handleStudentSort} align="right"  />
+                    <SortableHeader label="Roll No" sortKey="rollNumber" current={studentSort} onSort={handleStudentSort} align="left" />
+                    <SortableHeader label="Name" sortKey="name" current={studentSort} onSort={handleStudentSort} align="left" />
+                    <SortableHeader label="Std" sortKey="standard" current={studentSort} onSort={handleStudentSort} align="center" />
+                    <SortableHeader label="Last Bal." sortKey="openingBalance" current={studentSort} onSort={handleStudentSort} align="right" />
+                    <SortableHeader label="Topup (Period)" sortKey="topupInPeriod" current={studentSort} onSort={handleStudentSort} align="right" />
+                    <SortableHeader label="Expense (Period)" sortKey="expenseInPeriod" current={studentSort} onSort={handleStudentSort} align="right" />
+                    <SortableHeader label="Cur. Balance" sortKey="currentBalance" current={studentSort} onSort={handleStudentSort} align="right" />
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
                       Refund
                     </th>
@@ -1176,7 +1170,7 @@ export default function InventoryReportDashboard() {
                       </td>
                     </tr>
                   ) : (
-                        sortedStudents.map((row) => (
+                    sortedStudents.map((row) => (
                       //FIXME - Fix this
                       <tr key={row.studentId ?? `student-row-${row.rollNumber}`} className="hover:bg-gray-50 transition-colors">
                         {/* Roll No */}
@@ -1219,13 +1213,12 @@ export default function InventoryReportDashboard() {
                         </td>
                         {/* Current Balance */}
                         <td className="px-6 py-3.5 text-right">
-                          <span className={`font-mono text-sm font-bold ${
-                            row.currentBalance <= 0
+                          <span className={`font-mono text-sm font-bold ${row.currentBalance <= 0
                               ? "text-red-600"
                               : row.currentBalance < 50
-                              ? "text-amber-600"
-                              : "text-gray-800"
-                          }`}>
+                                ? "text-amber-600"
+                                : "text-gray-800"
+                            }`}>
                             {formatINR(row.currentBalance)}
                           </span>
                         </td>
@@ -1273,13 +1266,13 @@ export default function InventoryReportDashboard() {
 
 // // components/InventoryReportDashboard.tsx
 
-// import React, { useState, useCallback, useMemo } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
+// import React, { useState, useCallback, useMemo } from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Badge } from '@/components/ui/badge';
+// import { Button } from '@/components/ui/button';
 // import {
 //   Download,
 //   Loader2,
@@ -1295,7 +1288,7 @@ export default function InventoryReportDashboard() {
 //   AlertTriangle,
 //   BarChart3,
 // } from "lucide-react";
-// import { toast } from "sonner";
+// import { toast } from 'sonner';
 // import type {
 //   SoldProduct,
 //   SoldBatch,

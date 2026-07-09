@@ -1,7 +1,7 @@
 // hooks/use-mutations.ts
-import { ApiResponse } from "@/lib/api/base-handler";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { ApiResponse } from '@/lib/api/base-handler';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface MutationConfig<TData, TVariables> {
   queryKey: string[];
@@ -39,9 +39,9 @@ export function useCreate<TData, TVariables>(
       const result: ApiResponse<TData> | ApiErrorResponse = await response.json();
 
       if (!response.ok) {
-        const errorMsg = 
-          (result as ApiErrorResponse).error?.message || 
-          (result as ApiErrorResponse).message || 
+        const errorMsg =
+          (result as ApiErrorResponse).error?.message ||
+          (result as ApiErrorResponse).message ||
           "Failed to create resource";
         throw new Error(errorMsg);
       }
@@ -85,9 +85,9 @@ export function useUpdate<TData, TVariables extends { _id: string }>(
       const result: ApiResponse<TData> | ApiErrorResponse = await response.json();
 
       if (!response.ok) {
-        const errorMsg = 
-          (result as ApiErrorResponse).error?.message || 
-          (result as ApiErrorResponse).message || 
+        const errorMsg =
+          (result as ApiErrorResponse).error?.message ||
+          (result as ApiErrorResponse).message ||
           "Failed to update resource";
         throw new Error(errorMsg);
       }
@@ -129,15 +129,15 @@ export function useDelete<TData>(
       const result: ApiResponse<TData> | ApiErrorResponse = await response.json();
 
       if (!response.ok) {
-        const errorMsg = 
-          (result as ApiErrorResponse).error?.message || 
-          (result as ApiErrorResponse).message || 
+        const errorMsg =
+          (result as ApiErrorResponse).error?.message ||
+          (result as ApiErrorResponse).message ||
           "Failed to delete resource";
         throw new Error(errorMsg);
       }
 
       const successResult = result as ApiResponse<TData>;
-      
+
       // For delete, data might be null
       return successResult.data as TData;
     },

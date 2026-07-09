@@ -1,27 +1,27 @@
 // app/dashboard/products-tab.tsx
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { 
   Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, 
   AlertTriangle, PackagePlus, FileSpreadsheet, ArrowLeft, ChevronRight
 } from "lucide-react";
-import { toast } from "sonner";
-import AddProductModal from "@/components/modals/add-product-modal";
-import EditProductModal from "@/components/modals/edit-product-modal";
-import AddStockEntryModal from "@/components/modals/add-stock-entry-modal";
-import StockReportModal from "@/components/modals/stock-report-modal";
+import { toast } from 'sonner';
+import AddProductModal from '@/components/modals/add-product-modal';
+import EditProductModal from '@/components/modals/edit-product-modal';
+import AddStockEntryModal from '@/components/modals/add-stock-entry-modal';
+import StockReportModal from '@/components/modals/stock-report-modal';
 
-import type { Product, ProductsResponse, ProductFilterState } from "@/types/seller/product";
-import type { Category, CategoriesResponse } from "@/types/seller/category";
-import { ApiResponse } from "@/lib/api/base-handler";
+import type { Product, ProductsResponse, ProductFilterState } from '@/types/seller/product';
+import type { Category, CategoriesResponse } from '@/types/seller/category';
+import { ApiResponse } from '@/lib/api/base-handler';
 
 // Helper function to format stock entries as "latest + ... + oldest"
 const formatStockEntries = (entries: Array<{ quantity: number; createdAt: string }> | undefined) => {
@@ -539,28 +539,28 @@ export default function ProductsTab() {
 // // app/dashboard/products-tab.tsx
 // "use client";
 
-// import { useState, useMemo, useCallback } from "react";
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Switch } from "@/components/ui/switch";
+// import { useState, useMemo, useCallback } from 'react';
+// import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Badge } from '@/components/ui/badge';
+// import { Switch } from '@/components/ui/switch';
 // import { 
 //   Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, 
 //   AlertTriangle, PackagePlus, FileSpreadsheet, ArrowLeft, ChevronRight
 // } from "lucide-react";
-// import { toast } from "sonner";
-// import AddProductModal from "@/components/modals/add-product-modal";
-// import EditProductModal from "@/components/modals/edit-product-modal";
-// import AddStockEntryModal from "@/components/modals/add-stock-entry-modal";
-// import StockReportModal from "@/components/modals/stock-report-modal";
+// import { toast } from 'sonner';
+// import AddProductModal from '@/components/modals/add-product-modal';
+// import EditProductModal from '@/components/modals/edit-product-modal';
+// import AddStockEntryModal from '@/components/modals/add-stock-entry-modal';
+// import StockReportModal from '@/components/modals/stock-report-modal';
 
 // import type { 
 //   ApiResponse, Product, ProductsResponse, ProductFilterState 
 // } from "@/types/product";
-// import type { Category, CategoriesResponse } from "@/types/category";
+// import type { Category, CategoriesResponse } from '@/types/category';
 
 // export default function ProductsTab() {
 //   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -1021,28 +1021,28 @@ export default function ProductsTab() {
 // // // app/dashboard/products-tab.tsx
 // // "use client";
 
-// // import { useState, useMemo, useCallback } from "react";
-// // import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// // import { Button } from "@/components/ui/button";
-// // import { Input } from "@/components/ui/input";
-// // import { Label } from "@/components/ui/label";
-// // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // import { Badge } from "@/components/ui/badge";
-// // import { Switch } from "@/components/ui/switch";
+// // import { useState, useMemo, useCallback } from 'react';
+// // import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// // import { Button } from '@/components/ui/button';
+// // import { Input } from '@/components/ui/input';
+// // import { Label } from '@/components/ui/label';
+// // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // import { Badge } from '@/components/ui/badge';
+// // import { Switch } from '@/components/ui/switch';
 // // import { 
 // //   Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, 
 // //   AlertTriangle, PackagePlus, FileSpreadsheet, ArrowLeft, ChevronRight
 // // } from "lucide-react";
-// // import { toast } from "sonner";
-// // import AddProductModal from "@/components/modals/add-product-modal";
-// // import EditProductModal from "@/components/modals/edit-product-modal";
-// // import AddStockEntryModal from "@/components/modals/add-stock-entry-modal";
-// // import StockReportModal from "@/components/modals/stock-report-modal";
+// // import { toast } from 'sonner';
+// // import AddProductModal from '@/components/modals/add-product-modal';
+// // import EditProductModal from '@/components/modals/edit-product-modal';
+// // import AddStockEntryModal from '@/components/modals/add-stock-entry-modal';
+// // import StockReportModal from '@/components/modals/stock-report-modal';
 
 // // import type { 
 // //   ApiResponse, Product, ProductsResponse, ProductFilterState 
 // // } from "@/types/product";
-// // import type { Category, CategoriesResponse } from "@/types/category";
+// // import type { Category, CategoriesResponse } from '@/types/category';
 
 // // export default function ProductsTab() {
 // //   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -1481,15 +1481,15 @@ export default function ProductsTab() {
 // // // // app/dashboard/products-tab.tsx
 // // // "use client";
 
-// // // import { useState, useMemo, useCallback } from "react";
-// // // import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// // // import { Button } from "@/components/ui/button";
-// // // import { Input } from "@/components/ui/input";
-// // // import { Label } from "@/components/ui/label";
-// // // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// // // import { Badge } from "@/components/ui/badge";
-// // // import { Switch } from "@/components/ui/switch";
+// // // import { useState, useMemo, useCallback } from 'react';
+// // // import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// // // import { Button } from '@/components/ui/button';
+// // // import { Input } from '@/components/ui/input';
+// // // import { Label } from '@/components/ui/label';
+// // // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// // // import { Badge } from '@/components/ui/badge';
+// // // import { Switch } from '@/components/ui/switch';
 // // // import { 
 // // //   Plus, 
 // // //   Edit, 
@@ -1503,10 +1503,10 @@ export default function ProductsTab() {
 // // //   PackagePlus, 
 // // //   FileSpreadsheet
 // // // } from "lucide-react";
-// // // import { toast } from "sonner";
-// // // import AddProductModal from "@/components/modals/add-product-modal";
-// // // import EditProductModal from "@/components/modals/edit-product-modal";
-// // // import AddStockEntryModal from "@/components/modals/add-stock-entry-modal";
+// // // import { toast } from 'sonner';
+// // // import AddProductModal from '@/components/modals/add-product-modal';
+// // // import EditProductModal from '@/components/modals/edit-product-modal';
+// // // import AddStockEntryModal from '@/components/modals/add-stock-entry-modal';
 
 // // // import type { 
 // // //   ApiResponse, 
@@ -1514,8 +1514,8 @@ export default function ProductsTab() {
 // // //   ProductsResponse, 
 // // //   ProductFilterState 
 // // // } from "@/types/product";
-// // // import type { Category, CategoriesResponse } from "@/types/category";
-// // // import StockReportModal from "@/components/modals/stock-report-modal";
+// // // import type { Category, CategoriesResponse } from '@/types/category';
+// // // import StockReportModal from '@/components/modals/stock-report-modal';
 
 // // // export default function ProductsTab() {
 // // //   const [filterState, setFilterState] = useState<ProductFilterState>({
@@ -2262,19 +2262,19 @@ export default function ProductsTab() {
 // // // // // app/dashboard/products-tab.tsx
 // // // // "use client";
 
-// // // // import { useState, useMemo, useCallback } from "react";
-// // // // import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// // // // import { Button } from "@/components/ui/button";
-// // // // import { Input } from "@/components/ui/input";
-// // // // import { Label } from "@/components/ui/label";
-// // // // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// // // // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// // // // import { Badge } from "@/components/ui/badge";
-// // // // import { Switch } from "@/components/ui/switch";
-// // // // import { Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, AlertTriangle } from "lucide-react";
-// // // // import { toast } from "sonner";
-// // // // import AddProductModal from "@/components/modals/add-product-modal";
-// // // // import EditProductModal from "@/components/modals/edit-product-modal";
+// // // // import { useState, useMemo, useCallback } from 'react';
+// // // // import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// // // // import { Button } from '@/components/ui/button';
+// // // // import { Input } from '@/components/ui/input';
+// // // // import { Label } from '@/components/ui/label';
+// // // // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// // // // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// // // // import { Badge } from '@/components/ui/badge';
+// // // // import { Switch } from '@/components/ui/switch';
+// // // // import { Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, AlertTriangle } from 'lucide-react';
+// // // // import { toast } from 'sonner';
+// // // // import AddProductModal from '@/components/modals/add-product-modal';
+// // // // import EditProductModal from '@/components/modals/edit-product-modal';
 
 // // // // import type { 
 // // // //   ApiResponse, 
@@ -2282,7 +2282,7 @@ export default function ProductsTab() {
 // // // //   ProductsResponse, 
 // // // //   ProductFilterState 
 // // // // } from "@/types/product";
-// // // // import type { Category, CategoriesResponse } from "@/types/category";
+// // // // import type { Category, CategoriesResponse } from '@/types/category';
 
 // // // // export default function ProductsTab() {
 // // // //   const [filterState, setFilterState] = useState<ProductFilterState>({

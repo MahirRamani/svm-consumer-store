@@ -1,7 +1,7 @@
 // app/api/stock-transactions/[id]/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { StockTransaction } from '@/models/StockTransaction';
+import { StockTransaction } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateBody, validateParams, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withAuth, withRole, type AuthContext } from '@/lib/api/auth-helpers';

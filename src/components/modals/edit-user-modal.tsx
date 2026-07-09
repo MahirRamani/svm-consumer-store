@@ -1,25 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { User, AppRole } from "@/types/user";
-import { ALL_TAB_IDS, TABS_REGISTRY } from "@/lib/config/tabs-registry";
-import { ROLES } from "@/lib/config/rolesConfig";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { User, AppRole } from '@/types/user';
+import { ALL_TAB_IDS, TABS_REGISTRY } from '@/lib/config/tabs-registry';
+import { ROLES } from '@/lib/config/rolesConfig';
+import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ApiResponse } from "@/lib/api/base-handler";
+import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ApiResponse } from '@/lib/api/base-handler';
 
 interface EditUserModalProps {
   user: User | null;
@@ -44,11 +44,11 @@ function EditUserForm({
   onUserUpdated: () => void;
 }) {
   // ✅ Direct initialization — no useEffect needed because key remounts this
-  const [username,     setUsername]     = useState(user.username);
-  const [password,     setPassword]     = useState("");
+  const [username, setUsername] = useState(user.username);
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role,         setRole]         = useState<AppRole>(user.role);
-  const [allowedTabs,  setAllowedTabs]  = useState<string[]>(user.allowedTabs ?? []);
+  const [role, setRole] = useState<AppRole>(user.role);
+  const [allowedTabs, setAllowedTabs] = useState<string[]>(user.allowedTabs ?? []);
 
   const queryClient = useQueryClient();
 
@@ -242,25 +242,25 @@ export default function EditUserModal({
 
 // "use client";
 
-// import { useState, useEffect } from "react";
-// import { User, AppRole } from "@/types/user";
-// import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
-// import { toast } from "sonner";
+// import { useState, useEffect } from 'react';
+// import { User, AppRole } from '@/types/user';
+// import { TABS_REGISTRY } from '@/lib/config/tabs-registry';
+// import { toast } from 'sonner';
 // import {
 //   Dialog, DialogContent, DialogHeader,
 //   DialogTitle, DialogFooter,
 // } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Checkbox } from "@/components/ui/checkbox";
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Checkbox } from '@/components/ui/checkbox';
 // import {
 //   Select, SelectContent, SelectItem,
 //   SelectTrigger, SelectValue,
 // } from "@/components/ui/select";
-// import { Loader2, Eye, EyeOff } from "lucide-react";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import { ApiResponse } from "@/lib/api/base-handler";
+// import { Loader2, Eye, EyeOff } from 'lucide-react';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { ApiResponse } from '@/lib/api/base-handler';
 
 // interface EditUserModalProps {
 //   user: User | null;
@@ -472,25 +472,25 @@ export default function EditUserModal({
 
 // // "use client";
 
-// // import { useState, useEffect } from "react";
-// // import { User, AppRole } from "@/types/user";
-// // import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
-// // import { toast } from "sonner";
+// // import { useState, useEffect } from 'react';
+// // import { User, AppRole } from '@/types/user';
+// // import { TABS_REGISTRY } from '@/lib/config/tabs-registry';
+// // import { toast } from 'sonner';
 // // import {
 // //   Dialog, DialogContent, DialogHeader,
 // //   DialogTitle, DialogFooter,
 // // } from "@/components/ui/dialog";
-// // import { Button } from "@/components/ui/button";
-// // import { Input } from "@/components/ui/input";
-// // import { Label } from "@/components/ui/label";
-// // import { Checkbox } from "@/components/ui/checkbox";
+// // import { Button } from '@/components/ui/button';
+// // import { Input } from '@/components/ui/input';
+// // import { Label } from '@/components/ui/label';
+// // import { Checkbox } from '@/components/ui/checkbox';
 // // import {
 // //   Select, SelectContent, SelectItem,
 // //   SelectTrigger, SelectValue,
 // // } from "@/components/ui/select";
-// // import { Loader2, Eye, EyeOff } from "lucide-react";
-// // import { useMutation, useQueryClient } from "@tanstack/react-query";
-// // import { ApiResponse } from "@/lib/api/base-handler";
+// // import { Loader2, Eye, EyeOff } from 'lucide-react';
+// // import { useMutation, useQueryClient } from '@tanstack/react-query';
+// // import { ApiResponse } from '@/lib/api/base-handler';
 
 // // interface EditUserModalProps {
 // //   user: User | null;
@@ -682,10 +682,10 @@ export default function EditUserModal({
 
 // // // "use client";
 
-// // // import { useState, useEffect } from "react";
-// // // import { User } from "@/types/user";
-// // // import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
-// // // import { toast } from "sonner";
+// // // import { useState, useEffect } from 'react';
+// // // import { User } from '@/types/user';
+// // // import { TABS_REGISTRY } from '@/lib/config/tabs-registry';
+// // // import { toast } from 'sonner';
 // // // import {
 // // //   Dialog,
 // // //   DialogContent,
@@ -693,11 +693,11 @@ export default function EditUserModal({
 // // //   DialogTitle,
 // // //   DialogFooter,
 // // // } from "@/components/ui/dialog";
-// // // import { Button } from "@/components/ui/button";
-// // // import { Input } from "@/components/ui/input";
-// // // import { Label } from "@/components/ui/label";
-// // // import { Badge } from "@/components/ui/badge";
-// // // import { Checkbox } from "@/components/ui/checkbox";
+// // // import { Button } from '@/components/ui/button';
+// // // import { Input } from '@/components/ui/input';
+// // // import { Label } from '@/components/ui/label';
+// // // import { Badge } from '@/components/ui/badge';
+// // // import { Checkbox } from '@/components/ui/checkbox';
 // // // import {
 // // //   Select,
 // // //   SelectContent,
@@ -705,7 +705,7 @@ export default function EditUserModal({
 // // //   SelectTrigger,
 // // //   SelectValue,
 // // // } from "@/components/ui/select";
-// // // import { Loader2, Eye, EyeOff } from "lucide-react";
+// // // import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 // // // interface EditUserModalProps {
 // // //   user: User | null;

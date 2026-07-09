@@ -1,8 +1,8 @@
 // app/api/transactions/[id]/revert/route.ts
 import connectDB from '@/lib/config/db';
-import { Transaction } from '@/models/Transaction';
-import { Student } from '@/models/Student';
-import { StockTransaction } from '@/models/StockTransaction';
+import { Transaction } from '@/models';
+import { Student } from '@/models';
+import { StockTransaction } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
 import mongoose from 'mongoose';
@@ -49,7 +49,7 @@ async function restoreStock(
 
   // Restore the quantity
   stockTransaction.quantityLeft += quantityToRestore;
-  
+
   // If quantity was 0 and we're restoring, clear endedAt
   if (stockTransaction.endedAt && stockTransaction.quantityLeft > 0) {
     stockTransaction.endedAt = null;
@@ -90,7 +90,7 @@ const revertTransactionHandler = async (
       acc[path] = err.message;
       return acc;
     }, {} as Record<string, string>);
-    
+
     throw new ApiError('Validation failed', 400, 'VALIDATION_ERROR', details);
   }
 
@@ -171,7 +171,7 @@ const revertTransactionHandler = async (
     revertItems = await Promise.all(
       data.items.map(async (item) => {
         const originalItem = originalItemsMap.get(item.productId);
-        
+
         if (!originalItem) {
           throw new ApiError(
             `Product ${item.productId} not found in original transaction`,

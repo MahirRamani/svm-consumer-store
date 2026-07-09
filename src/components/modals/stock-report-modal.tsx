@@ -1,7 +1,7 @@
 // components/modals/stock-report-modal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Calendar,
   ArrowRightLeft,
@@ -29,10 +29,10 @@ import {
   FileSpreadsheet,
   CalendarDays,
 } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-import type { Product } from "@/types/seller/product";
+import type { Product } from '@/types/seller/product';
 
 type ReportType = "today" | "specific" | "range" | "all";
 type ExportFormat = "csv" | "pdf" | "excel";
@@ -427,7 +427,7 @@ export default function StockReportModal({
 }// // components/modals/stock-report-modal.tsx
 // "use client";
 
-// import { useState, useEffect } from "react";
+// import { useState, useEffect } from 'react';
 // import {
 //   Dialog,
 //   DialogContent,
@@ -435,9 +435,9 @@ export default function StockReportModal({
 //   DialogTitle,
 //   DialogFooter,
 // } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
+// import { Button } from '@/components/ui/button';
+// import { Label } from '@/components/ui/label';
+// import { Input } from '@/components/ui/input';
 // import {
 //   Select,
 //   SelectContent,
@@ -445,7 +445,7 @@ export default function StockReportModal({
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 // import {
 //   Calendar,
 //   ArrowRightLeft,
@@ -455,10 +455,10 @@ export default function StockReportModal({
 //   FileSpreadsheet,
 //   CalendarDays,
 // } from "lucide-react";
-// import { toast } from "sonner";
-// import { cn } from "@/lib/utils";
+// import { toast } from 'sonner';
+// import { cn } from '@/lib/utils';
 
-// import type { Product } from "@/types/product";
+// import type { Product } from '@/types/product';
 
 // // =============================================
 // // Type Definitions

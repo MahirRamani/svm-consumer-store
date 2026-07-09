@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import ProductNavigation from "@/components/seller/pos/product-navigation";
-import ShoppingCart from "@/components/seller/pos/shopping-cart";
-import StudentLookup from "@/components/seller/pos/student-lookup";
-import type { CartItem, Student } from "@/types/seller/pos";
+import { useState, useCallback } from 'react';
+import ProductNavigation from '@/components/seller/pos/product-navigation';
+import ShoppingCart from '@/components/seller/pos/shopping-cart';
+import StudentLookup from '@/components/seller/pos/student-lookup';
+import type { CartItem, Student } from '@/types/seller/pos';
 
 export default function PosPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

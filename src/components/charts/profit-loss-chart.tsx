@@ -1,7 +1,7 @@
 // components/charts/profit-loss-chart.tsx
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from '@tanstack/react-query'
 import {
   LineChart,
   Line,
@@ -12,8 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { ProfitLossDataPoint, CustomTooltipProps } from "@/types/dashboard/overview"
-import { ApiResponse } from "@/lib/api/base-handler"
+import type { ProfitLossDataPoint, CustomTooltipProps } from '@/types/dashboard/overview'
+import { ApiResponse } from '@/lib/api/base-handler'
 
 export default function ProfitLossChart() {
   const { data: chartResponse, isLoading } = useQuery<ApiResponse<ProfitLossDataPoint[]>>({
@@ -42,7 +42,7 @@ export default function ProfitLossChart() {
       const cost = payload[1]?.value || 0
       const profit = sales - cost
       const profitPercent = sales > 0 ? ((profit / sales) * 100).toFixed(1) : 0
-        
+
       return (
         <div className="bg-white p-2 border rounded-lg shadow-lg text-xs">
           <p className="font-medium mb-1">{label}</p>

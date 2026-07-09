@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, TrendingUp, TrendingDown, Link2, Calendar } from "lucide-react";
-import { toast } from "sonner";
-import { useCreateAccountTransaction } from "@/hooks/use-account-transaction-mutations";
-import type { Account } from "@/types/admin/account";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, TrendingUp, TrendingDown, Link2, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
+import { useCreateAccountTransaction } from '@/hooks/use-account-transaction-mutations';
+import type { Account } from '@/types/admin/account';
 
 interface AddTransactionModalProps {
   open: boolean;
@@ -185,8 +185,8 @@ export default function AddTransactionModal({
                 type="button"
                 variant={formData.type === "CREDIT" ? "default" : "outline"}
                 className={`h-14 flex flex-col gap-1 ${formData.type === "CREDIT"
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "hover:bg-green-50 hover:border-green-300"
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "hover:bg-green-50 hover:border-green-300"
                   }`}
                 onClick={() => handleChange("type", "CREDIT")}
               >
@@ -197,8 +197,8 @@ export default function AddTransactionModal({
                 type="button"
                 variant={formData.type === "DEBIT" ? "default" : "outline"}
                 className={`h-14 flex flex-col gap-1 ${formData.type === "DEBIT"
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "hover:bg-red-50 hover:border-red-300"
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "hover:bg-red-50 hover:border-red-300"
                   }`}
                 onClick={() => handleChange("type", "DEBIT")}
               >
@@ -322,8 +322,8 @@ export default function AddTransactionModal({
               type="submit"
               disabled={isSubmitting || !isFormValid}
               className={`flex-1 ${formData.type === "CREDIT"
-                  ? "bg-green-500 hover:bg-green-600"
-                  : "bg-red-500 hover:bg-red-600"
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-red-500 hover:bg-red-600"
                 }`}
             >
               {isSubmitting ? (

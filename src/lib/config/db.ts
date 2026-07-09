@@ -40,7 +40,7 @@ async function dbConnect() {
       return mongooseInstance;
     });
   }
-  
+
   try {
     cached.conn = await cached.promise;
   } catch (e) {
@@ -54,7 +54,7 @@ async function dbConnect() {
 export default dbConnect;
 
 
-// // import mongoose from "mongoose"
+// // import mongoose from 'mongoose'
 
 // // const MONGODB_URI = process.env.MONGODB_URI
 

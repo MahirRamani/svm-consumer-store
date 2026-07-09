@@ -10,8 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Variant = "destructive" | "warning" | "info";
 

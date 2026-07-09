@@ -1,10 +1,10 @@
 // app/api/stock-transactions/report/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/config/db";
-import { StockTransaction } from "@/models/StockTransaction";
-import { Product } from "@/models/Product";
-import { Category } from "@/models/Category";
-import mongoose from "mongoose";
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/config/db';
+import { StockTransaction } from '@/models';
+import { Product } from '@/models';
+import { Category } from '@/models';
+import mongoose from 'mongoose';
 
 interface StockReportFilter {
   productId?: mongoose.Types.ObjectId;
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Product filter (takes precedence over category)
     if (productId && productId !== "all") {
       filter.productId = new mongoose.Types.ObjectId(productId);
-    } 
+    }
     // NEW: Category filter (only if no specific product is selected)
     else if (categoryId && categoryId !== "all") {
       filter.categoryId = new mongoose.Types.ObjectId(categoryId);
@@ -283,7 +283,7 @@ function generateFilename(
   extension: string
 ): string {
   const dateStr = new Date().toISOString().split("T")[0];
-  
+
   let suffix = "";
   if (productId && productId !== "all") {
     suffix = `-product-${productId}`;
@@ -292,7 +292,7 @@ function generateFilename(
   } else {
     suffix = "-all";
   }
-  
+
   return `stock-report-${reportType}${suffix}-${dateStr}.${extension}`;
 }
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { AlertCircle, Check, ChevronDown, Loader2 } from "lucide-react";
-import type { AssignReport } from "@/types/manage-student/manage-student-bulk";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { AlertCircle, Check, ChevronDown, Loader2 } from 'lucide-react';
+import type { AssignReport } from '@/types/manage-student/manage-student-bulk';
 
 // ── Empty / loading state ───────────────────────────────────────────────────
 
@@ -45,13 +45,14 @@ export function Field({
 // ── Conflict / error list block (with swap-rolls hint) ──────────────────────
 
 export function ErrorBlock({ message }: { message: string }) {
-  const errors = message.split(" | ").map((s) => s.trim()).filter(Boolean);
+  // const errors = message.split(" | ").map((s) => s.trim()).filter(Boolean);
+  const [sentence, ...errors] = message.split(" | ").map((s) => s.trim()).filter(Boolean);
   return (
     <div className="mt-2 rounded-md border border-red-200 bg-red-50">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-red-200">
         <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
         <span className="text-sm font-medium text-red-700">
-          {errors.length} conflict{errors.length !== 1 ? "s" : ""} found
+          {errors.length} conflict{errors.length !== 1 ? "s" : ""} found - {sentence}
         </span>
       </div>
       <ul className="max-h-36 overflow-y-auto divide-y divide-red-100 px-3 py-1">

@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Store, Bell, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-// import { useAuthStore } from "@/lib/store/auth-store";
+import { Button } from '@/components/ui/button';
+import { Store, Bell, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+// import { useAuthStore } from '@/lib/store/auth-store';
 
 /**
  * A dedicated header component for the admin dashboard.
@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
  */
 export default function AdminHeader() {
   const router = useRouter();
-//   const { logout } = useAuthStore();
+  //   const { logout } = useAuthStore();
 
   const handleLogout = () => {
     // logout();

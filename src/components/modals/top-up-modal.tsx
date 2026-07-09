@@ -1,15 +1,15 @@
 // components/modals/top-up-modal.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useUpdateStudentBalance } from "@/hooks/use-student-mutations";
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { PlusCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useUpdateStudentBalance } from '@/hooks/use-student-mutations';
 
 interface TopUpModalProps {
   open: boolean;
@@ -228,7 +228,7 @@ export default function TopUpModal({ open, onOpenChange, studentId }: TopUpModal
             <p className="text-xs text-muted-foreground">{formData.reason.length}/200 characters</p>
           </div>
 
-          {formData.amount  && !errors.amount && formData.reason && !errors.reason && (
+          {formData.amount && !errors.amount && formData.reason && !errors.reason && (
             <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-700 dark:text-green-300">
                 <strong>₹{Number(formData.amount).toFixed(2)}</strong> will be added to student's account

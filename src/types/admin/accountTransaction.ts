@@ -1,6 +1,6 @@
 // types/accountTransaction.ts
 
-import type { PaginationMetadata } from "./account";
+import type { PaginationMetadata } from './account';
 
 export type { PaginationMetadata };
 

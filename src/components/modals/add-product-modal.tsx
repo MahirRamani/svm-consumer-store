@@ -1,17 +1,17 @@
 // components/modals/add-product-modal.tsx
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,10 +19,10 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { X, ImageIcon, Loader2, FileText } from "lucide-react";
-import { useCreateProduct } from "@/hooks/use-product-mutations";
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { X, ImageIcon, Loader2, FileText } from 'lucide-react';
+import { useCreateProduct } from '@/hooks/use-product-mutations';
 
 import type {
   ProductFormData,
@@ -33,7 +33,7 @@ import type {
   Category,
   CategoriesResponse
 } from "@/types/seller/category";
-import { ApiResponse } from "@/lib/api/base-handler";
+import { ApiResponse } from '@/lib/api/base-handler';
 
 interface AddProductModalProps {
   open: boolean;
@@ -642,21 +642,21 @@ export default function AddProductModal({
 // // components/modals/add-product-modal.tsx
 // "use client";
 
-// import { useState, useEffect } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Textarea } from "@/components/ui/textarea";
-// import { useCreateProduct } from "@/hooks/use-product-mutations";
+// import { useState, useEffect } from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Textarea } from '@/components/ui/textarea';
+// import { useCreateProduct } from '@/hooks/use-product-mutations';
 
 // import type {
 //   ProductFormData,
 //   ProductFormErrors
 // } from "@/types/product";
-// import type { ApiResponse, Category, CategoriesResponse } from "@/types/category";
+// import type { ApiResponse, Category, CategoriesResponse } from '@/types/category';
 
 // interface AddProductModalProps {
 //   open: boolean;

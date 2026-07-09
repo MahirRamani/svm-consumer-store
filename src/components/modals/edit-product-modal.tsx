@@ -1,17 +1,17 @@
 // components/modals/edit-product-modal.tsx
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,11 +19,11 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { X, ImageIcon, Loader2, FileText, Edit } from "lucide-react";
-import { useUpdateProduct } from "@/hooks/use-product-mutations";
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { X, ImageIcon, Loader2, FileText, Edit } from 'lucide-react';
+import { useUpdateProduct } from '@/hooks/use-product-mutations';
 
 import type {
   Product,
@@ -35,7 +35,7 @@ import type {
   Category,
   CategoriesResponse
 } from "@/types/seller/category";
-import { ApiResponse } from "@/lib/api/base-handler";
+import { ApiResponse } from '@/lib/api/base-handler';
 
 interface EditProductModalProps {
   open: boolean;
@@ -501,20 +501,20 @@ export default function EditProductModal({
 // // components/modals/edit-product-modal.tsx
 // "use client";
 
-// import { useState, useEffect } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Switch } from "@/components/ui/switch";
-// import { Edit } from "lucide-react";
-// import { useUpdateProduct } from "@/hooks/use-product-mutations";
+// import { useState, useEffect } from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Textarea } from '@/components/ui/textarea';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Switch } from '@/components/ui/switch';
+// import { Edit } from 'lucide-react';
+// import { useUpdateProduct } from '@/hooks/use-product-mutations';
 
-// import type { Product, ProductFormData, ProductFormErrors } from "@/types/product";
-// import type { ApiResponse, Category, CategoriesResponse } from "@/types/category";
+// import type { Product, ProductFormData, ProductFormErrors } from '@/types/product';
+// import type { ApiResponse, Category, CategoriesResponse } from '@/types/category';
 
 // interface EditProductModalProps {
 //   open: boolean;

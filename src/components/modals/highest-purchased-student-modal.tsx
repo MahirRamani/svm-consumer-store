@@ -1,11 +1,11 @@
 // components/modals/highest-purchased-student-modal.tsx
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Award, TrendingUp, ShoppingBag, Trophy } from "lucide-react"
-import type { HighestPurchasedStudent } from "@/types/dashboard/overview"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Award, TrendingUp, ShoppingBag, Trophy } from 'lucide-react'
+import type { HighestPurchasedStudent } from '@/types/dashboard/overview'
 
 interface HighestPurchasedStudentModalProps {
   open: boolean
@@ -13,10 +13,10 @@ interface HighestPurchasedStudentModalProps {
   student: HighestPurchasedStudent | null
 }
 
-export default function HighestPurchasedStudentModal({ 
-  open, 
-  onOpenChange, 
-  student 
+export default function HighestPurchasedStudentModal({
+  open,
+  onOpenChange,
+  student
 }: HighestPurchasedStudentModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

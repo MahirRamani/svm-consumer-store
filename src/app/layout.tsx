@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { QueryClientProvider_ } from "@/context/queryClientProvider";
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from '@/components/ui/sonner';
+import { QueryClientProvider_ } from '@/context/queryClientProvider';
+// import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 
 const geistSans = Geist({
@@ -47,8 +47,8 @@ export default function RootLayout({
   );
 }
 
-// import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
+// import type { Metadata } from 'next';
+// import { Geist, Geist_Mono } from 'next/font/google';
 // import "./globals.css";
 
 // const geistSans = Geist({

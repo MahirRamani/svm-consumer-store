@@ -1,6 +1,6 @@
 // types/pos.ts
 
-import type { TransactionType } from "@/types"
+import type { TransactionType } from '@/types'
 
 // =============================================
 // Base API Response Type
@@ -239,9 +239,9 @@ export function getCategoryId(product: Product): string | null {
 
 /** Check if product has available stock */
 export function hasAvailableStock(product: Product): boolean {
-  return product.currentStock !== null && 
-         product.currentStock !== undefined && 
-         product.currentStock.quantityLeft > 0;
+  return product.currentStock !== null &&
+    product.currentStock !== undefined &&
+    product.currentStock.quantityLeft > 0;
 }
 
 /** Check if product is low on stock */

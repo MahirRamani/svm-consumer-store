@@ -1,7 +1,7 @@
 // components/charts/category-analytics-chart.tsx
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from '@tanstack/react-query'
 import {
   BarChart,
   Bar,
@@ -12,8 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { AnalyticsDataPoint, AnalyticsView, CustomTooltipProps } from "@/types/dashboard/overview"
-import { ApiResponse } from "@/lib/api/base-handler"
+import type { AnalyticsDataPoint, AnalyticsView, CustomTooltipProps } from '@/types/dashboard/overview'
+import { ApiResponse } from '@/lib/api/base-handler'
 
 interface CategoryAnalyticsChartProps {
   view: AnalyticsView
@@ -28,7 +28,7 @@ export default function CategoryAnalyticsChart({ view, categoryId, productId }: 
       const params = new URLSearchParams({ view })
       if (categoryId && categoryId !== "all") params.append("categoryId", categoryId)
       if (productId && productId !== "all") params.append("productId", productId)
-      
+
       const response = await fetch(`/api/dashboard/analytics?${params}`)
       if (!response.ok) throw new Error("Failed to fetch analytics data")
       return response.json()
@@ -53,7 +53,7 @@ export default function CategoryAnalyticsChart({ view, categoryId, productId }: 
           <p className="text-sm font-medium mb-1">{label}</p>
           {payload.map((entry, index) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.name === "Sales" 
+              {entry.name}: {entry.name === "Sales"
                 ? `₹${entry.value.toLocaleString('en-IN')}`
                 : entry.value}
             </p>

@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/config/db';
-import { User } from '@/models/User';
+import { User } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateBody, validateParams, objectIdSchema } from '@/lib/api/validation-helpers';
 import { withRole, withAuth, type AuthContext } from '@/lib/api/auth-helpers';

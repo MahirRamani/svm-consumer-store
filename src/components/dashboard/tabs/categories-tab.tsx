@@ -1,25 +1,25 @@
 // app/dashboard/categories-tab.tsx
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Plus, Edit, Trash2, Search, AlertTriangle, Loader2, Eye, EyeOff, Download } from "lucide-react";
-import { toast } from "sonner";
-import AddCategoryModal from "@/components/modals/add-category-modal";
-import EditCategoryModal from "@/components/modals/edit-category-modal";
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Edit, Trash2, Search, AlertTriangle, Loader2, Eye, EyeOff, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import AddCategoryModal from '@/components/modals/add-category-modal';
+import EditCategoryModal from '@/components/modals/edit-category-modal';
 
 import type {
   Category,
   CategoriesResponse,
   CategoryFilterState
 } from "@/types/seller/category";
-import { ApiResponse } from "@/lib/api/base-handler";
+import { ApiResponse } from '@/lib/api/base-handler';
 
 export default function CategoriesTab() {
   const [filterState, setFilterState] = useState<CategoryFilterState>({

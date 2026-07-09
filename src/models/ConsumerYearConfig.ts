@@ -1,7 +1,7 @@
-import mongoose, { Schema, type Document } from "mongoose"
+import mongoose, { Schema, type Document } from 'mongoose'
 
-export interface IYearConfig extends Document {
-  currentYear: string
+export interface IConsumerYearConfig extends Document {
+  consumerYear: string
   yearStartDate: Date
   yearEndDate: Date
   isActive: boolean
@@ -9,9 +9,9 @@ export interface IYearConfig extends Document {
   createdBy: mongoose.Types.ObjectId
 }
 
-const YearConfigSchema = new Schema<IYearConfig>(
+const ConsumerYearConfigSchema = new Schema<IConsumerYearConfig>(
   {
-    currentYear: { type: String, required: true },      // "2025-26"
+    consumerYear: { type: String, required: true },      // "2025-26"
     yearStartDate: { type: Date, required: true },
     yearEndDate: { type: Date, required: true },
     isActive: { type: Boolean, default: false },
@@ -24,8 +24,8 @@ const YearConfigSchema = new Schema<IYearConfig>(
   }
 )
 
-YearConfigSchema.index(
+ConsumerYearConfigSchema.index(
   { isActive: 1 },
   { unique: true, partialFilterExpression: { isActive: true } }
 );
-export const YearConfig = mongoose.models.YearConfig || mongoose.model<IYearConfig>("YearConfig", YearConfigSchema)
+export const ConsumerYearConfig = mongoose.models.ConsumerYearConfig || mongoose.model<IConsumerYearConfig>("ConsumerYearConfig", ConsumerYearConfigSchema)

@@ -1,11 +1,11 @@
 // app/api/products/route.ts
 import connectDB from '@/lib/config/db';
-import { Product, type IProduct } from '@/models/Product';
-import { StockTransaction } from '@/models/StockTransaction';
-import { 
-  withErrorHandler, 
-  successResponse, 
-  paginatedResponse 
+import { Product } from '@/models';
+import { StockTransaction } from '@/models';
+import {
+  withErrorHandler,
+  successResponse,
+  paginatedResponse
 } from '@/lib/api/base-handler';
 import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
@@ -16,6 +16,7 @@ import {
   type GetProductsQueryDto,
 } from '@/lib/validations/product';
 import mongoose, { type FilterQuery } from 'mongoose';
+import { IProduct } from '@/models/Product';
 
 // =============================================
 // GET - List Products with Filtering, Pagination & Stock
@@ -24,29 +25,29 @@ const getProductsHandler = async (req: Request) => {
   await connectDB();
 
   const query = validateQuery(req, getProductsQuerySchema);
-  const { 
-    page, 
-    limit, 
-    sortBy, 
-    sortOrder, 
-    search, 
-    categoryId, 
+  const {
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+    search,
+    categoryId,
     includeInactive,
     size,
-    lowStockOnly 
+    lowStockOnly
   } = query;
 
   // Build filter
   const filter: FilterQuery<IProduct> = {};
-  
+
   if (!includeInactive) {
     filter.isActive = true;
   }
-  
+
   if (categoryId) {
     filter.categoryId = new mongoose.Types.ObjectId(categoryId);
   }
-  
+
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: 'i' } },
@@ -54,7 +55,7 @@ const getProductsHandler = async (req: Request) => {
       { barcode: { $regex: search, $options: 'i' } },
     ];
   }
-  
+
   if (size) {
     filter.size = { $regex: size, $options: 'i' };
   }
@@ -119,12 +120,12 @@ const getProductsHandler = async (req: Request) => {
     return {
       ...product,
       _id: productIdStr,
-      category: product.categoryId 
+      category: product.categoryId
         ? {
-            _id: (product.categoryId as any)._id?.toString(),
-            name: (product.categoryId as any).name,
-            description: (product.categoryId as any).description,
-          }
+          _id: (product.categoryId as any)._id?.toString(),
+          name: (product.categoryId as any).name,
+          description: (product.categoryId as any).description,
+        }
         : null,
       categoryId: (product.categoryId as any)?._id?.toString() || product.categoryId?.toString(),
       stockEntries,
@@ -141,10 +142,10 @@ const getProductsHandler = async (req: Request) => {
     });
   }
 
-  return paginatedResponse('products', finalProducts, { 
-    page, 
-    limit, 
-    totalCount: lowStockOnly ? finalProducts.length : totalCount 
+  return paginatedResponse('products', finalProducts, {
+    page,
+    limit,
+    totalCount: lowStockOnly ? finalProducts.length : totalCount
   });
 };
 
@@ -152,13 +153,13 @@ const getProductsHandler = async (req: Request) => {
 // POST - Create Product (Admin only)
 // =============================================
 const createProductHandler = async (
-  req: Request, 
+  req: Request,
   authContext: AuthContext
 ) => {
   await connectDB();
 
   const data = await validateBody(req, createProductSchema);
-  
+
   // Clean empty strings to undefined
   const cleanedData = {
     ...data,
@@ -170,15 +171,15 @@ const createProductHandler = async (
   };
 
   const product = await Product.create(cleanedData);
-  
+
   const populated = await product.populate({
     path: 'categoryId',
     select: 'name description',
   });
 
   return successResponse(
-    populated.toObject(), 
-    201, 
+    populated.toObject(),
+    201,
     'Product created successfully'
   );
 };

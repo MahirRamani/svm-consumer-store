@@ -1,33 +1,33 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, EyeOff, Eye } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Loader2, EyeOff, Eye } from 'lucide-react';
 
-import { User } from "@/types/user";
-import { ApiResponse } from "@/lib/api/base-handler";
-import { CreateUserSchema, CreateUserValues } from "@/schemas/user";
-import { ROLES } from "@/lib/config/rolesConfig";
-import { TabId, TABS_REGISTRY } from "@/lib/config/tabs-registry";
+import { User } from '@/types/user';
+import { ApiResponse } from '@/lib/api/base-handler';
+import { CreateUserSchema, CreateUserValues } from '@/schemas/user';
+import { ROLES } from '@/lib/config/rolesConfig';
+import { TabId, TABS_REGISTRY } from '@/lib/config/tabs-registry';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form, FormControl, FormDescription,
   FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card, CardContent, CardDescription,
   CardHeader, CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
+import { useState } from 'react';
 
 async function createUser(body: CreateUserValues): Promise<User> {
   const res = await fetch("/api/users", {

@@ -1,12 +1,12 @@
 // app/api/dashboard/stats/route.ts
 import connectDB from '@/lib/config/db';
-import { Transaction } from '@/models/Transaction';
-import { Product } from '@/models/Product';
-import { Student } from '@/models/Student';
+import { Transaction } from '@/models';
+import { Product } from '@/models';
+import { Student } from '@/models';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
-import type { 
-  AdminDashboardStats, 
+import type {
+  AdminDashboardStats,
   SellerDashboardStats,
   LowStockProduct,
   LowBalanceStudent,
@@ -214,12 +214,12 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
 
   const topSoldProduct: TopSoldProduct | null = topSoldResult[0]
     ? {
-        id: String(topSoldResult[0]._id),
-        name: topSoldResult[0].product.name,
-        size: topSoldResult[0].product.size,
-        quantitySold: topSoldResult[0].quantitySold,
-        revenue: topSoldResult[0].revenue,
-      }
+      id: String(topSoldResult[0]._id),
+      name: topSoldResult[0].product.name,
+      size: topSoldResult[0].product.size,
+      quantitySold: topSoldResult[0].quantitySold,
+      revenue: topSoldResult[0].revenue,
+    }
     : null;
 
   // 3. Low Balance Students (threshold: 500)
@@ -290,13 +290,13 @@ const getDashboardStatsHandler = async (req: Request, authContext: AuthContext) 
 
   const highestPurchasedStudent: HighestPurchasedStudent | null = highestPurchasedResult[0]
     ? {
-        id: String(highestPurchasedResult[0]._id),
-        name: highestPurchasedResult[0].student.name,
-        rollNumber: highestPurchasedResult[0].student.rollNumber,
-        standard: highestPurchasedResult[0].student.standard,
-        totalPurchase: highestPurchasedResult[0].totalPurchase,
-        transactionCount: highestPurchasedResult[0].transactionCount,
-      }
+      id: String(highestPurchasedResult[0]._id),
+      name: highestPurchasedResult[0].student.name,
+      rollNumber: highestPurchasedResult[0].student.rollNumber,
+      standard: highestPurchasedResult[0].student.standard,
+      totalPurchase: highestPurchasedResult[0].totalPurchase,
+      transactionCount: highestPurchasedResult[0].transactionCount,
+    }
     : null;
 
   // Build common response data

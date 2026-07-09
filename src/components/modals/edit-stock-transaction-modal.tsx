@@ -1,17 +1,17 @@
 // components/modals/edit-stock-transaction-modal.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Loader2, Package, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
-import { useUpdateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors, StockTransactionReason } from "@/types/seller/stock-transaction";
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Loader2, Package, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { useUpdateStockTransaction } from '@/hooks/use-stock-transaction-mutations';
+import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors, StockTransactionReason } from '@/types/seller/stock-transaction';
 
 interface EditStockTransactionModalProps {
   open: boolean;
@@ -549,17 +549,17 @@ export default function EditStockTransactionModal({
 // // components/modals/edit-stock-transaction-modal.tsx
 // "use client";
 
-// import { useState, useEffect, useCallback } from "react";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Edit, Loader2, Package, AlertCircle } from "lucide-react";
-// import { toast } from "sonner";
-// import { useUpdateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-// import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors } from "@/types/stock-transaction";
+// import { useState, useEffect, useCallback } from 'react';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Textarea } from '@/components/ui/textarea';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Edit, Loader2, Package, AlertCircle } from 'lucide-react';
+// import { toast } from 'sonner';
+// import { useUpdateStockTransaction } from '@/hooks/use-stock-transaction-mutations';
+// import type { StockTransaction, StockTransactionFormData, StockTransactionFormErrors } from '@/types/stock-transaction';
 
 // interface EditStockTransactionModalProps {
 //   open: boolean;
@@ -1074,16 +1074,16 @@ export default function EditStockTransactionModal({
 // // // components/modals/edit-stock-transaction-modal.tsx
 // // "use client";
 
-// // import { useState, useEffect, useCallback } from "react";
-// // import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// // import { Button } from "@/components/ui/button";
-// // import { Input } from "@/components/ui/input";
-// // import { Label } from "@/components/ui/label";
-// // import { Textarea } from "@/components/ui/textarea";
-// // import { Edit, Loader2, Package } from "lucide-react";
-// // import { toast } from "sonner";
-// // import { useUpdateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-// // import type { StockTransaction } from "@/types";
+// // import { useState, useEffect, useCallback } from 'react';
+// // import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// // import { Button } from '@/components/ui/button';
+// // import { Input } from '@/components/ui/input';
+// // import { Label } from '@/components/ui/label';
+// // import { Textarea } from '@/components/ui/textarea';
+// // import { Edit, Loader2, Package } from 'lucide-react';
+// // import { toast } from 'sonner';
+// // import { useUpdateStockTransaction } from '@/hooks/use-stock-transaction-mutations';
+// // import type { StockTransaction } from '@/types';
 
 // // interface EditStockTransactionModalProps {
 // //   open: boolean;

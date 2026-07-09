@@ -1,9 +1,9 @@
 // app/api/transactions/route.ts
 import connectDB from '@/lib/config/db';
-import { Transaction } from '@/models/Transaction';
-import { Student } from '@/models/Student';
-import { Product } from '@/models/Product';
-import { StockTransaction } from '@/models/StockTransaction';
+import { Transaction } from '@/models';
+import { Student } from '@/models';
+import { Product } from '@/models';
+import { StockTransaction } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import mongoose from 'mongoose';
 import { z } from 'zod';
@@ -61,7 +61,7 @@ function validateParsedBody<T extends z.ZodType>(
       acc[path] = err.message;
       return acc;
     }, {} as Record<string, string>);
-    
+
     throw new ApiError('Validation failed', 400, 'VALIDATION_ERROR', details);
   }
   return result.data;
@@ -189,8 +189,8 @@ async function deductStockFIFO(
 const createPurchaseHandler = async (data: CreatePurchaseDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
   console.log("data", data);
-  
-  const performedBy = data.performedBy 
+
+  const performedBy = data.performedBy
     ? new mongoose.Types.ObjectId(data.performedBy)
     : undefined;
 
@@ -233,8 +233,8 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
       }
 
       return {
-        categoryId: item.categoryId 
-          ? new mongoose.Types.ObjectId(item.categoryId) 
+        categoryId: item.categoryId
+          ? new mongoose.Types.ObjectId(item.categoryId)
           : product.categoryId,
         productId,
         stockTransactionId: primaryStockTransactionId,
@@ -303,8 +303,8 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 // =============================================
 const createTopupHandler = async (data: CreateTopupDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  const performedBy = data.performedBy 
-    ? new mongoose.Types.ObjectId(data.performedBy) 
+  const performedBy = data.performedBy
+    ? new mongoose.Types.ObjectId(data.performedBy)
     : undefined;
 
   const student = await Student.findById(studentId);
@@ -352,8 +352,8 @@ const createTopupHandler = async (data: CreateTopupDto) => {
 // =============================================
 const createDeductionHandler = async (data: CreateDeductionDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  const performedBy = data.performedBy 
-    ? new mongoose.Types.ObjectId(data.performedBy) 
+  const performedBy = data.performedBy
+    ? new mongoose.Types.ObjectId(data.performedBy)
     : undefined;
 
   const student = await Student.findById(studentId);
@@ -447,8 +447,8 @@ const createTransactionHandler = async (req: Request) => {
 export const POST = withErrorHandler(createTransactionHandler);
 
 // app/api/transactions/route.ts (add this GET handler)
-// import { Product } from "@/models/Product";
-import { Category } from "@/models/Category";
+// import { Product } from '@/models';
+import { Category } from '@/models';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';
 import { WILD_ROLL_NUMBERS } from '@/lib/constant';
@@ -557,7 +557,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     await dbConnect();
 
     const searchParams = request.nextUrl.searchParams;
-    
+
     // const search = searchParams.get("search") || "";
     // const status = searchParams.get("status") || "all";
     // const dateRange = searchParams.get("dateRange") || "all";
@@ -594,7 +594,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //     dateFilter = { createdAt: { $gte: todayStart, $lte: todayEnd } };
     //     break;
     //   }
-      
+
     //   case "week": {
     //     const weekStart = new Date(now);
     //     weekStart.setDate(now.getDate() - now.getDay());
@@ -602,14 +602,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //     dateFilter = { createdAt: { $gte: weekStart } };
     //     break;
     //   }
-      
+
     //   case "month": {
     //     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     //     monthStart.setHours(0, 0, 0, 0);
     //     dateFilter = { createdAt: { $gte: monthStart } };
     //     break;
     //   }
-      
+
     //   case "custom": {
     //     if (startDate && endDate) {
     //       const start = new Date(startDate);
@@ -620,7 +620,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //     }
     //     break;
     //   }
-      
+
     //   default:
     //     break;
     // }
@@ -677,7 +677,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //   { $sort: { createdAt: -1 } },
     //   { $skip: skip },
     //   { $limit: limit },
-      
+
     //   // Lookup student data
     //   {
     //     $lookup: {
@@ -688,7 +688,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //     }
     //   },
     //   { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
-      
+
     //   // Process items array
     //   {
     //     $addFields: {
@@ -880,7 +880,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         },
       },
     ]);
-    
+
     // Fetch detailed information for items
     const transactionsWithItemDetails: FormattedTransaction[] = await Promise.all(
       transactions.map(async (transaction) => {
@@ -889,7 +889,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         //   (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
         //     let name = "Unknown Item";
         //     let size: string | undefined;
-            
+
         //     // Get name from Product (which is now the base item)
         //     if (item.productId) {
         //       const product = await Product.findById(item.productId).select("name size");
@@ -920,7 +920,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
             let name = "Unknown Item";
             let size: string | undefined;
-            
+
             // Get name from Product (which is now the base item)
             if (item.productId) {
               const product = await Product.findById(item.productId).select("name size");
@@ -948,7 +948,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             };
           })
         );
-        
+
         return {
           id: transaction._id.toString(),
           student: {

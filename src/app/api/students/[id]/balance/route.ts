@@ -1,8 +1,8 @@
 // app/api/students/[id]/balance/route.ts
 import { z } from 'zod';
 import connectDB from '@/lib/config/db';
-import { Student } from '@/models/Student';
-import { Transaction } from '@/models/Transaction';
+import { Student } from '@/models';
+import { Transaction } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { validateBody, validateParams } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
@@ -39,7 +39,7 @@ const updateBalanceHandler = async (
 
   // Calculate new balance
   const newBalance = (student.balance || 0) + amount;
-  
+
   // Prevent negative balance for deductions
   if (newBalance < 0) {
     throw new ApiError('Insufficient balance', 400);
@@ -51,6 +51,8 @@ const updateBalanceHandler = async (
   // Create transaction record
   const transaction = await Transaction.create({
     studentId: student._id,
+    rollNumber: student.rollNumber,
+    year: student.year,
     items: [], // No items for topup/deduction
     totalAmount: Math.abs(amount), // Always positive in transaction record
     status: 'Completed',
@@ -70,7 +72,11 @@ const updateBalanceHandler = async (
   );
 
   return successResponse(
-    { student: updated!.toObject(), transaction: transaction.toObject() },
+    {
+      rollNumber: student.rollNumber,
+      newBalance: updated!.balance,
+      action: type === 'Topup' ? 'added to' : 'deducted from',
+    },
     200,
     `Balance ${type.toLowerCase()} successful`
   );

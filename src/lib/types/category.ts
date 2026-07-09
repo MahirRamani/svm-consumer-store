@@ -1,4 +1,4 @@
-import type { BaseEntity } from "@/types"
+import type { BaseEntity } from '@/types'
 
 // =============================================
 // Category Entity

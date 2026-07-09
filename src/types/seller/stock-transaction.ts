@@ -1,6 +1,6 @@
 // types/stock-transaction.ts
 
-import { BaseEntity, PaginationMetadata } from "..";
+import { BaseEntity, PaginationMetadata } from '..';
 
 export interface StockEntryFormData {
   buyingPrice: string;

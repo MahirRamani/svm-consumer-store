@@ -1,22 +1,22 @@
 // components/modals/revert-transaction-modal.tsx
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  RotateCcw, 
-  Loader2, 
+import { useState, useCallback, useMemo } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  RotateCcw,
+  Loader2,
   AlertTriangle,
   Package,
   DollarSign
 } from "lucide-react";
-import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TransactionType } from "@/types";
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TransactionType } from '@/types';
 
 // Use base TransactionItem from @/types but extend with display properties
 export interface RevertTransactionItem {
@@ -109,8 +109,8 @@ export default function RevertTransactionModal({
   // =============================================
   const selectedItemsData = useMemo(() => {
     if (!transaction || revertType === 'Full') return transaction?.items || [];
-    
-    return transaction.items.filter(item => 
+
+    return transaction.items.filter(item =>
       selectedItems.has(item.productId)
     );
   }, [transaction, selectedItems, revertType]);
@@ -142,7 +142,7 @@ export default function RevertTransactionModal({
 
   const handleSelectAll = useCallback(() => {
     if (!transaction) return;
-    
+
     if (selectedItems.size === transaction.items.length) {
       setSelectedItems(new Set());
     } else {
@@ -163,16 +163,16 @@ export default function RevertTransactionModal({
 
       if (!transaction || !canSubmit) return;
 
-      const itemsToRevert = revertType === 'Full' 
-        ? undefined 
+      const itemsToRevert = revertType === 'Full'
+        ? undefined
         : selectedItemsData.map(item => ({
-            categoryId: item.categoryId,
-            productId: item.productId,
-            stockTransactionId: item.stockTransactionId,
-            quantity: item.quantity,
-            price: item.price,
-            totalPrice: item.totalPrice,
-          }));
+          categoryId: item.categoryId,
+          productId: item.productId,
+          stockTransactionId: item.stockTransactionId,
+          quantity: item.quantity,
+          price: item.price,
+          totalPrice: item.totalPrice,
+        }));
       console.log("🚀 ~ RevertTransactionModal ~ itemsToRevert:", itemsToRevert)
 
       revertMutation.mutate({
@@ -267,11 +267,10 @@ export default function RevertTransactionModal({
                   <button
                     type="button"
                     onClick={() => handleRevertTypeChange('Full')}
-                    className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      revertType === 'Full'
+                    className={`p-4 border-2 rounded-lg text-left transition-all ${revertType === 'Full'
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <p className="font-medium text-gray-900">Full Revert</p>
                     <p className="text-sm text-gray-600 mt-1">
@@ -281,11 +280,10 @@ export default function RevertTransactionModal({
                   <button
                     type="button"
                     onClick={() => handleRevertTypeChange('Partial')}
-                    className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      revertType === 'Partial'
+                    className={`p-4 border-2 rounded-lg text-left transition-all ${revertType === 'Partial'
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <p className="font-medium text-gray-900">Partial Revert</p>
                     <p className="text-sm text-gray-600 mt-1">
@@ -309,7 +307,7 @@ export default function RevertTransactionModal({
                       {selectedItems.size === transaction.items.length ? 'Deselect All' : 'Select All'}
                     </Button>
                   </div>
-                  
+
                   <div className="border rounded-lg divide-y max-h-60 overflow-y-auto">
                     {transaction.items.map((item) => (
                       <div

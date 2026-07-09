@@ -1,27 +1,27 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Schema } from 'mongoose'
 
 export interface IAuditLog {
-    action: string
-    entity: string
-    entityId: mongoose.Types.ObjectId
-    before: Schema.Types.Mixed
-    after: Schema.Types.Mixed
-    performedBy: mongoose.Types.ObjectId
-    reason: string
-    year: string
+  action: string
+  entity: string
+  entityId: mongoose.Types.ObjectId
+  before: Schema.Types.Mixed
+  after: Schema.Types.Mixed
+  performedBy: mongoose.Types.ObjectId
+  reason: string
+  year: string
 }
 
 const AuditLogSchema = new Schema<IAuditLog>(
   {
     action: {
       type: String,
-      enum: ["STUDENT_CREATED","ROLL_NUMBER_UPDATE", "YEAR_START", "YEAR_CHANGE", "YEAR_END", "STATUS_CHANGE"],
+      enum: ["STUDENT_CREATED", "ROLL_NUMBER_UPDATE", "YEAR_START", "YEAR_CHANGE", "YEAR_END", "STATUS_CHANGE"],
       required: true,
       index: true,
     },
     entity: {
       type: String,
-      enum: ["Student",  "YearConfig"],
+      enum: ["Student", "ConsumerYearConfig"],
       required: true,
     },
     entityId: {

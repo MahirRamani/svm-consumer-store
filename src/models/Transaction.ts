@@ -1,6 +1,6 @@
 // models/Transaction.ts
-import mongoose, { Schema, type Document, type Model } from "mongoose";
-import { ObjectId } from "mongoose";
+import mongoose, { Schema, type Document, type Model } from 'mongoose';
+import { ObjectId } from 'mongoose';
 
 // ============================================================================
 // INTERFACES
@@ -81,7 +81,7 @@ const TransactionSchema = new Schema<ITransaction>(
     },
     year: {
       type: String,
-      required: true,               // ← snapshot from YearConfig.currentYear at txn time
+      required: true,               // ← snapshot from ConsumerYearConfig.consumerYear at txn time
       index: true,
     },
     rollNumber: {
@@ -164,7 +164,7 @@ TransactionSchema.pre("save", function (next) {
 
     // Then validate the total amount
     const calculatedTotal = this.items.reduce((sum, item) => sum + item.totalPrice, 0);
-    
+
     if (Math.abs(this.totalAmount - calculatedTotal) > 0.01) {
       return next(
         new Error(

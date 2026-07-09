@@ -1,8 +1,8 @@
 // hooks/use-auth.ts
 "use client";
 
-import { useSession } from "next-auth/react";
-import type { AppRole } from "@/lib/config/rolesConfig";
+import { useSession } from 'next-auth/react';
+import type { AppRole } from '@/lib/config/rolesConfig';
 
 export function useAuth() {
   const { data: session, status, update } = useSession();

@@ -1,7 +1,7 @@
 // hooks/use-transaction-mutations.ts
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import type { Transaction, Student } from "@/types";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import type { Transaction, Student } from '@/types';
 
 const ENDPOINT = "/api/transactions";
 const QUERY_KEYS = {

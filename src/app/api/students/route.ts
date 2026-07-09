@@ -1,17 +1,15 @@
 // app/api/students/route.ts
 import connectDB from '@/lib/config/db';
-import { Student } from '@/models/Student';
+import { Student } from '@/models';
 import { withErrorHandler, successResponse, paginatedResponse } from '@/lib/api/base-handler';
 import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
 import {
   createStudentSchema,
   getStudentsQuerySchema,
-  type CreateStudentDto,
-  type GetStudentsQueryDto,
 } from '@/lib/validations/student';
 import type { FilterQuery } from 'mongoose';
-import type { IStudent } from '@/models/Student';
+import { IStudent } from '@/models/Student';
 
 // =============================================
 // GET - List Students

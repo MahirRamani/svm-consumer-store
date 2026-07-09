@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, Pencil } from "lucide-react";
-import { toast } from "sonner";
-import { useUpdateAccount } from "@/hooks/use-account-mutations";
-import type { Account } from "@/types/admin/account";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Loader2, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
+import { useUpdateAccount } from '@/hooks/use-account-mutations';
+import type { Account } from '@/types/admin/account';
 
 interface EditAccountModalProps {
   open: boolean;

@@ -1,11 +1,11 @@
 "use client";
 
-import { User } from "@/types/user";
-import { TABS_REGISTRY } from "@/lib/config/tabs-registry";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { User } from '@/types/user';
+import { TABS_REGISTRY } from '@/lib/config/tabs-registry';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2 } from 'lucide-react';
 
 interface UserListItemProps {
   user: User;

@@ -1,7 +1,7 @@
 // components/modals/balance-report-modal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Calendar,
   ArrowRightLeft,
@@ -32,10 +32,10 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-import type { Student } from "@/types";
+import type { Student } from '@/types';
 
 // =============================================
 // Type Definitions

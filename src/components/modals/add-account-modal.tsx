@@ -1,19 +1,19 @@
 // components/modals/add-account-modal.tsx
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -21,10 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Wallet, Users } from "lucide-react";
-import { toast } from "sonner";
-import { useCreateAccount } from "@/hooks/use-account-mutations";
-import type { AccountFormErrors } from "@/types/admin/account";
+import { Loader2, Wallet, Users } from 'lucide-react';
+import { toast } from 'sonner';
+import { useCreateAccount } from '@/hooks/use-account-mutations';
+import type { AccountFormErrors } from '@/types/admin/account';
 
 interface AddAccountModalProps {
   open: boolean;
@@ -260,21 +260,21 @@ export default function AddAccountModal({ open, onOpenChange }: AddAccountModalP
 
 // "use client";
 
-// import { useState, useCallback, useEffect } from "react";
+// import { useState, useCallback, useEffect } from 'react';
 // import {
 //   Dialog,
 //   DialogContent,
 //   DialogHeader,
 //   DialogTitle,
 // } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Switch } from "@/components/ui/switch";
-// import { Loader2, Wallet } from "lucide-react";
-// import { toast } from "sonner";
-// import { useCreateAccount } from "@/hooks/use-account-mutations";
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Textarea } from '@/components/ui/textarea';
+// import { Switch } from '@/components/ui/switch';
+// import { Loader2, Wallet } from 'lucide-react';
+// import { toast } from 'sonner';
+// import { useCreateAccount } from '@/hooks/use-account-mutations';
 
 // interface AddAccountModalProps {
 //   open: boolean;

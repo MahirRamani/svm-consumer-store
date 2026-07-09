@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, Wallet, Receipt, Plus } from "lucide-react";
-import AccountsTab from "@/components/dashboard/tabs/accounts-tab";
-import AccountTransactionsTab from "@/components/dashboard/tabs/account-transactions-tab";
-import type { Account } from "@/types/admin/account";
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import AddAccountModal from "@/components/modals/add-account-modal";
+import { useState } from 'react';
+import { ChevronRight, Wallet, Receipt, Plus } from 'lucide-react';
+import AccountsTab from '@/components/dashboard/tabs/accounts-tab';
+import AccountTransactionsTab from '@/components/dashboard/tabs/account-transactions-tab';
+import type { Account } from '@/types/admin/account';
+import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
+import AddAccountModal from '@/components/modals/add-account-modal';
 
 // ── Breadcrumb ────────────────────────────────────────────────────────────
 
@@ -130,10 +130,10 @@ export default function AccountsDashboard() {
 //  *   (remove 'account-transactions' from registry entirely — navigation is internal)
 //  */
 
-// import { useState } from "react";
-// import AccountsTab from "@/components/dashboard/tabs/accounts-tab";
-// import AccountTransactionsTab from "@/components/dashboard/tabs/account-transactions-tab";
-// import type { Account } from "@/types/account";
+// import { useState } from 'react';
+// import AccountsTab from '@/components/dashboard/tabs/accounts-tab';
+// import AccountTransactionsTab from '@/components/dashboard/tabs/account-transactions-tab';
+// import type { Account } from '@/types/account';
 
 // export default function AccountsDashboard() {
 //   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);

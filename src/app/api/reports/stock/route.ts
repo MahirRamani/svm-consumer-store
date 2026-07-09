@@ -1,10 +1,10 @@
 // app/api/reports/stock/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import dbConnect from "@/lib/config/db";
-import { Product } from "@/models/Product";
-import { Category } from "@/models/Category";
-import { StockTransaction } from "@/models/StockTransaction";
+import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import dbConnect from '@/lib/config/db';
+import { Product } from '@/models';
+import { Category } from '@/models';
+import { StockTransaction } from '@/models';
 import type {
   StockProduct,
   StockBatch,
@@ -150,8 +150,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           st.endedAt instanceof Date
             ? st.endedAt.toISOString()
             : st.endedAt
-            ? new Date(st.endedAt as Date).toISOString()
-            : null,
+              ? new Date(st.endedAt as Date).toISOString()
+              : null,
         status: batchStatus,
       };
 
@@ -212,7 +212,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     data.sort((a, b) => {
       // First, compare Category Names
       const catCompare = a.categoryName.localeCompare(b.categoryName);
-      
+
       // If categories are different, return the result
       if (catCompare !== 0) return catCompare;
 

@@ -1,6 +1,6 @@
 // app/api/dashboard/profit-loss/route.ts
 import connectDB from '@/lib/config/db';
-import { Transaction } from '@/models/Transaction';
+import { Transaction } from '@/models';
 import { withErrorHandler, successResponse } from '@/lib/api/base-handler';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
 

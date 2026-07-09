@@ -1,5 +1,5 @@
 // hooks/use-category-mutations.ts
-import { useCreate, useUpdate, useDelete } from "./use-mutations";
+import { useCreate, useUpdate, useDelete } from './use-mutations';
 import type {
   Category,
   CreateCategoryInput,

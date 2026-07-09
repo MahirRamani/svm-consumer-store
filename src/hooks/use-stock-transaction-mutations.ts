@@ -1,6 +1,6 @@
 // hooks/use-stock-transaction-mutations.ts
-import { CreateStockTransactionDto } from "@/lib/validations/stockTransaction";
-import { useCreate, useUpdate, useDelete } from "./use-mutations";
+import { CreateStockTransactionDto } from '@/lib/validations/stockTransaction';
+import { useCreate, useUpdate, useDelete } from './use-mutations';
 import type {
   StockTransaction,
   CreateStockTransactionInput

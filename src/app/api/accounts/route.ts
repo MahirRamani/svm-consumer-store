@@ -1,6 +1,6 @@
 // app/api/accounts/route.ts
 import connectDB from '@/lib/config/db';
-import { Account, type IAccount } from '@/models/Account';
+import { Account } from '@/models';
 import { withErrorHandler, successResponse, paginatedResponse } from '@/lib/api/base-handler';
 import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';
@@ -9,6 +9,7 @@ import {
   getAccountsQuerySchema,
 } from '@/lib/validations/account';
 import type { FilterQuery } from 'mongoose';
+import { IAccount } from '@/models/Account';
 
 // =============================================
 // GET - List Accounts
@@ -100,7 +101,7 @@ export const POST = withErrorHandler(withAuth(createAccountHandler));
 
 // // app/api/accounts/route.ts
 // import connectDB from '@/lib/config/db';
-// import { Account, type IAccount } from '@/models/Account';
+// import { Account, type IAccount } from '@/models';
 // import { withErrorHandler, successResponse, paginatedResponse } from '@/lib/api/base-handler';
 // import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 // import { withAuth, type AuthContext } from '@/lib/api/auth-helpers';

@@ -1,12 +1,12 @@
 // components/pos/confirmation-modal.tsx
 "use client";
 
-import { useMemo } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2, CreditCard, X, ShoppingCart } from "lucide-react";
-import type { Student, CartItem } from "@/types/seller/pos";
-import { WILD_ROLL_NUMBERS } from "@/lib/constant";
+import { useMemo } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Loader2, CreditCard, X, ShoppingCart } from 'lucide-react';
+import type { Student, CartItem } from '@/types/seller/pos';
+import { WILD_ROLL_NUMBERS } from '@/lib/constant';
 
 interface ConfirmationModalProps {
   open: boolean;
@@ -167,14 +167,14 @@ export default function ConfirmationModal({
 // // components/pos/confirmation-modal.tsx
 // "use client";
 
-// import { useMemo } from "react";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Separator } from "@/components/ui/separator";
-// import { Badge } from "@/components/ui/badge";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-// import { AlertTriangle, Loader2, CreditCard, X, User, Package, Receipt } from "lucide-react";
-// import type { Student, CartItem } from "@/types/pos";
+// import { useMemo } from 'react';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// import { Button } from '@/components/ui/button';
+// import { Separator } from '@/components/ui/separator';
+// import { Badge } from '@/components/ui/badge';
+// import { ScrollArea } from '@/components/ui/scroll-area';
+// import { AlertTriangle, Loader2, CreditCard, X, User, Package, Receipt } from 'lucide-react';
+// import type { Student, CartItem } from '@/types/pos';
 
 // interface ConfirmationModalProps {
 //   open: boolean;

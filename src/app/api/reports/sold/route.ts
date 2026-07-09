@@ -1,11 +1,11 @@
 // app/api/reports/sold/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import dbConnect from "@/lib/config/db";
-import { Transaction } from "@/models/Transaction";
-import { Product } from "@/models/Product";
-import { Category } from "@/models/Category";
-import { StockTransaction } from "@/models/StockTransaction";
+import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import dbConnect from '@/lib/config/db';
+import { Transaction } from '@/models';
+import { Product } from '@/models';
+import { Category } from '@/models';
+import { StockTransaction } from '@/models';
 import type {
   SoldProduct,
   SoldBatch,
@@ -47,19 +47,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // }
 
     const fromDate = searchParams.get("fromDate");
-const toDate   = searchParams.get("toDate");
-// fallback: if old ?date= is still sent, use it for both
-const date     = searchParams.get("date");
+    const toDate = searchParams.get("toDate");
+    // fallback: if old ?date= is still sent, use it for both
+    const date = searchParams.get("date");
 
-const resolvedFrom = fromDate ?? date;
-const resolvedTo   = toDate   ?? date;
+    const resolvedFrom = fromDate ?? date;
+    const resolvedTo = toDate ?? date;
 
-if (!resolvedFrom || !resolvedTo) {
-  return NextResponse.json({ error: "fromDate and toDate are required" }, { status: 400 });
-}
+    if (!resolvedFrom || !resolvedTo) {
+      return NextResponse.json({ error: "fromDate and toDate are required" }, { status: 400 });
+    }
 
-const start = new Date(`${resolvedFrom}T00:00:00.000Z`);
-const end   = new Date(`${resolvedTo}T23:59:59.999Z`);
+    const start = new Date(`${resolvedFrom}T00:00:00.000Z`);
+    const end = new Date(`${resolvedTo}T23:59:59.999Z`);
 
     const dayStart = start;
     // const dayStart = new Date(targetDate);
@@ -111,12 +111,12 @@ const end   = new Date(`${resolvedTo}T23:59:59.999Z`);
       // Filter by category if provided
       ...(productIdsInCategory
         ? [
-            {
-              $match: {
-                "items.productId": { $in: productIdsInCategory },
-              },
-            } as mongoose.PipelineStage,
-          ]
+          {
+            $match: {
+              "items.productId": { $in: productIdsInCategory },
+            },
+          } as mongoose.PipelineStage,
+        ]
         : []),
       {
         $group: {
@@ -294,7 +294,7 @@ const end   = new Date(`${resolvedTo}T23:59:59.999Z`);
     data.sort((a, b) => {
       // First, compare Category Names
       const catCompare = a.categoryName.localeCompare(b.categoryName);
-      
+
       // If categories are different, return the result
       if (catCompare !== 0) return catCompare;
 

@@ -1,6 +1,6 @@
 // app/api/stock-transactions/route.ts
 import connectDB from '@/lib/config/db';
-import { StockTransaction, type IStockTransaction } from '@/models/StockTransaction';
+import { StockTransaction } from '@/models';
 import { withErrorHandler, successResponse, paginatedResponse } from '@/lib/api/base-handler';
 import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
@@ -10,6 +10,7 @@ import {
 } from '@/lib/validations/stockTransaction';
 import type { FilterQuery, Types } from 'mongoose';
 import { Category, Product } from '@/models';
+import { IStockTransaction } from '@/models/StockTransaction';
 
 // =============================================
 // GET - List Stock Transactions

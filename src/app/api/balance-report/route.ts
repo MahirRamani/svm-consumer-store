@@ -2,11 +2,11 @@
 // app/api/balance-report/route.ts - Using ExcelJS (SECURE)
 // =============================================
 
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/config/db";
-import { Transaction } from "@/models/Transaction";
-import mongoose from "mongoose";
-import ExcelJS from "exceljs";
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/config/db';
+import { Transaction } from '@/models';
+import mongoose from 'mongoose';
+import ExcelJS from 'exceljs';
 
 interface BalanceReportFilter {
   studentId?: mongoose.Types.ObjectId;
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const reportData: ReportRow[] = transactions.map((transaction) => {
       const transactionDate = new Date(transaction.createdAt);
-      
+
       let performedByName = "System";
       if (transaction.performedBy) {
         if (typeof transaction.performedBy === 'object' && '_id' in transaction.performedBy) {
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (format === "csv") {
       const csvContent = generateCSV(reportData, summary, reportType, type);
       const filename = generateFilename(reportType, studentId, type, "csv");
-      
+
       const BOM = "\uFEFF";
       const csvWithBOM = BOM + csvContent;
 
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (format === "excel") {
       const excelBuffer = await generateExcel(reportData, summary, reportType, type);
       const filename = generateFilename(reportType, studentId, type, "xlsx");
-      
+
       return new NextResponse(Buffer.from(excelBuffer), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -226,9 +226,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 // =============================================
 
 function generateCSV(
-  data: ReportRow[], 
-  summary: ReportSummary, 
-  reportType: string, 
+  data: ReportRow[],
+  summary: ReportSummary,
+  reportType: string,
   transactionType: string
 ): string {
   if (data.length === 0) {
@@ -236,7 +236,7 @@ function generateCSV(
   }
 
   const headers = Object.keys(data[0]);
-  
+
   const rows = data.map((row) =>
     headers.map((header) => {
       const value = row[header as keyof ReportRow];
@@ -270,9 +270,9 @@ function generateCSV(
 }
 
 async function generateExcel(
-  data: ReportRow[], 
-  summary: ReportSummary, 
-  reportType: string, 
+  data: ReportRow[],
+  summary: ReportSummary,
+  reportType: string,
   transactionType: string
 ): Promise<Uint8Array> {
   const workbook = new ExcelJS.Workbook();
@@ -374,7 +374,7 @@ async function generateExcel(
 
   // Add summary section
   const summaryStartRow = worksheet.rowCount + 3;
-  
+
   // Summary title
   const summaryTitleRow = worksheet.getRow(summaryStartRow);
   summaryTitleRow.getCell(1).value = "SUMMARY";
@@ -389,22 +389,22 @@ async function generateExcel(
 
   // Summary data
   let currentRow = summaryStartRow + 1;
-  
+
   const addSummaryRow = (label: string, value: string | number, isBold = false) => {
     const row = worksheet.getRow(currentRow);
     const labelCell = row.getCell(1);
     const valueCell = row.getCell(2);
-    
+
     labelCell.value = label;
     valueCell.value = value;
-    
+
     // Left align labels, right align values
     if (label == "Purchase Amount (₹):" || label == "Top-up Amount (₹):" || label == "Deduction Amount (₹):") {
       valueCell.alignment = { vertical: "middle", horizontal: "right" };
     } else {
       valueCell.alignment = { vertical: "middle", horizontal: "center" };
     }
-    
+
     if (isBold) {
       labelCell.font = { bold: true };
       valueCell.font = { bold: true };
@@ -430,16 +430,16 @@ async function generateExcel(
   const netRow = worksheet.getRow(currentRow);
   const netLabelCell = netRow.getCell(1);
   const netValueCell = netRow.getCell(2);
-  
+
   netLabelCell.value = "Net Amount (₹):";
   netValueCell.value = summary.netAmount.toFixed(2);
-  
+
   netLabelCell.font = { bold: true, size: 12 };
   netValueCell.font = { bold: true, size: 12 };
-  
+
   netLabelCell.alignment = { vertical: "middle", horizontal: "left" };
   netValueCell.alignment = { vertical: "middle", horizontal: "right" };
-  
+
   // Only color the value cell, not the label
   netValueCell.fill = {
     type: "pattern",

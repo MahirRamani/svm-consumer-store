@@ -1,10 +1,10 @@
 // app/api/reports/categories/route.ts
 // Returns a flat list of categories for the filter dropdown.
 
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/config/db";
-import { Category } from "@/models/Category";
-import type { CategoryOption } from "@/lib/types/reports";
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/config/db';
+import { Category } from '@/models';
+import type { CategoryOption } from '@/lib/types/reports';
 
 export async function GET(): Promise<NextResponse> {
   try {

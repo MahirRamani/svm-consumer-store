@@ -1,17 +1,17 @@
 // components/modals/add-stock-entry-modal.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Package, Calendar, DollarSign, Hash, Loader2 } from "lucide-react";
-import { useCreateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { Package, Calendar, DollarSign, Hash, Loader2 } from 'lucide-react';
+import { useCreateStockTransaction } from '@/hooks/use-stock-transaction-mutations';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/use-auth';
 
 import type { 
   StockEntryFormData, 
@@ -401,18 +401,18 @@ export default function AddStockEntryModal({
 // // components/modals/add-stock-entry-modal.tsx
 // "use client";
 
-// import { useState, useEffect, useCallback } from "react";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import { toast } from "sonner";
-// import { Package, Calendar, DollarSign, Hash, Loader2 } from "lucide-react";
-// import { useCreateStockTransaction } from "@/hooks/use-stock-transaction-mutations";
-// import { useQueryClient } from "@tanstack/react-query";
+// import { useState, useEffect, useCallback } from 'react';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Textarea } from '@/components/ui/textarea';
+// import { toast } from 'sonner';
+// import { Package, Calendar, DollarSign, Hash, Loader2 } from 'lucide-react';
+// import { useCreateStockTransaction } from '@/hooks/use-stock-transaction-mutations';
+// import { useQueryClient } from '@tanstack/react-query';
 // // Import your auth hook - adjust the import path based on your project structure
-// import { useAuth } from "@/hooks/use-auth"; // or wherever your auth context is
+// import { useAuth } from '@/hooks/use-auth'; // or wherever your auth context is
 
 // import type { 
 //   StockEntryFormData, 

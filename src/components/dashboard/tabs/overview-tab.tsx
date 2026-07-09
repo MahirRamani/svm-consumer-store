@@ -1,10 +1,10 @@
 // app/dashboard/overview-tab.tsx
 "use client"
 
-import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Package, 
   IndianRupee, 
@@ -16,11 +16,11 @@ import {
   Users,
   Wallet
 } from "lucide-react"
-import ProfitLossChart from "@/components/charts/profit-loss-chart"
-import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart"
-import LowStockModal from "@/components/modals/low-stock-modal"
-import TodaysSalesModal from "@/components/modals/todays-sales-modal"
-import LowBalanceModal from "@/components/modals/low-balance-students-modal"
+import ProfitLossChart from '@/components/charts/profit-loss-chart'
+import CategoryAnalyticsChart from '@/components/charts/category-analytics-chart'
+import LowStockModal from '@/components/modals/low-stock-modal'
+import TodaysSalesModal from '@/components/modals/todays-sales-modal'
+import LowBalanceModal from '@/components/modals/low-balance-students-modal'
 import type { 
   DashboardStatsResponse,
   AdminDashboardStats,
@@ -28,7 +28,7 @@ import type {
   Product,
   AnalyticsView 
 } from "@/types/dashboard/overview"
-import { ApiResponse } from "@/lib/api/base-handler"
+import { ApiResponse } from '@/lib/api/base-handler'
 
 export default function OverviewTab() {
   const [showLowStockModal, setShowLowStockModal] = useState(false)
@@ -371,10 +371,10 @@ export default function OverviewTab() {
 // // app/admin/dashboard/overview-tab.tsx
 // "use client"
 
-// import { useState } from "react"
-// import { useQuery } from "@tanstack/react-query"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { useState } from 'react'
+// import { useQuery } from '@tanstack/react-query'
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 // import { 
 //   Package, 
 //   IndianRupee, 
@@ -385,11 +385,11 @@ export default function OverviewTab() {
 //   Award,
 //   Wallet
 // } from "lucide-react"
-// import ProfitLossChart from "@/components/charts/profit-loss-chart"
-// import CategoryAnalyticsChart from "@/components/charts/category-analytics-chart"
-// import LowStockModal from "@/components/modals/low-stock-modal"
-// import LowBalanceStudentsModal from "@/components/modals/low-balance-students-modal"
-// import HighestPurchasedStudentModal from "@/components/modals/highest-purchased-student-modal"
+// import ProfitLossChart from '@/components/charts/profit-loss-chart'
+// import CategoryAnalyticsChart from '@/components/charts/category-analytics-chart'
+// import LowStockModal from '@/components/modals/low-stock-modal'
+// import LowBalanceStudentsModal from '@/components/modals/low-balance-students-modal'
+// import HighestPurchasedStudentModal from '@/components/modals/highest-purchased-student-modal'
 // import { useUserPermissions } from '@/hooks/use-user-permissions'
 // import { 
 //   type ApiResponse, 

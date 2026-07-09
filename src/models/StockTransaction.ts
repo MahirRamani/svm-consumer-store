@@ -1,5 +1,5 @@
 // models/StockTransaction.ts
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
 export interface IStockTransaction extends Document {
   productId: Types.ObjectId;
@@ -62,18 +62,18 @@ const StockTransactionSchema = new Schema(
         return this.stockType === "Buy";
       },
       validate: {
-        validator: function(v: mongoose.Types.Decimal128) {
+        validator: function (v: mongoose.Types.Decimal128) {
           if (!v) return true;
           return parseFloat(v.toString()) >= 0;
         },
         message: 'Buying price cannot be negative'
       },
-      set: function(value: any) {
+      set: function (value: any) {
         if (!value && value !== 0) return value;
         if (value instanceof mongoose.Types.Decimal128) return value;
         return mongoose.Types.Decimal128.fromString(String(value));
       },
-      get: function(value: mongoose.Types.Decimal128) {
+      get: function (value: mongoose.Types.Decimal128) {
         return value ? parseFloat(value.toString()) : 0;
       }
     },
@@ -83,18 +83,18 @@ const StockTransactionSchema = new Schema(
         return this.stockType === "Sell";
       },
       validate: {
-        validator: function(v: mongoose.Types.Decimal128) {
+        validator: function (v: mongoose.Types.Decimal128) {
           if (!v) return true;
           return parseFloat(v.toString()) >= 0;
         },
         message: 'Selling price cannot be negative'
       },
-      set: function(value: any) {
+      set: function (value: any) {
         if (!value && value !== 0) return value;
         if (value instanceof mongoose.Types.Decimal128) return value;
         return mongoose.Types.Decimal128.fromString(String(value));
       },
-      get: function(value: mongoose.Types.Decimal128) {
+      get: function (value: mongoose.Types.Decimal128) {
         return value ? parseFloat(value.toString()) : undefined;
       }
     },
@@ -177,11 +177,11 @@ StockTransactionSchema.pre("save", function (next) {
       this.endedAt = new Date();
     }
   }
-  
+
   if (this.quantityLeft === 0 && !this.endedAt) {
     this.endedAt = new Date();
   }
-  
+
   next();
 });
 

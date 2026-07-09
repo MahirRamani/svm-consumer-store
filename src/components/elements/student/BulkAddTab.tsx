@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, AlertCircle, CalendarDays, Download, Upload, FileSpreadsheet, UserPlus, X } from "lucide-react";
-import { parseExcelFile, findCol, downloadExcelTemplate, ID_KEYS, ROLL_KEYS, STD_KEYS, NAME_KEYS } from "@/lib/utils/excel-utils";
-import type { YearConfigEntry, AddPhase, AddRow, AddRowErrors } from "@/types/manage-student/manage-student-bulk";
+import { useState, useCallback, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Check, AlertCircle, CalendarDays, Download, Upload, FileSpreadsheet, UserPlus, X } from 'lucide-react';
+import { parseExcelFile, findCol, downloadExcelTemplate, ID_KEYS, ROLL_KEYS, STD_KEYS, NAME_KEYS } from '@/lib/utils/excel-utils';
+import type { ConsumerYearConfigEntry, AddPhase, AddRow, AddRowErrors } from '@/types/manage-student/manage-student-bulk';
 
 interface Props {
-    activeYear: YearConfigEntry | null;
+    activeYear: ConsumerYearConfigEntry | null;
     onStudentsCreated: () => void;
 }
 
@@ -200,7 +200,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     <div className="flex items-center gap-2">
                         <AlertCircle className="w-5 h-5 text-amber-500" />
                         <p className="font-semibold text-gray-800">
-                            Preview — {addRows.length} student{addRows.length !== 1 ? "s" : ""} will be created in {activeYear?.currentYear}
+                            Preview — {addRows.length} student{addRows.length !== 1 ? "s" : ""} will be created in {activeYear?.consumerYear}
                         </p>
                     </div>
                     <p className="mt-1 text-xs text-amber-600">Review carefully — no students have been created yet.</p>
@@ -278,7 +278,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     <Check className="w-6 h-6 text-emerald-600" />
                 </div>
                 <p className="font-semibold text-gray-800">
-                    {createdCount} student{createdCount !== 1 ? "s" : ""} created in {activeYear?.currentYear}!
+                    {createdCount} student{createdCount !== 1 ? "s" : ""} created in {activeYear?.consumerYear}!
                 </p>
                 <Button
                     variant="outline"
@@ -307,7 +307,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                             <div className="flex items-center gap-2">
                                 <Badge className="text-xs gap-1 bg-indigo-500 text-white">
                                     <CalendarDays className="w-3 h-3" />
-                                    {activeYear.currentYear}
+                                    {activeYear.consumerYear}
                                 </Badge>
                                 <span className="text-xs text-gray-400">students will be added to this year</span>
                             </div>
@@ -362,18 +362,18 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                                 {addMutation.error instanceof Error ? addMutation.error.message : "Something went wrong"}
                             </span> */}
                             <div className="text-sm font-medium text-red-700 flex flex-col max-h-24 overflow-y-auto min-h-0 w-full pr-1">
-    {(addMutation.error instanceof Error ? addMutation.error.message : "Something went wrong")
-        .split('|')
-        .map((errPiece, index) => {
-            const trimmedErr = errPiece.trim();
-            return trimmedErr ? (
-                <span key={index} className="block break-words whitespace-pre-wrap">
-                    {trimmedErr}
-                </span>
-            ) : null;
-        })
-    }
-</div>
+                                {(addMutation.error instanceof Error ? addMutation.error.message : "Something went wrong")
+                                    .split('|')
+                                    .map((errPiece, index) => {
+                                        const trimmedErr = errPiece.trim();
+                                        return trimmedErr ? (
+                                            <span key={index} className="block break-words whitespace-pre-wrap">
+                                                {trimmedErr}
+                                            </span>
+                                        ) : null;
+                                    })
+                                }
+                            </div>
                         </div>
                     </div>
                 )}
@@ -459,7 +459,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
 
                                     <td className="px-3 py-2">
                                         <span className="text-xs text-gray-400 font-mono">
-                                            {activeYear?.currentYear ?? <span className="italic text-gray-300">no year</span>}
+                                            {activeYear?.consumerYear ?? <span className="italic text-gray-300">no year</span>}
                                         </span>
                                     </td>
 

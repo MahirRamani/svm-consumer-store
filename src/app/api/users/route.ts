@@ -1,17 +1,18 @@
 // app/api/users/route.ts
 import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/config/db';
-import { User, type IUser } from '@/models/User';
+import { User } from '@/models';
 import { withErrorHandler, successResponse, paginatedResponse, ApiError } from '@/lib/api/base-handler';
 import { validateBody, validateQuery } from '@/lib/api/validation-helpers';
 import { withRole, type AuthContext } from '@/lib/api/auth-helpers';
 import {
+  CreateUserDto,
+  type UpdateUserDto,
   createUserSchema,
   getUsersQuerySchema,
-  type CreateUserDto,
-  type GetUsersQueryDto,
 } from '@/lib/validations/user';
 import type { FilterQuery } from 'mongoose';
+import { IUser } from '@/models/User';
 
 // =============================================
 // GET - List Users (Admin only)
@@ -64,7 +65,7 @@ const createUserHandler = async (req: Request, authContext: AuthContext) => {
   await connectDB();
 
   const data = await validateBody(req, createUserSchema);
-  
+
 
   // // Check if username already exists
   // const existingUser = await User.findOne({ username: data.username });

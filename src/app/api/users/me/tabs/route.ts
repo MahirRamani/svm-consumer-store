@@ -1,6 +1,6 @@
 // app/api/users/me/tabs/route.ts
 import connectDB from '@/lib/config/db';
-import { User } from '@/models/User';
+import { User } from '@/models';
 import { withErrorHandler, successResponse, ApiError } from '@/lib/api/base-handler';
 import { withAuth } from '@/lib/api/auth-helpers';
 

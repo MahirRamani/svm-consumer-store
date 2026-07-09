@@ -1,11 +1,11 @@
 // components/modals/low-stock-modal.tsx
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { AlertTriangle, Package } from "lucide-react"
-import type { LowStockProduct } from "@/types/dashboard/overview"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { AlertTriangle, Package } from 'lucide-react'
+import type { LowStockProduct } from '@/types/dashboard/overview'
 
 interface LowStockModalProps {
   open: boolean

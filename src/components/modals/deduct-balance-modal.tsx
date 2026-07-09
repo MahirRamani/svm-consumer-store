@@ -1,15 +1,15 @@
 // components/modals/deduct-balance-modal.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Minus, Loader2, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
-import { useUpdateStudentBalance } from "@/hooks/use-student-mutations";
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Minus, Loader2, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
+import { useUpdateStudentBalance } from '@/hooks/use-student-mutations';
 
 interface DeductBalanceModalProps {
   open: boolean;
@@ -122,6 +122,7 @@ export default function DeductBalanceModal({ open, onOpenChange, studentId }: De
     (e: React.FormEvent) => {
       e.preventDefault();
 
+      console.log("🚀 ~ DeductBalanceModal ~ studentId:", studentId)
       if (!studentId) {
         toast.error("No student selected");
         return;
