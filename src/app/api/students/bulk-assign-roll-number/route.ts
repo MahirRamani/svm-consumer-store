@@ -410,22 +410,15 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
     //   );
     // }
 
+
     if (isBulkWriteError) {
       const bulkErr = err as { writeErrors: Array<unknown> };
       console.log('writeErrors:', JSON.stringify(bulkErr.writeErrors, null, 2));
-    }
-
-    if (isBulkWriteError) {
-      const bulkErr = err as {
-        writeErrors: Array<{ err?: { code?: number; errmsg?: string; op?: { rollNumber?: number } } }>
-      };
 
       const conflicts = bulkErr.writeErrors
-        .filter((e) => e.err?.code === 11000)
-        .map((e) => {
-          // Extract rollNumber from the failed operation directly
-          const rollNumber = e.err?.op?.rollNumber;
-          // Find student name from studentMap using rollNumber
+        .filter((e: any) => e.code === 11000)
+        .map((e: any) => {
+          const rollNumber = e.op?.rollNumber;
           const student = [...studentMap.values()].find(
             (s) => s.rollNumber === rollNumber
           );
