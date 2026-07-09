@@ -411,6 +411,11 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
     // }
 
     if (isBulkWriteError) {
+      const bulkErr = err as { writeErrors: Array<unknown> };
+      console.log('writeErrors:', JSON.stringify(bulkErr.writeErrors, null, 2));
+    }
+
+    if (isBulkWriteError) {
       const bulkErr = err as {
         writeErrors: Array<{ err?: { code?: number; errmsg?: string; op?: { rollNumber?: number } } }>
       };
