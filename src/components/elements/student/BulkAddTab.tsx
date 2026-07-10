@@ -157,10 +157,20 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
             });
 
             console.log("4");
-            const ids = addRows.map((r) => r.id.trim()).filter(Boolean);
+            // const ids = addRows.map((r) => r.id.trim()).filter(Boolean);
+            // const dupIds = ids.filter((id, i) => ids.indexOf(id) !== i);
+            // const ids = addRows.map((r) => r.id.trim()).filter(Boolean);
+            const ids = addRows
+                .map((r) => r.id.trim())
+                .filter((id) => id !== "" && id !== "0");
+            console.log("ids:", ids); // ← add this
             const dupIds = ids.filter((id, i) => ids.indexOf(id) !== i);
+            console.log("dupIds:", dupIds); // ← add this
+            // addRows.forEach((r) => {
+            //     if (r.id.trim() && dupIds.includes(r.id.trim())) {
             addRows.forEach((r) => {
-                if (r.id.trim() && dupIds.includes(r.id.trim())) {
+                const idVal = r.id.trim();
+                if (idVal && idVal !== "0" && dupIds.includes(idVal)) {
                     errors[r._key] = { ...errors[r._key], id: "Duplicate in batch" };
                     hasErrors = true;
                 }
