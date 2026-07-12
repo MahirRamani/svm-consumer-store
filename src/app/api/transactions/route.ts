@@ -72,13 +72,14 @@ function validateParsedBody<T extends z.ZodType>(
 // =============================================
 async function deductStockByTransactionId(
   stockTransactionId: mongoose.Types.ObjectId,
-  quantityToDeduct: number
+  quantityToDeduct: number,
+  session?: mongoose.ClientSession
 ): Promise<{
   stockTransactionId: mongoose.Types.ObjectId;
   deductedQuantity: number;
   remainingQuantity: number;
 }> {
-  const stockTransaction = await StockTransaction.findById(stockTransactionId);
+  const stockTransaction = await StockTransaction.findById(stockTransactionId).session(session ?? null);
 
   if (!stockTransaction) {
     throw new ApiError(`Stock transaction not found: ${stockTransactionId}`, 404);
@@ -123,7 +124,8 @@ async function deductStockByTransactionId(
 // =============================================
 async function deductStockFIFO(
   productId: mongoose.Types.ObjectId,
-  quantityToDeduct: number
+  quantityToDeduct: number,
+  session?: mongoose.ClientSession
 ): Promise<Array<{
   stockTransactionId: mongoose.Types.ObjectId;
   deductedQuantity: number;
@@ -133,7 +135,7 @@ async function deductStockFIFO(
     productId, // Changed from subProductId
     stockType: 'Buy',
     quantityLeft: { $gt: 0 },
-  }).sort({ purchaseDate: 1, createdAt: 1 });
+  }).sort({ purchaseDate: 1, createdAt: 1 }).session(session ?? null);
 
   const totalAvailable = availableStock.reduce(
     (sum, stock) => sum + (stock.quantityLeft || 0),
@@ -186,118 +188,247 @@ async function deductStockFIFO(
 // =============================================
 // POST - Create Purchase Transaction
 // =============================================
+//NOTE - Without Session
+// const createPurchaseHandler = async (data: CreatePurchaseDto) => {
+//   const studentId = new mongoose.Types.ObjectId(data.studentId);
+//   console.log("data", data);
+
+//   const performedBy = data.performedBy
+//     ? new mongoose.Types.ObjectId(data.performedBy)
+//     : undefined;
+
+//   const student = await Student.findById(studentId);
+//   if (!student) {
+//     throw new ApiError('Student not found', 404);
+//   }
+
+//   if (!student.isActive) {
+//     throw new ApiError('Student account is inactive', 400);
+//   }
+
+//   const processedItems = await Promise.all(
+//     data.items.map(async (item) => {
+//       const productId = new mongoose.Types.ObjectId(item.productId);
+
+//       // Verify product exists
+//       const product = await Product.findById(productId);
+//       if (!product) {
+//         throw new ApiError(`Product not found: ${item.productId}`, 404);
+//       }
+
+//       if (!product.isActive) {
+//         throw new ApiError(`Product is inactive: ${product.name}`, 400);
+//       }
+
+//       const totalPrice = item.quantity * item.price;
+
+//       let stockDeduction;
+//       let primaryStockTransactionId;
+
+//       if (item.stockTransactionId) {
+//         const stockTransactionId = new mongoose.Types.ObjectId(item.stockTransactionId);
+//         stockDeduction = await deductStockByTransactionId(stockTransactionId, item.quantity);
+//         primaryStockTransactionId = stockTransactionId;
+//       } else {
+//         const fifoDeductions = await deductStockFIFO(productId, item.quantity);
+//         stockDeduction = fifoDeductions;
+//         primaryStockTransactionId = fifoDeductions[0]?.stockTransactionId;
+//       }
+
+//       return {
+//         categoryId: item.categoryId
+//           ? new mongoose.Types.ObjectId(item.categoryId)
+//           : product.categoryId,
+//         productId,
+//         stockTransactionId: primaryStockTransactionId,
+//         quantity: item.quantity,
+//         price: item.price,
+//         totalPrice,
+//         _deduction: stockDeduction,
+//       };
+//     })
+//   );
+
+//   const totalAmount = processedItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+//   if (student.balance < totalAmount && !WILD_ROLL_NUMBERS.includes(student.rollNumber)) {
+//     throw new ApiError(
+//       `Insufficient balance. Required: ₹${totalAmount}, Available: ₹${student.balance}`,
+//       400
+//     );
+//   }
+
+//   const updatedStudent = await Student.findByIdAndUpdate(
+//     studentId,
+//     { $inc: { balance: -totalAmount } },
+//     { new: true, runValidators: true }
+//   );
+
+//   const transactionItems = processedItems.map((item) => {
+//     const { _deduction, ...rest } = item;
+//     return rest;
+//   });
+
+//   const transaction = await Transaction.create({
+//     studentId,
+//     year: student.year,
+//     rollNumber: student.rollNumber,
+//     items: transactionItems,
+//     totalAmount,
+//     status: 'Completed',
+//     type: 'Purchase',
+//     performedBy,
+//   });
+
+//   return successResponse(
+//     {
+//       transaction,
+//       student: {
+//         id: updatedStudent?._id,
+//         name: updatedStudent?.name,
+//         rollNumber: updatedStudent?.rollNumber,
+//         previousBalance: student.balance,
+//         newBalance: updatedStudent?.balance,
+//         amountDeducted: totalAmount,
+//       },
+//       stockDeductions: processedItems.map((item) => ({
+//         productId: item.productId,
+//         stockTransactionId: item.stockTransactionId,
+//         quantity: item.quantity,
+//         deductionDetails: item._deduction,
+//       })),
+//     },
+//     201,
+//     'Purchase transaction created successfully'
+//   );
+// };
+
+//NOTE - With Session
 const createPurchaseHandler = async (data: CreatePurchaseDto) => {
-  const studentId = new mongoose.Types.ObjectId(data.studentId);
-  console.log("data", data);
+  const session = await mongoose.startSession();
 
-  const performedBy = data.performedBy
-    ? new mongoose.Types.ObjectId(data.performedBy)
-    : undefined;
+  try {
+    // Everything inside here is atomic — if anything throws,
+    // ALL changes (balance + transaction) are rolled back
+    const result = await session.withTransaction(async () => {
+      const studentId = new mongoose.Types.ObjectId(data.studentId);
+      const performedBy = data.performedBy
+        ? new mongoose.Types.ObjectId(data.performedBy)
+        : undefined;
 
-  const student = await Student.findById(studentId);
-  if (!student) {
-    throw new ApiError('Student not found', 404);
-  }
+      const student = await Student.findById(studentId).session(session);
+      if (!student) throw new ApiError('Student not found', 404);
+      if (!student.isActive) throw new ApiError('Student account is inactive', 400);
 
-  if (!student.isActive) {
-    throw new ApiError('Student account is inactive', 400);
-  }
+      const processedItems = await Promise.all(
+        data.items.map(async (item) => {
+          const productId = new mongoose.Types.ObjectId(item.productId);
 
-  const processedItems = await Promise.all(
-    data.items.map(async (item) => {
-      const productId = new mongoose.Types.ObjectId(item.productId);
+          const product = await Product.findById(productId).session(session);
+          if (!product) throw new ApiError(`Product not found: ${item.productId}`, 404);
+          if (!product.isActive) throw new ApiError(`Product is inactive: ${product.name}`, 400);
 
-      // Verify product exists
-      const product = await Product.findById(productId);
-      if (!product) {
-        throw new ApiError(`Product not found: ${item.productId}`, 404);
+          const totalPrice = item.quantity * item.price;
+
+          let stockDeduction;
+          let primaryStockTransactionId;
+
+          if (item.stockTransactionId) {
+            const stockTransactionId = new mongoose.Types.ObjectId(item.stockTransactionId);
+            // ⚠️ Pass session into your stock helpers too (see note below)
+            stockDeduction = await deductStockByTransactionId(stockTransactionId, item.quantity, session);
+            primaryStockTransactionId = stockTransactionId;
+          } else {
+            const fifoDeductions = await deductStockFIFO(productId, item.quantity, session);
+            stockDeduction = fifoDeductions;
+            primaryStockTransactionId = fifoDeductions[0]?.stockTransactionId;
+          }
+
+          return {
+            categoryId: item.categoryId
+              ? new mongoose.Types.ObjectId(item.categoryId)
+              : product.categoryId,
+            productId,
+            stockTransactionId: primaryStockTransactionId,
+            quantity: item.quantity,
+            price: item.price,
+            totalPrice,
+            _deduction: stockDeduction,
+          };
+        })
+      );
+
+      const totalAmount = processedItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+      if (student.balance < totalAmount && !WILD_ROLL_NUMBERS.includes(student.rollNumber)) {
+        throw new ApiError(
+          `Insufficient balance. Required: ₹${totalAmount}, Available: ₹${student.balance}`,
+          400
+        );
       }
 
-      if (!product.isActive) {
-        throw new ApiError(`Product is inactive: ${product.name}`, 400);
-      }
+      // 1. Deduct balance
+      const updatedStudent = await Student.findByIdAndUpdate(
+        studentId,
+        { $inc: { balance: -totalAmount } },
+        { new: true, runValidators: true, session } // 👈 session here
+      );
 
-      const totalPrice = item.quantity * item.price;
+      // 2. Create transaction (same atomic unit as the balance deduction)
+      const transactionItems = processedItems.map(({ _deduction, ...rest }) => rest);
 
-      let stockDeduction;
-      let primaryStockTransactionId;
-
-      if (item.stockTransactionId) {
-        const stockTransactionId = new mongoose.Types.ObjectId(item.stockTransactionId);
-        stockDeduction = await deductStockByTransactionId(stockTransactionId, item.quantity);
-        primaryStockTransactionId = stockTransactionId;
-      } else {
-        const fifoDeductions = await deductStockFIFO(productId, item.quantity);
-        stockDeduction = fifoDeductions;
-        primaryStockTransactionId = fifoDeductions[0]?.stockTransactionId;
-      }
+      const [transaction] = await Transaction.create(
+        [
+          {
+            studentId,
+            year: student.year,
+            rollNumber: student.rollNumber,
+            items: transactionItems,
+            totalAmount,
+            status: 'Completed',
+            type: 'Purchase',
+            performedBy,
+          },
+        ],
+        { session } // 👈 session here — note: create() needs array + options when using sessions
+      );
 
       return {
-        categoryId: item.categoryId
-          ? new mongoose.Types.ObjectId(item.categoryId)
-          : product.categoryId,
-        productId,
-        stockTransactionId: primaryStockTransactionId,
-        quantity: item.quantity,
-        price: item.price,
-        totalPrice,
-        _deduction: stockDeduction,
+        transaction,
+        updatedStudent,
+        student,
+        totalAmount,
+        processedItems,
       };
-    })
-  );
+    });
 
-  const totalAmount = processedItems.reduce((sum, item) => sum + item.totalPrice, 0);
+    const { transaction, updatedStudent, student, totalAmount, processedItems } = result;
 
-  if (student.balance < totalAmount && !WILD_ROLL_NUMBERS.includes(student.rollNumber)) {
-    throw new ApiError(
-      `Insufficient balance. Required: ₹${totalAmount}, Available: ₹${student.balance}`,
-      400
-    );
-  }
-
-  const updatedStudent = await Student.findByIdAndUpdate(
-    studentId,
-    { $inc: { balance: -totalAmount } },
-    { new: true, runValidators: true }
-  );
-
-  const transactionItems = processedItems.map((item) => {
-    const { _deduction, ...rest } = item;
-    return rest;
-  });
-
-  const transaction = await Transaction.create({
-    studentId,
-    items: transactionItems,
-    totalAmount,
-    status: 'Completed',
-    type: 'Purchase',
-    performedBy,
-  });
-
-  return successResponse(
-    {
-      transaction,
-      student: {
-        id: updatedStudent?._id,
-        name: updatedStudent?.name,
-        rollNumber: updatedStudent?.rollNumber,
-        previousBalance: student.balance,
-        newBalance: updatedStudent?.balance,
-        amountDeducted: totalAmount,
+    return successResponse(
+      {
+        transaction,
+        student: {
+          id: updatedStudent?._id,
+          name: updatedStudent?.name,
+          rollNumber: updatedStudent?.rollNumber,
+          previousBalance: student.balance,
+          newBalance: updatedStudent?.balance,
+          amountDeducted: totalAmount,
+        },
+        stockDeductions: processedItems.map((item) => ({
+          productId: item.productId,
+          stockTransactionId: item.stockTransactionId,
+          quantity: item.quantity,
+          deductionDetails: item._deduction,
+        })),
       },
-      stockDeductions: processedItems.map((item) => ({
-        productId: item.productId,
-        stockTransactionId: item.stockTransactionId,
-        quantity: item.quantity,
-        deductionDetails: item._deduction,
-      })),
-    },
-    201,
-    'Purchase transaction created successfully'
-  );
+      201,
+      'Purchase transaction created successfully'
+    );
+  } finally {
+    session.endSession(); // Always clean up
+  }
 };
-
 // =============================================
 // POST - Create Topup Transaction
 // =============================================

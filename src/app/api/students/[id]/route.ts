@@ -99,6 +99,6 @@ const deleteStudentHandler = async (
 // =============================================
 // Export Routes
 // =============================================
-export const GET = withErrorHandler(withRole(['SUPERUSER', 'ACCOUNTANT', 'ADMIN'])(getStudentHandler));
+export const GET = withErrorHandler(withRole(['SUPERUSER', 'ACCOUNTANT', 'ADMIN', 'SELLER'])(getStudentHandler));
 export const PATCH = withErrorHandler(withRole(['SUPERUSER', 'ACCOUNTANT', 'ADMIN'])(updateStudentHandler));
 export const DELETE = withErrorHandler(withRole(['SUPERUSER'])(deleteStudentHandler));
