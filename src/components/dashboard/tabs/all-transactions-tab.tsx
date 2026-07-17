@@ -123,37 +123,6 @@ export default function TransactionsTab() {
     setFilters(prev => ({ ...prev, currentPage: 1 }));
   }, []);
 
-  // const { data: response, isLoading, isFetching } = useQuery<TransactionsResponse>({
-  //   queryKey: [
-  //     "transactions",
-  //     committedSearch,
-  //     filters.statusFilter,
-  //     filters.dateRange,
-  //     filters.startDate,
-  //     filters.endDate,
-  //     filters.currentPage,
-  //     filters.pageSize,
-  //   ],
-  //   queryFn: async (): Promise<TransactionsResponse> => {
-  //     const params = new URLSearchParams();
-
-  //     if (committedSearch) params.append("search", committedSearch);
-  //     if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
-  //     if (filters.dateRange !== "all") params.append("dateRange", filters.dateRange);
-  //     if (filters.dateRange === "custom" && filters.startDate) params.append("startDate", filters.startDate);
-  //     if (filters.dateRange === "custom" && filters.endDate) params.append("endDate", filters.endDate);
-  //     params.append("page", filters.currentPage.toString());
-  //     params.append("limit", filters.pageSize.toString());
-
-  //     const response = await fetch(`/api/transactions?${params}`);
-  //     if (!response.ok) throw new Error("Failed to fetch transactions");
-  //     return response.json();
-  //   },
-  //   staleTime: 30 * 1000,
-  //   placeholderData: (previousData) => previousData,
-  // });
-
-  // Add this helper
   const getYesterday = () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -395,18 +364,6 @@ export default function TransactionsTab() {
     setShowRevertModal(true);
   }, [parseTransactionItems]);
 
-  // Check if transaction can be reverted - properly typed with extended types
-  // const canRevert = useCallback((transaction: Transaction): boolean => {
-  //   const type = transaction.transactionType as TransactionTypeExtended;
-  //   return (
-  //     transaction.status === "Completed" &&
-  //     type !== "Reverted" &&
-  //     type !== "Partial Revert" &&
-  //     type !== "Partial Reverted" &&
-  //     type !== "Revert"
-  //   );
-  // }, []);
-
   const canRevert = useCallback((transaction: Transaction): boolean => {
     const type = transaction.type as TransactionType;
 
@@ -414,7 +371,7 @@ export default function TransactionsTab() {
     const isOriginalTransaction = ["Purchase", "Topup", "Deduction"].includes(type);
 
     console.log('Checking canRevert for transaction:', {
-      id: transaction.id,
+      _id: transaction._id,
       status: transaction.status,
       type: transaction.type,
       isOriginal: isOriginalTransaction,
@@ -461,7 +418,7 @@ export default function TransactionsTab() {
         });
         const timeStr = transactionDate.toLocaleTimeString();
 
-        const txnId = `TXN${transaction.id.toString().padStart(6, "0")}`;
+        const txnId = `TXN${transaction._id.toString().padStart(6, "0")}`;
         const studentName = transaction.student?.name || "Unknown";
         const rollNumber = transaction.student?.rollNumber || "N/A";
         const totalAmount = Number(transaction.totalAmount).toFixed(2);
@@ -797,7 +754,7 @@ export default function TransactionsTab() {
 
                       if (items.length === 0) {
                         return (
-                          <tr key={transaction.id} className="hover:bg-gray-50">
+                          <tr key={transaction._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>

@@ -381,7 +381,7 @@ export interface TransactionItem {
 }
 
 export interface Transaction extends BaseEntity {
-  id: string
+  _id: string
   student: Student
   userId?: string
   items?: TransactionItem[]

@@ -381,6 +381,7 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
         [
           {
             studentId,
+            id: student.id,
             year: student.year,
             rollNumber: student.rollNumber,
             items: transactionItems,
@@ -453,6 +454,9 @@ const createTopupHandler = async (data: CreateTopupDto) => {
 
   const transaction = await Transaction.create({
     studentId,
+    id: student.id,
+    year: student.year,
+    rollNumber: student.rollNumber,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',
@@ -509,6 +513,9 @@ const createDeductionHandler = async (data: CreateDeductionDto) => {
 
   const transaction = await Transaction.create({
     studentId,
+    id: student.id,
+    year: student.year,
+    rollNumber: student.rollNumber,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',
@@ -640,6 +647,7 @@ interface AggregatedTransaction {
   totalAmount: number;
   student?: {
     name: string;
+    id: string;
     rollNumber: string;
   };
   items: TransactionItem[];
@@ -657,7 +665,7 @@ interface ProcessedItem {
 }
 
 interface FormattedTransaction {
-  id: string;
+  _id: string;
   student: {
     name: string;
     rollNumber: string;
@@ -1081,9 +1089,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         );
 
         return {
-          id: transaction._id.toString(),
+          _id: transaction._id.toString(),
           student: {
             name: transaction.student?.name || "Unknown",
+            id: transaction.student?.id.toString(),
             rollNumber: transaction.student?.rollNumber || "N/A"
           },
           items: JSON.stringify(itemsWithNames),

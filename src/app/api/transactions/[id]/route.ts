@@ -268,6 +268,9 @@ const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 
   const transaction = await Transaction.create({
     studentId,
+    id: student.id,
+    year: student.year,
+    rollNumber: student.rollNumber,
     items: transactionItems,
     totalAmount,
     status: 'Completed',
@@ -322,6 +325,9 @@ const createTopupHandler = async (data: CreateTopupDto) => {
 
   const transaction = await Transaction.create({
     studentId,
+    id: student.id,
+    year: student.year,
+    rollNumber: student.rollNumber,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',
@@ -378,6 +384,9 @@ const createDeductionHandler = async (data: CreateDeductionDto) => {
 
   const transaction = await Transaction.create({
     studentId,
+    id: student.id,
+    year: student.year,
+    rollNumber: student.rollNumber,
     items: [],
     totalAmount: data.totalAmount,
     status: 'Completed',

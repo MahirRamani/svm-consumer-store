@@ -32,7 +32,8 @@ type RevertTransactionDto = z.infer<typeof revertTransactionSchema>;
 // =============================================
 async function restoreStock(
   stockTransactionId: mongoose.Types.ObjectId,
-  quantityToRestore: number
+  quantityToRestore: number,
+  session?: mongoose.ClientSession
 ): Promise<void> {
   const stockTransaction = await StockTransaction.findById(stockTransactionId);
 
@@ -84,6 +85,7 @@ const revertTransactionHandler = async (
   }
 
   const result = revertTransactionSchema.safeParse(body);
+
   if (!result.success) {
     const details = result.error.issues.reduce((acc, err) => {
       const path = err.path.join('.');
@@ -96,168 +98,168 @@ const revertTransactionHandler = async (
 
   const data: RevertTransactionDto = result.data;
 
-  // Find original transaction
-  const originalTransaction = await Transaction.findById(id);
+  // ✅ Start session — all DB writes are atomic
+  const session = await mongoose.startSession();
 
-  if (!originalTransaction) {
-    throw new ApiError('Transaction not found', 404);
-  }
+  try {
+    let responsePayload: unknown;
 
-  // Validate transaction can be reverted
-  if (originalTransaction.type !== 'Purchase') {
-    throw new ApiError('Only Purchase transactions can be reverted', 400);
-  }
+    await session.withTransaction(async () => {
+      const originalTransaction = await Transaction.findById(id).session(session);
+      if (!originalTransaction) throw new ApiError('Transaction not found', 404);
 
-  if (originalTransaction.status === 'Cancelled') {
-    throw new ApiError('Transaction is already cancelled', 400);
-  }
+      if (originalTransaction.type !== 'Purchase') {
+        throw new ApiError('Only Purchase transactions can be reverted', 400);
+      }
+      if (originalTransaction.status === 'Cancelled') {
+        throw new ApiError('Transaction is already cancelled', 400);
+      }
 
-  // Check if already reverted
-  const existingRevert = await Transaction.findOne({
-    type: { $in: ['Revert', 'Partial Revert'] },
-    reason: { $regex: id, $options: 'i' },
-  });
+      const existingRevert = await Transaction.findOne({
+        type: { $in: ['Revert', 'Partial Revert'] },
+        reason: { $regex: id, $options: 'i' },
+      }).session(session);
 
-  if (existingRevert && data.revertType === 'Full') {
-    throw new ApiError('Transaction has already been reverted', 400);
-  }
+      if (existingRevert && data.revertType === 'Full') {
+        throw new ApiError('Transaction has already been reverted', 400);
+      }
 
-  // Get student
-  const student = await Student.findById(originalTransaction.studentId);
-  if (!student) {
-    throw new ApiError('Student not found', 404);
-  }
+      const student = await Student.findById(originalTransaction.studentId).session(session);
+      if (!student) throw new ApiError('Student not found', 404);
 
-  // Calculate revert amount and items
-  let revertAmount = 0;
-  let revertItems: typeof originalTransaction.items = [];
+      let revertAmount = 0;
+      let revertItems: typeof originalTransaction.items = [];
 
-  if (data.revertType === 'Full') {
-    // Full revert - revert all items
-    revertAmount = originalTransaction.totalAmount;
-    revertItems = originalTransaction.items || [];
+      if (data.revertType === 'Full') {
+        revertAmount = originalTransaction.totalAmount;
+        revertItems = originalTransaction.items || [];
 
-    // Restore stock for all items
-    if (revertItems.length > 0) {
-      await Promise.all(
-        revertItems.map(async (item) => {
-          if (item.stockTransactionId) {
-            await restoreStock(
-              item.stockTransactionId as mongoose.Types.ObjectId,
-              item.quantity
-            );
-          }
-        })
+        if (revertItems.length > 0) {
+          await Promise.all(
+            revertItems.map(async (item) => {
+              if (item.stockTransactionId) {
+                await restoreStock(
+                  new mongoose.Types.ObjectId(item.stockTransactionId),
+                  item.quantity,
+                  session  // ✅ pass session
+                );
+              }
+            })
+          );
+        }
+
+        originalTransaction.type = 'Reverted';
+        originalTransaction.status = 'Cancelled';
+        originalTransaction.id = student.id;
+        originalTransaction.year = student.year;
+        originalTransaction.rollNumber = student.rollNumber
+        await originalTransaction.save({ session });
+      } else {
+        if (!data.items || data.items.length === 0) {
+          throw new ApiError('Items are required for partial revert', 400);
+        }
+
+        const originalItemsMap = new Map(
+          (originalTransaction.items || []).map(item => [item.productId.toString(), item])
+        );
+
+        revertItems = await Promise.all(
+          data.items.map(async (item) => {
+            const originalItem = originalItemsMap.get(item.productId);
+            if (!originalItem) {
+              throw new ApiError(`Product ${item.productId} not found in original transaction`, 400);
+            }
+            if (item.quantity > originalItem.quantity) {
+              throw new ApiError(
+                `Revert quantity (${item.quantity}) exceeds original quantity (${originalItem.quantity})`,
+                400
+              );
+            }
+
+            if (item.stockTransactionId) {
+              await restoreStock(
+                new mongoose.Types.ObjectId(item.stockTransactionId),
+                item.quantity,
+                session  // ✅ pass session
+              );
+            }
+
+            revertAmount += item.totalPrice;
+
+            return {
+              categoryId: originalItem.categoryId,
+              productId: new mongoose.Types.ObjectId(item.productId),
+              stockTransactionId: new mongoose.Types.ObjectId(item.stockTransactionId),
+              quantity: item.quantity,
+              price: item.price,
+              totalPrice: item.totalPrice,
+            };
+          })
+        );
+
+        originalTransaction.type = 'Partial Reverted';
+        // originalTransaction.status = 'Cancelled';
+        originalTransaction.id = student.id;
+        originalTransaction.year = student.year;
+        originalTransaction.rollNumber = student.rollNumber;
+        await originalTransaction.save({ session });
+      }
+
+      const updatedStudent = await Student.findByIdAndUpdate(
+        originalTransaction.studentId,
+        { $inc: { balance: revertAmount } },
+        { new: true, runValidators: true, session }  // ✅ pass session
       );
-    }
 
-    // Mark original transaction as cancelled
-    originalTransaction.status = 'Cancelled';
-    await originalTransaction.save();
-  } else {
-    // Partial revert
-    if (!data.items || data.items.length === 0) {
-      throw new ApiError('Items are required for partial revert', 400);
-    }
+      // ✅ If this throws (e.g. missing `id` field), everything above rolls back
+      const revertTransaction = await Transaction.create(
+        [{
+          studentId: originalTransaction.studentId,
+          id: originalTransaction.id ?? student.id,
+          year: originalTransaction.year,
+          rollNumber: originalTransaction.rollNumber,
+          items: revertItems,
+          totalAmount: revertAmount,
+          status: 'Completed',
+          type: data.revertType === 'Full' ? 'Revert' : 'Partial Revert',
+          reason: `${data.revertType === 'Full' ? 'Full' : 'Partial'} revert of transaction ${id}: ${data.reason}`,
+          performedBy: authContext.user.id,
+        }],
+        { session }  // ✅ create() with session needs array form
+      );
 
-    // Validate items exist in original transaction
-    const originalItemsMap = new Map(
-      (originalTransaction.items || []).map(item => [
-        item.productId.toString(),
-        item
-      ])
+      responsePayload = {
+        revertTransaction: revertTransaction[0],
+        originalTransaction: {
+          id: originalTransaction._id,
+          status: originalTransaction.status,
+          type: originalTransaction.type,
+        },
+        student: {
+          id: updatedStudent?._id,
+          name: updatedStudent?.name,
+          rollNumber: updatedStudent?.rollNumber,
+          previousBalance: student.balance,
+          newBalance: updatedStudent?.balance,
+          amountRestored: revertAmount,
+        },
+        summary: {
+          revertType: data.revertType,
+          totalItemsReverted: revertItems.length,
+          totalAmountRestored: revertAmount,
+        },
+      };
+    });
+
+    return successResponse(
+      responsePayload,
+      201,
+      `Transaction ${data.revertType === 'Full' ? 'fully' : 'partially'} reverted successfully`
     );
-
-    revertItems = await Promise.all(
-      data.items.map(async (item) => {
-        const originalItem = originalItemsMap.get(item.productId);
-
-        if (!originalItem) {
-          throw new ApiError(
-            `Product ${item.productId} not found in original transaction`,
-            400
-          );
-        }
-
-        // Validate quantity doesn't exceed original
-        if (item.quantity > originalItem.quantity) {
-          throw new ApiError(
-            `Revert quantity (${item.quantity}) exceeds original quantity (${originalItem.quantity})`,
-            400
-          );
-        }
-
-        // Restore stock
-        if (item.stockTransactionId) {
-          await restoreStock(
-            new mongoose.Types.ObjectId(item.stockTransactionId),
-            item.quantity
-          );
-        }
-
-        revertAmount += item.totalPrice;
-
-        return {
-          categoryId: originalItem.categoryId,
-          productId: new mongoose.Types.ObjectId(item.productId),
-          stockTransactionId: new mongoose.Types.ObjectId(item.stockTransactionId),
-          quantity: item.quantity,
-          price: item.price,
-          totalPrice: item.totalPrice,
-        };
-      })
-    );
-
-    // Update original transaction status
-    originalTransaction.type = 'Partial Reverted';
-    await originalTransaction.save();
+  } finally {
+    await session.endSession();  // ✅ always clean up
   }
-
-  // Restore balance to student
-  const updatedStudent = await Student.findByIdAndUpdate(
-    originalTransaction.studentId,
-    { $inc: { balance: revertAmount } },
-    { new: true, runValidators: true }
-  );
-
-  // Create revert transaction record
-  const revertTransaction = await Transaction.create({
-    studentId: originalTransaction.studentId,
-    items: revertItems,
-    totalAmount: revertAmount,
-    status: 'Completed',
-    type: data.revertType === 'Full' ? 'Reverted' : 'Partial Revert',
-    reason: `${data.revertType === 'Full' ? 'Full' : 'Partial'} revert of transaction ${id}: ${data.reason}`,
-    performedBy: authContext.user.id,
-  });
-
-  return successResponse(
-    {
-      revertTransaction,
-      originalTransaction: {
-        id: originalTransaction._id,
-        status: originalTransaction.status,
-        type: originalTransaction.type,
-      },
-      student: {
-        id: updatedStudent?._id,
-        name: updatedStudent?.name,
-        rollNumber: updatedStudent?.rollNumber,
-        previousBalance: student.balance,
-        newBalance: updatedStudent?.balance,
-        amountRestored: revertAmount,
-      },
-      summary: {
-        revertType: data.revertType,
-        totalItemsReverted: revertItems.length,
-        totalAmountRestored: revertAmount,
-      },
-    },
-    201,
-    `Transaction ${data.revertType === 'Full' ? 'fully' : 'partially'} reverted successfully`
-  );
 };
-
 // =============================================
 // Export Route
 // =============================================

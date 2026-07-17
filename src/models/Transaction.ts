@@ -17,8 +17,9 @@ export interface ITransactionItem {
 
 export interface ITransaction extends Document {
   studentId: mongoose.Types.ObjectId;
+  id: number;
   year: string;
-  rollNumber: string;
+  rollNumber: number;
   items?: ITransactionItem[];
   totalAmount: number;
   status: "Pending" | "Completed" | "Cancelled";
@@ -79,13 +80,18 @@ const TransactionSchema = new Schema<ITransaction>(
       required: true,
       index: true,
     },
+    id: {
+      type: Number,
+      required: true,
+      index: true,
+    },
     year: {
       type: String,
       required: true,               // ← snapshot from ConsumerYearConfig.consumerYear at txn time
       index: true,
     },
     rollNumber: {
-      type: String,
+      type: Number,
       required: true,               // ← snapshot of student's rollNo at txn time
       trim: true,
     },
