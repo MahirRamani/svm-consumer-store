@@ -124,7 +124,6 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
     const handleSubmit = useCallback(
 
         (dryRun: boolean) => {
-            console.log("1");
             const errors: Record<string, AddRowErrors> = {};
             let hasErrors = false;
 
@@ -142,11 +141,9 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     rowErrors.standard = "Required";
                     hasErrors = true;
                 }
-                console.log("2");
                 if (Object.keys(rowErrors).length) errors[r._key] = rowErrors;
             });
 
-            console.log("3");
             const rolls = addRows.map((r) => r.rollNumber.trim()).filter(Boolean);
             const dupRolls = rolls.filter((r, i) => rolls.indexOf(r) !== i);
             addRows.forEach((r) => {
@@ -156,16 +153,13 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                 }
             });
 
-            console.log("4");
             // const ids = addRows.map((r) => r.id.trim()).filter(Boolean);
             // const dupIds = ids.filter((id, i) => ids.indexOf(id) !== i);
             // const ids = addRows.map((r) => r.id.trim()).filter(Boolean);
             const ids = addRows
                 .map((r) => r.id.trim())
                 .filter((id) => id !== "" && id !== "0");
-            console.log("ids:", ids); // ← add this
             const dupIds = ids.filter((id, i) => ids.indexOf(id) !== i);
-            console.log("dupIds:", dupIds); // ← add this
             // addRows.forEach((r) => {
             //     if (r.id.trim() && dupIds.includes(r.id.trim())) {
             addRows.forEach((r) => {
@@ -175,16 +169,11 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     hasErrors = true;
                 }
             });
-            console.log("5");
-
-            console.log("🚀 ~ BulkAddTab ~ hasErrors:", hasErrors)
             if (hasErrors) {
                 setAddRowErrors(errors);
-                console.log("🚀 ~ BulkAddTab ~ errors:", errors)
                 return;
             }
 
-            console.log("6");
             addMutation.mutate({
                 dryRun,
                 students: addRows.map((r) => ({
@@ -194,7 +183,6 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     ...(r.id.trim() ? { id: Number(r.id.trim()) } : {}),
                 })),
             });
-            console.log("7");
         },
         [addRows, addMutation]
     );

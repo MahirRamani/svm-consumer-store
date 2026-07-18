@@ -189,7 +189,6 @@ export default function TransactionsTab() {
 
       if (committedSearch) params.append("search", committedSearch);
       if (filters.statusFilter !== "all") params.append("status", filters.statusFilter);
-      console.log("filters.typeFilter", filters.typeFilter);
       if (filters.typeFilter !== "all") {
         params.append("type", filters.typeFilter as TransactionType); // ✅ cast after narrowing
       }
@@ -331,9 +330,6 @@ export default function TransactionsTab() {
       apiItems = [];
     }
 
-    console.log("🔍 apiItems structure:", JSON.stringify(apiItems, null, 2));
-    console.log("🔍 First item:", apiItems[0]);
-
     // Transform API items to modal format
     const revertItems: RevertTransactionItem[] = apiItems.map(item => ({
       categoryId: item.categoryId,
@@ -369,14 +365,6 @@ export default function TransactionsTab() {
 
     // Can only revert completed original transactions
     const isOriginalTransaction = ["Purchase", "Topup", "Deduction"].includes(type);
-
-    console.log('Checking canRevert for transaction:', {
-      _id: transaction._id,
-      status: transaction.status,
-      type: transaction.type,
-      isOriginal: isOriginalTransaction,
-      canRevert: transaction.status === "Completed" && isOriginalTransaction
-    });
 
     return transaction.status === "Completed" && isOriginalTransaction;
   }, []);

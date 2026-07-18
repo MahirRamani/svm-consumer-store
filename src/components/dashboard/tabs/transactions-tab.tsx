@@ -214,7 +214,6 @@ export default function TransactionsTab() {
 
   
   const transactions = response?.data || [];
-  console.log("traaaaaaaaaaaaaaa", transactions);
   const pagination = response?.pagination;
 
   // const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -327,9 +326,6 @@ export default function TransactionsTab() {
       apiItems = [];
     }
 
-    console.log("🔍 apiItems structure:", JSON.stringify(apiItems, null, 2));
-    console.log("🔍 First item:", apiItems[0]);
-
     // Transform API items to modal format
     const revertItems: RevertTransactionItem[] = apiItems.map(item => ({
       categoryId: item.categoryId,
@@ -341,8 +337,6 @@ export default function TransactionsTab() {
       name: item.name,
       // size: item.size,
     }));
-
-    console.log("sssssssssssssssssss");
     
     // Create properly formatted transaction object for the modal
     const formattedTransaction: RevertTransaction = {
@@ -367,14 +361,6 @@ export default function TransactionsTab() {
 
     // Can only revert completed original transactions
     const isOriginalTransaction = ["Purchase", "Topup", "Deduction"].includes(type);
-
-    console.log('Checking canRevert for transaction:', {
-      id: transaction._id,
-      status: transaction.status,
-      type: transaction.type,
-      isOriginal: isOriginalTransaction,
-      canRevert: transaction.status === "Completed" && isOriginalTransaction
-    });
 
     return transaction.status === "Completed" && isOriginalTransaction;
   }, []);

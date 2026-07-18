@@ -51,8 +51,9 @@ const updateBalanceHandler = async (
   // Create transaction record
   const transaction = await Transaction.create({
     studentId: student._id,
-    rollNumber: student.rollNumber,
     year: student.year,
+    id: student.id,
+    rollNumber: student.rollNumber,
     items: [], // No items for topup/deduction
     totalAmount: Math.abs(amount), // Always positive in transaction record
     status: 'Completed',

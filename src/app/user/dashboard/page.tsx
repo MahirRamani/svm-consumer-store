@@ -17,7 +17,6 @@ export default function Dashboard() {
 
   // Get tabs user can access
   const accessibleTabs = getAccessibleTabs(allowedTabs);
-  console.log("🚀 ~ Dashboard ~ accessibleTabs:", accessibleTabs)
 
   // Set first accessible tab as active
   useEffect(() => {

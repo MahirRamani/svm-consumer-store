@@ -188,7 +188,6 @@ async function deductStockFIFO(
 // =============================================
 const createPurchaseHandler = async (data: CreatePurchaseDto) => {
   const studentId = new mongoose.Types.ObjectId(data.studentId);
-  console.log("data", data);
 
   const performedBy = data.performedBy
     ? new mongoose.Types.ObjectId(data.performedBy)

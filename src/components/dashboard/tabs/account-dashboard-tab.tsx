@@ -115,37 +115,3 @@ export default function AccountsDashboard() {
     </div>
   );
 }
-
-// "use client";
-
-// /**
-//  * accounts-dashboard.tsx
-//  *
-//  * This is the parent component that wires AccountsTab → AccountTransactionsTab.
-//  * Drop this into your dashboard's tab registry instead of the individual tabs,
-//  * OR use each tab independently by passing the right props via TABS_REGISTRY.
-//  *
-//  * Usage in TABS_REGISTRY (recommended):
-//  *   account: { component: AccountsDashboard, ... }
-//  *   (remove 'account-transactions' from registry entirely — navigation is internal)
-//  */
-
-// import { useState } from 'react';
-// import AccountsTab from '@/components/dashboard/tabs/accounts-tab';
-// import AccountTransactionsTab from '@/components/dashboard/tabs/account-transactions-tab';
-// import type { Account } from '@/types/account';
-
-// export default function AccountsDashboard() {
-//   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-
-//   if (selectedAccount) {
-//     return (
-//       <AccountTransactionsTab
-//         account={selectedAccount}
-//         onBack={() => setSelectedAccount(null)}
-//       />
-//     );
-//   }
-
-//   return <AccountsTab onSelectAccount={setSelectedAccount} />;
-// }

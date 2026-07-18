@@ -191,7 +191,6 @@ async function deductStockFIFO(
 //NOTE - Without Session
 // const createPurchaseHandler = async (data: CreatePurchaseDto) => {
 //   const studentId = new mongoose.Types.ObjectId(data.studentId);
-//   console.log("data", data);
 
 //   const performedBy = data.performedBy
 //     ? new mongoose.Types.ObjectId(data.performedBy)
@@ -861,8 +860,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const filter: TransactionFilter = {};
 
     const typeParam = searchParams.get("type"); // or however you read query params
-    console.log("🚀 ~ GET ~ searchParams:", searchParams)
-    console.log("🚀 ~ GET ~ typeParam:", typeParam)
 
     if (typeParam) {
       filter.type = typeParam as TransactionType;

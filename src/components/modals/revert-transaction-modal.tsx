@@ -58,8 +58,6 @@ export default function RevertTransactionModal({
   onOpenChange,
   transaction,
 }: RevertTransactionModalProps) {
-  console.log("🔍 Full transaction object:", transaction);
-  console.log("🔍 Transaction items:", transaction?.items);
   const queryClient = useQueryClient();
 
   const [revertType, setRevertType] = useState<RevertType>('Full');
@@ -173,7 +171,6 @@ export default function RevertTransactionModal({
           price: item.price,
           totalPrice: item.totalPrice,
         }));
-      console.log("🚀 ~ RevertTransactionModal ~ itemsToRevert:", itemsToRevert)
 
       revertMutation.mutate({
         transactionId: transaction._id,

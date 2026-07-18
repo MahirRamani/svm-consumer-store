@@ -122,7 +122,6 @@ export default function DeductBalanceModal({ open, onOpenChange, studentId }: De
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      console.log("🚀 ~ DeductBalanceModal ~ studentId:", studentId)
       if (!studentId) {
         toast.error("No student selected");
         return;

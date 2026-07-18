@@ -131,12 +131,10 @@ export function getTabInfo(tabId: TabId): TabInfo {
 //   return allowedTabIds.map(getTabInfo);
 // }
 export function getAccessibleTabs(allowedTabIds: TabId[]): TabInfo[] {
-  console.log("getAccessibleTabs called with:", allowedTabIds);
   const result = allowedTabIds.map(tabId => {
-    console.log("Processing tab:", tabId, "exists:", tabId in TABS_REGISTRY);
     return getTabInfo(tabId);
   });
-  console.log("getAccessibleTabs result:", result);
+  
   return result;
 }
 
