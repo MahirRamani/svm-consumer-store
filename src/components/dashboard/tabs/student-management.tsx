@@ -224,7 +224,7 @@ export default function StudentManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Student Account Management</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Student Management</h2>
         <div className="flex space-x-2">
           {/* Balance Report Button */}
           <Button

@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2, 
-  AlertTriangle, PackagePlus, FileSpreadsheet, ArrowLeft, ChevronRight
+import {
+  Plus, Edit, Search, Trash2, Eye, EyeOff, Download, Loader2,
+  AlertTriangle, PackagePlus, FileSpreadsheet, ArrowLeft, ChevronRight,
+  X
 } from "lucide-react";
 import { toast } from 'sonner';
 import AddProductModal from '@/components/modals/add-product-modal';
@@ -22,37 +23,7 @@ import StockReportModal from '@/components/modals/stock-report-modal';
 import type { Product, ProductsResponse, ProductFilterState } from '@/types/seller/product';
 import type { Category, CategoriesResponse } from '@/types/seller/category';
 import { ApiResponse } from '@/lib/api/base-handler';
-
-// Helper function to format stock entries as "latest + ... + oldest"
-const formatStockEntries = (entries: Array<{ quantity: number; createdAt: string }> | undefined) => {
-  if (!entries || entries.length === 0) {
-    return <span className="text-gray-400">No stock</span>;
-  }
-  
-  // Sort by date descending (latest first)
-  const sorted = [...entries].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  
-  return (
-    <div className="flex items-center flex-wrap gap-0.5 font-mono text-xs">
-      {sorted.map((entry, i) => (
-        <span key={i} className="flex items-center">
-          <span 
-            className={`inline-block px-1.5 py-0.5 rounded font-medium ${
-              i === sorted.length - 1 && sorted.length > 1? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            {entry.quantity}
-          </span>
-          {i < sorted.length - 1 && (
-            <span className="text-gray-400 mx-0.5">+</span>
-          )}
-        </span>
-      ))}
-    </div>
-  );
-};
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog';
 
 // Helper function to calculate total stock
 const getTotalStock = (entries: Array<{ quantity: number; createdAt: string }> | undefined): number => {
@@ -61,11 +32,11 @@ const getTotalStock = (entries: Array<{ quantity: number; createdAt: string }> |
 };
 
 export default function ProductsTab() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchTerm: "",
-    selectedCategory: "all",
+    // selectedCategory: "all",
     showInactive: false,
   });
   const [showAddModal, setShowAddModal] = useState(false);
@@ -74,7 +45,12 @@ export default function ProductsTab() {
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [showStockReportModal, setShowStockReportModal] = useState(false);
   const [stockReportProductId, setStockReportProductId] = useState<string | null>(null);
-  
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState<string>("");
+
   const queryClient = useQueryClient();
 
   const {
@@ -148,6 +124,64 @@ export default function ProductsTab() {
     onError: (error: Error) => toast.error(`Failed to update product: ${error.message}`),
   });
 
+  // Add these handlers before the return statements
+  const handleStockReportClick = useCallback((id: string) => {
+    setStockReportProductId(id);
+    setShowStockReportModal(true);
+  }, []);
+
+  const handleAddStockClick = useCallback((product: Product) => {
+    setStockProduct(product);
+  }, []);
+
+  const handleEditClick = useCallback((product: Product) => {
+    setSelectedProduct(product);
+    setShowEditModal(true);
+  }, []);
+
+  const handleToggleClick = useCallback((product: Product) => {
+    setTogglingId(product._id);
+    toggleProductMutation.mutate(
+      { productId: product._id, isActive: !product.isActive },
+      { onSettled: () => setTogglingId(null) }
+    );
+  }, [toggleProductMutation]);
+
+  const handleDeleteClick = useCallback((id: string, name: string) => {
+    setDeleteConfirmId(id);
+    setDeleteConfirmName(name);
+  }, []);
+
+  // Helper function to format stock entries as "latest + ... + oldest"
+  const formatStockEntries = useCallback((entries: Array<{ quantity: number; createdAt: string }> | undefined) => {
+    if (!entries || entries.length === 0) {
+      return <span className="text-gray-400">No stock</span>;
+    }
+
+    // Sort by date descending (latest first)
+    const sorted = [...entries].sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return (
+      <div className="flex items-center flex-wrap gap-0.5 font-mono text-xs">
+        {sorted.map((entry, i) => (
+          <span key={i} className="flex items-center">
+            <span
+              className={`inline-block px-1.5 py-0.5 rounded font-medium ${i === sorted.length - 1 && sorted.length > 1 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                }`}
+            >
+              {entry.quantity}
+            </span>
+            {i < sorted.length - 1 && (
+              <span className="text-gray-400 mx-0.5">+</span>
+            )}
+          </span>
+        ))}
+      </div>
+    );
+  }, []);
+
   const getCategoryIcon = useCallback((categoryName: string): string => {
     switch (categoryName.toLowerCase()) {
       case "food": return "🍜";
@@ -173,6 +207,16 @@ export default function ProductsTab() {
     return product.categoryId;
   }, []);
 
+  const handleCategoryClick = useCallback((id: string) => {
+    setSelectedCategoryId(id);
+    setFilterState(p => ({ ...p, searchTerm: "" }));
+  }, []);
+
+  const handleBackClick = useCallback(() => {
+    setSelectedCategoryId("");
+    setCategorySearchTerm("");
+  }, []);
+
   const categoryProductCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     products.forEach((product: Product) => {
@@ -188,12 +232,12 @@ export default function ProductsTab() {
 
   const filteredProducts = useMemo(() => {
     if (!selectedCategoryId) return [];
-    
+
     return products.filter((product: Product) => {
       if (!product || product.categoryId !== selectedCategoryId) return false;
 
       const searchTerm = filterState.searchTerm.toLowerCase().trim();
-      return !searchTerm || 
+      return !searchTerm ||
         product.name?.toLowerCase().includes(searchTerm) ||
         product.description?.toLowerCase().includes(searchTerm) ||
         product.size?.toLowerCase().includes(searchTerm) ||
@@ -289,11 +333,7 @@ export default function ProductsTab() {
   // STEP 1: Category Selection (ORIGINAL SIZE)
   if (!selectedCategoryId) {
     return (
-      <div className="">
-        {/* <div className="flex justify-between items-center"> */}
-          {/* <h2 className="text-2xl font-bold text-gray-900">Select Category</h2> */}
-        {/* </div> */}
-
+      <div>
         <Card className="mt-0 mb-1.5 p-0 overflow-auto">
           <div className="flex space-x-2 p-1.5 justify-between items-center">
             <div>
@@ -301,7 +341,15 @@ export default function ProductsTab() {
                 <Label className="block text-sm font-medium text-gray-700 mb-2">Search Categories</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input placeholder="Search for a category..." value={categorySearchTerm} onChange={(e) => setCategorySearchTerm(e.target.value)} className="pl-10" />
+                  <Input placeholder="Search a category..." value={categorySearchTerm} onChange={(e) => setCategorySearchTerm(e.target.value)} className="pl-10 pr-8" />
+                  {categorySearchTerm && (
+                    <button
+                      onClick={() => setCategorySearchTerm("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </CardContent>
             </div>
@@ -333,7 +381,8 @@ export default function ProductsTab() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-9 gap-1.5">
                 {filteredCategories.map((category) => (
-                  <Card key={category._id} className="cursor-pointer transition-all hover:shadow-lg hover:scale-102 border-2 hover:border-blue-400" onClick={() => setSelectedCategoryId(category._id)}>
+                  <Card key={category._id} className="cursor-pointer transition-all hover:shadow-lg hover:scale-102 border-2 hover:border-blue-400"
+                    onClick={() => handleCategoryClick(category._id)}>
                     <CardContent className="p-0 text-center overflow-auto">
                       <div className="text-5xl mb-3">{getCategoryIcon(category.name)}</div>
                       <h3 className="font-semibold text-lg capitalize mb-1.5">{category.name}</h3>
@@ -352,12 +401,19 @@ export default function ProductsTab() {
           </CardContent>
         </Card>
 
-        <AddProductModal open={showAddModal} onOpenChange={setShowAddModal} />
-        <StockReportModal 
-          open={showStockReportModal} 
-          onOpenChange={setShowStockReportModal} 
-          products={products} 
-          preSelectedProductId={stockReportProductId} 
+        <AddProductModal
+          open={showAddModal}
+          onOpenChange={setShowAddModal}
+          defaultCategoryId={selectedCategoryId}
+        />
+        <StockReportModal
+          open={showStockReportModal}
+          onOpenChange={(open) => {
+            setShowStockReportModal(open);
+            if (!open) setStockReportProductId(null);
+          }}
+          products={products}
+          preSelectedProductId={stockReportProductId}
         />
       </div>
     );
@@ -368,14 +424,14 @@ export default function ProductsTab() {
   const categoryName = selectedCategory?.name || "Unknown";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-3">
-          <Button onClick={() => setSelectedCategoryId(null)} variant="outline" size="sm">
+          <Button onClick={handleBackClick} variant="outline" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />Back
           </Button>
           <h2 className="text-2xl font-bold capitalize flex items-center">
-            <span className="text-3xl mr-2">{getCategoryIcon(categoryName)}</span>{categoryName} Products
+            <span className="text-3xl mr-2">{getCategoryIcon(categoryName)}</span>{categoryName}
           </h2>
         </div>
         <div className="flex space-x-2">
@@ -391,31 +447,49 @@ export default function ProductsTab() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
+      <Card className="pt-4 pb-5 mb-2">
+        <CardContent className="p-6 py-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">Search Products</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input placeholder="Name, size, barcode..." value={filterState.searchTerm} onChange={(e) => setFilterState(p => ({ ...p, searchTerm: e.target.value }))} className="pl-10" />
+                <Input placeholder="Name" value={filterState.searchTerm} onChange={(e) => setFilterState(p => ({ ...p, searchTerm: e.target.value }))} className="pl-10 pr-8" />
+                {filterState.searchTerm && (
+                  <button
+                    onClick={() => setFilterState(p => ({ ...p, searchTerm: "" }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Show Inactive Products</Label>
-              <div className="flex items-center space-x-2 mt-3">
-                <Switch checked={filterState.showInactive} onCheckedChange={(checked) => setFilterState(p => ({ ...p, showInactive: checked }))} />
-                <span className="text-sm text-gray-600">Include disabled products</span>
+            <div className="flex flex-col justify-center pl-10">
+              <Label className="text-sm font-medium text-gray-700">Products Status</Label>
+              <div className="flex items-center space-x-2 mt-1">
+                <Switch
+                  checked={filterState.showInactive}
+                  onCheckedChange={(checked) => setFilterState(p => ({ ...p, showInactive: checked }))}
+                />
+                <div>
+                  <span className="text-sm text-gray-600">
+                    {filterState.showInactive ? "Showing all products" : "Showing active only"}
+                  </span>
+                  <p className="text-xs text-gray-400">
+                    {filterState.showInactive ? "Toggle to hide inactive" : "Toggle to show inactive"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <CardTitle>Products Inventory</CardTitle>
+      <Card className="pt-4">
+        <CardHeader className="gap-0">
+          <div className="flex items-center gap-3 pb-0">
+            <CardTitle className="text-lg font-semibold text-gray-900">Products Inventory</CardTitle>
             <p className="text-sm text-gray-600 pt-1">[{filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}]</p>
           </div>
         </CardHeader>
@@ -434,22 +508,22 @@ export default function ProductsTab() {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size/Weight</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock (Latest → Oldest)</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Stock</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Size/Weight</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Stock (Latest → Oldest)</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Total Stock</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredProducts.map((product: Product) => {
                     const totalStock = getTotalStock(product.stockEntries);
                     const isLowStock = totalStock < (product.lowStockThreshold || 20);
-                    
+
                     return (
                       <tr key={product._id} className={!product.isActive ? "bg-gray-50 opacity-75" : ""}>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           <div className="flex items-center">
                             {product.imageURL ? (
                               <img src={product.imageURL} alt={product.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
@@ -464,44 +538,48 @@ export default function ProductsTab() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-6 py-3 whitespace-nowrap text-sm">
                           {product.size && <span className="font-medium">{product.size}</span>}
                           {product.weight && <div className="text-gray-500">{product.weight}</div>}
                           {product.volume && <div className="text-gray-500">{product.volume}</div>}
                           {!product.size && !product.weight && !product.volume && <span className="text-gray-400">N/A</span>}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-3">
                           {formatStockEntries(product.stockEntries)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold ${
-                            isLowStock ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
-                          }`}>
+                        <td className="px-6 py-3 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold ${isLowStock ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
                             {totalStock}
                             {isLowStock && <AlertTriangle className="w-4 h-4 ml-1" />}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           <Badge variant={product.isActive ? "default" : "secondary"} className={product.isActive ? "bg-green-500" : "bg-gray-400"}>
                             {product.isActive ? "Active" : "Disabled"}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           <div className="flex space-x-1">
-                            <Button variant="ghost" size="sm" onClick={() => { setStockReportProductId(product._id); setShowStockReportModal(true); }} className="text-green-500 hover:bg-green-50" title="Stock Report">
+                            <Button variant="ghost" size="sm" onClick={() => handleStockReportClick(product._id)} className="text-green-500 hover:bg-green-50" title="Stock Report">
                               <FileSpreadsheet className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setStockProduct(product)} className="text-blue-500 hover:bg-blue-50" title="Add Stock">
+                            <Button variant="ghost" size="sm" onClick={() => handleAddStockClick(product)} className="text-blue-500 hover:bg-blue-50" title="Add Stock">
                               <PackagePlus className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => { setSelectedProduct(product); setShowEditModal(true); }} className="text-purple-500 hover:bg-purple-50" title="Edit">
+                            <Button variant="ghost" size="sm" onClick={() => handleEditClick(product)} className="text-purple-500 hover:bg-purple-50" title="Edit">
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => toggleProductMutation.mutate({ productId: product._id, isActive: !product.isActive })} disabled={toggleProductMutation.isPending} className={product.isActive ? "text-orange-500 hover:bg-orange-50" : "text-green-500 hover:bg-green-50"}>
-                              {toggleProductMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : product.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <Button variant="ghost" size="sm" disabled={togglingId === product._id} onClick={() => handleToggleClick(product)} className={product.isActive ? "text-orange-500 hover:bg-orange-50" : "text-green-500 hover:bg-green-50"}                            >
+                              {togglingId === product._id
+                                ? <Loader2 className="w-4 h-4 animate-spin" />
+                                : product.isActive
+                                  ? <EyeOff className="w-4 h-4" />
+                                  : <Eye className="w-4 h-4" />
+                              }
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => { if (window.confirm(`Delete "${product.name}"?`)) deleteProductMutation.mutate(product._id); }} disabled={deleteProductMutation.isPending} className="text-red-500 hover:bg-red-50">
-                              {deleteProductMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteClick(product._id, product.name)} >
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </td>
@@ -515,21 +593,64 @@ export default function ProductsTab() {
         </CardContent>
       </Card>
 
-      <AddProductModal open={showAddModal} onOpenChange={setShowAddModal} />
-      <EditProductModal open={showEditModal} onOpenChange={setShowEditModal} product={selectedProduct} />
+      <AddProductModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        defaultCategoryId={selectedCategoryId}
+      />
+
+      <EditProductModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        product={selectedProduct}
+      />
+
       {stockProduct && (
-        <AddStockEntryModal open={!!stockProduct} onOpenChange={(open) => !open && setStockProduct(null)} productId={stockProduct._id} productName={stockProduct.name} categoryId={getCategoryId(stockProduct)} />
+        <AddStockEntryModal
+          open={!!stockProduct}
+          onOpenChange={(open) => !open && setStockProduct(null)}
+          productId={stockProduct._id} productName={stockProduct.name}
+          categoryId={getCategoryId(stockProduct)}
+        />
       )}
-      <StockReportModal 
-        open={showStockReportModal} 
-        onOpenChange={(open) => { 
-          setShowStockReportModal(open); 
-          if (!open) setStockReportProductId(null); 
-        }} 
-        products={categoryFilteredProducts} 
+
+      <StockReportModal
+        open={showStockReportModal}
+        onOpenChange={(open) => {
+          setShowStockReportModal(open);
+          if (!open) setStockReportProductId(null);
+        }}
+        products={categoryFilteredProducts}
         preSelectedProductId={stockReportProductId}
         categoryId={selectedCategoryId}
       />
+
+      <ConfirmDialog
+        open={!!deleteConfirmId}
+        onOpenChange={(open: boolean) => {
+          if (!open) {
+            setDeleteConfirmId(null);
+            setDeleteConfirmName("");
+          }
+        }}
+        title={`Delete "${deleteConfirmName}"?`}
+        description="This action cannot be undone. The product will be permanently removed."
+        icon={Trash2}
+        confirmLabel="Delete"
+        loadingLabel="Deleting..."
+        variant="destructive"
+        isLoading={!!deleteConfirmId && deleteProductMutation.isPending}
+        onConfirm={() => {
+          if (!deleteConfirmId) return;
+          deleteProductMutation.mutate(deleteConfirmId, {
+            onSettled: () => {
+              setDeleteConfirmId(null);
+              setDeleteConfirmName("");
+            },
+          });
+        }}
+      />
+
     </div>
   );
 }

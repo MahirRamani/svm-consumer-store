@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
 import EditAccountModal from '@/components/modals/edit-account-modal';
-import AddTransactionModal from '@/components/modals/add-transaction-modal';
+import AddTransactionModal from '@/components/modals/add-account-transaction-modal';
 import { useDeleteAccount, useUpdateAccount } from '@/hooks/use-account-mutations';
 import type { Account, AccountsPaginatedResponse, PaginationMetadata } from '@/types/admin/account';
 

@@ -1,20 +1,20 @@
 // models/AccountTransaction.ts
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
-  export interface IAccountTransaction extends Document {
-    accountId: Types.ObjectId;
-    type: 'CREDIT' | 'DEBIT';
-    amount: number;
-    note: string;
-    billUrl?: string | null;
-    balanceBefore: number;
-    balanceAfter: number;
-    performedBy: Types.ObjectId;
-    enteredAt: Date;
-    isDeleted: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  }
+export interface IAccountTransaction extends Document {
+  accountId: Types.ObjectId;
+  type: 'CREDIT' | 'DEBIT';
+  amount: number;
+  billUrl?: string | null;
+  note: string;
+  balanceBefore: number;
+  balanceAfter: number;
+  enteredAt: Date;
+  isDeleted: boolean;
+  performedBy: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface IAccountTransactionModel extends Model<IAccountTransaction> {
   findByAccount(accountId: Types.ObjectId): Promise<IAccountTransaction[]>;
@@ -48,12 +48,6 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
       required: [true, 'Amount is required'],
       min: [0.01, 'Amount must be greater than 0'],
     },
-    note: {
-      type: String,
-      required: [true, 'Note is required'],
-      trim: true,
-      maxlength: [500, 'Note cannot exceed 500 characters'],
-    },
     billUrl: {
       type: String,
       trim: true,
@@ -72,6 +66,12 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
         message: 'Invalid URL format',
       },
     },
+    note: {
+      type: String,
+      required: [true, 'Note is required'],
+      trim: true,
+      maxlength: [500, 'Note cannot exceed 500 characters'],
+    },
     balanceBefore: {
       type: Number,
       required: [true, 'Balance before is required'],
@@ -79,12 +79,6 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
     balanceAfter: {
       type: Number,
       required: [true, 'Balance after is required'],
-    },
-    performedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Performed by user is required'],
-      index: true,
     },
     enteredAt: {
       type: Date,
@@ -94,6 +88,12 @@ const accountTransactionSchema = new Schema<IAccountTransaction, IAccountTransac
     isDeleted: {
       type: Boolean,
       default: false,
+      index: true,
+    },
+    performedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Performed by user is required'],
       index: true,
     },
   },

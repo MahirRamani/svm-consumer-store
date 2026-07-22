@@ -23,7 +23,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { X, ImageIcon, Loader2, FileText } from 'lucide-react';
 import { useCreateProduct } from '@/hooks/use-product-mutations';
-
 import type {
   ProductFormData,
   ProductFormErrors,
@@ -34,10 +33,12 @@ import type {
   CategoriesResponse
 } from "@/types/seller/category";
 import { ApiResponse } from '@/lib/api/base-handler';
+import { deleteFile, uploadFile } from '@/lib/utils/upload-file';
 
 interface AddProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultCategoryId?: string;
 }
 
 // Validation utility
@@ -84,7 +85,8 @@ const initialFormData: ProductFormData = {
 
 export default function AddProductModal({
   open,
-  onOpenChange
+  onOpenChange,
+  defaultCategoryId
 }: AddProductModalProps) {
   const createMutation = useCreateProduct();
 
@@ -119,18 +121,27 @@ export default function AddProductModal({
 
   // Reset form when modal closes
   useEffect(() => {
-    if (!open) {
-      setFormData(initialFormData);
+    if (open) {
+      setFormData({
+        ...initialFormData,
+        categoryId: defaultCategoryId || "", // 👈 pre-select
+      });
       setImageFile(null);
       setImageName("");
       setImagePreview("");
       setErrors({});
       setTouched({});
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  }, [open]);
+  }, [open, defaultCategoryId]);
+
+  // Add this effect to both modals
+  useEffect(() => {
+    if (imageFile) {
+      // Keep image name in sync with product name while user is typing
+      setImageName(formData.name.trim() || imageFile.name.split('.').slice(0, -1).join('.'));
+    }
+  }, [formData.name, imageFile]);
 
   const validateField = useCallback((
     name: keyof ProductFormData,
@@ -175,29 +186,6 @@ export default function AddProductModal({
     }
     return undefined;
   }, []);
-
-  // const validateForm = useCallback((): boolean => {
-  //   const newErrors: ProductFormErrors = {};
-
-  //   (Object.keys(formData) as Array<keyof ProductFormData>).forEach((field) => {
-  //     const error = validateField(field, formData[field]);
-  //     if (error) newErrors[field] = error;
-  //   });
-
-  //   // Validate image name if file selected
-  //   if (imageFile && imageName.trim()) {
-  //     if (imageName.length < 3) {
-  //       newErrors.image = "Image name must be at least 3 characters";
-  //     } else if (imageName.length > 50) {
-  //       newErrors.image = "Image name must be less than 50 characters";
-  //     } else if (!/^[a-zA-Z0-9\s\-_.]+$/.test(imageName)) {
-  //       newErrors.image = "Image name can only contain letters, numbers, spaces, hyphens, dots, underscores";
-  //     }
-  //   }
-
-  //   setErrors(newErrors);
-  //   return Object.keys(newErrors).length === 0;
-  // }, [formData, imageFile, imageName, validateField]);
 
   // ✅ BETTER: Validate only the fields that need it
   const validateForm = useCallback((): boolean => {
@@ -258,9 +246,31 @@ export default function AddProductModal({
     setErrors(prev => ({ ...prev, [field]: error }));
   }, [formData, validateField]);
 
-  const handleImageSelect = useCallback((
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // const handleImageSelect = useCallback((
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+
+  //   const validation = validateImageFile(file);
+  //   if (!validation.isValid) {
+  //     toast.error(validation.error);
+  //     return;
+  //   }
+
+  //   setImageFile(file);
+
+  //   if (!imageName.trim()) {
+  //     const fileName = file.name.split('.').slice(0, -1).join('.');
+  //     setImageName(fileName);
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => setImagePreview(e.target?.result as string);
+  //   reader.readAsDataURL(file);
+  // }, [imageName]);
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -272,10 +282,9 @@ export default function AddProductModal({
 
     setImageFile(file);
 
-    if (!imageName.trim()) {
-      const fileName = file.name.split('.').slice(0, -1).join('.');
-      setImageName(fileName);
-    }
+    // ✅ Prefer product name, fallback to file name
+    const nameToUse = formData.name.trim() || file.name.split('.').slice(0, -1).join('.');
+    setImageName(nameToUse);
 
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
@@ -289,42 +298,111 @@ export default function AddProductModal({
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
+  // const uploadImage = useCallback(async (): Promise<string | null> => {
+  //   if (!imageFile) return null;
 
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      if (imageName.trim()) {
-        formData.append("imageName", imageName.trim());
-      }
+  //   setIsUploading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("image", imageFile);
+  //     if (imageName.trim()) {
+  //       formData.append("imageName", imageName.trim());
+  //     }
 
-      const response = await fetch("/api/products/upload-image", {
-        method: "POST",
-        body: formData,
-      });
+  //     const response = await fetch("/api/products/upload-image", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-      const result: ImageUploadResponse = await response.json();
+  //     const result: ImageUploadResponse = await response.json();
 
-      if (!response.ok || !result.success || !result.data) {
-        throw new Error(result.error || "Failed to upload image");
-      }
+  //     if (!response.ok || !result.success || !result.data) {
+  //       throw new Error(result.error || "Failed to upload image");
+  //     }
 
-      return result.data.secure_url;
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Upload failed";
-      toast.error(msg);
-      throw error;
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  //     return result.data.secure_url;
+  //   } catch (error) {
+  //     const msg = error instanceof Error ? error.message : "Upload failed";
+  //     toast.error(msg);
+  //     throw error;
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // }, [imageFile, imageName]);
 
+  // const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   // Mark all as touched
+  //   const allTouched = Object.keys(formData).reduce((acc, key) => {
+  //     acc[key] = true;
+  //     return acc;
+  //   }, {} as Record<string, boolean>);
+  //   setTouched(allTouched);
+
+  //   if (!validateForm()) {
+  //     toast.error("Please fix the form errors");
+  //     return;
+  //   }
+
+  //   let imageUrl: string | undefined;
+
+  //   if (imageFile) {
+  //     try {
+  //       const url = await uploadImage();
+  //       if (url) imageUrl = url;
+  //     } catch {
+  //       return;
+  //     }
+  //   }
+
+  //   createMutation.mutate(
+  //     {
+  //       name: formData.name.trim(),
+  //       categoryId: formData.categoryId,
+  //       description: formData.description.trim() || undefined,
+  //       priority: formData.priority.trim()
+  //         ? Number(formData.priority)
+  //         : undefined,
+  //       imageURL: imageUrl,
+  //       size: formData.size.trim() || undefined,
+  //       weight: formData.weight.trim() || undefined,
+  //       volume: formData.volume.trim() || undefined,
+  //       barcode: formData.barcode.trim() || undefined,
+  //       lowStockThreshold: formData.lowStockThreshold.trim()
+  //         ? Number(formData.lowStockThreshold)
+  //         : undefined,
+  //     },
+  //     {
+  //       onSuccess: () => onOpenChange(false),
+  //     }
+  //   );
+  // }, [formData, imageFile, validateForm, createMutation, onOpenChange, uploadImage]);
+
+  const uploadImage = useCallback(async (): Promise<{
+  secure_url: string;
+  public_id: string;
+} | null> => {
+  if (!imageFile) return null;
+  setIsUploading(true);
+  try {
+    const result = await uploadFile({
+      file: imageFile,
+      context: 'product',
+      fileName: imageName,
+    });
+    return result; // returns { secure_url, public_id, ... }
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : "Upload failed");
+    throw error;
+  } finally {
+    setIsUploading(false);
+  }
+  }, [imageFile, imageName]);
+  
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all as touched
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
       return acc;
@@ -337,11 +415,15 @@ export default function AddProductModal({
     }
 
     let imageUrl: string | undefined;
+    let uploadedPublicId: string | undefined; // 👈 track for cleanup
 
     if (imageFile) {
       try {
-        const url = await uploadImage();
-        if (url) imageUrl = url;
+        const result = await uploadImage(); // 👈 update uploadImage to return full result
+        if (result) {
+          imageUrl = result.secure_url;
+          uploadedPublicId = result.public_id;
+        }
       } catch {
         return;
       }
@@ -352,9 +434,7 @@ export default function AddProductModal({
         name: formData.name.trim(),
         categoryId: formData.categoryId,
         description: formData.description.trim() || undefined,
-        priority: formData.priority.trim()
-          ? Number(formData.priority)
-          : undefined,
+        priority: formData.priority.trim() ? Number(formData.priority) : undefined,
         imageURL: imageUrl,
         size: formData.size.trim() || undefined,
         weight: formData.weight.trim() || undefined,
@@ -366,9 +446,15 @@ export default function AddProductModal({
       },
       {
         onSuccess: () => onOpenChange(false),
+        onError: async () => {
+          // ✅ No orphan — cleanup if DB save failed
+          if (uploadedPublicId) {
+            await deleteFile(uploadedPublicId, "image");
+          }
+        },
       }
     );
-  }, [formData, imageFile, validateForm, createMutation, onOpenChange]);
+  }, [formData, imageFile, validateForm, createMutation, onOpenChange, uploadImage]);
 
   const handleClose = useCallback(() => {
     if (!createMutation.isPending && !isUploading) {

@@ -147,6 +147,14 @@ export default function EditProductModal({
     }
   }, [open]);
 
+  // Add this effect to both modals
+  useEffect(() => {
+    if (imageFile) {
+      // Keep image name in sync with product name while user is typing
+      setImageName(formData.name.trim() || imageFile.name.split('.').slice(0, -1).join('.'));
+    }
+  }, [formData.name, imageFile]);
+
   const validateField = useCallback((
     name: keyof ProductFormData,
     value: string
@@ -192,9 +200,29 @@ export default function EditProductModal({
     setErrors(prev => ({ ...prev, [field]: error }));
   }, [validateField]);
 
-  const handleImageSelect = useCallback((
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // const handleImageSelect = useCallback((
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+
+  //   const validation = validateImageFile(file);
+  //   if (!validation.isValid) {
+  //     toast.error(validation.error);
+  //     return;
+  //   }
+
+  //   setImageFile(file);
+  //   if (!imageName) {
+  //     setImageName(file.name.split('.').slice(0, -1).join('.'));
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => setImagePreview(e.target?.result as string);
+  //   reader.readAsDataURL(file);
+  // }, [imageName]);
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -205,9 +233,10 @@ export default function EditProductModal({
     }
 
     setImageFile(file);
-    if (!imageName) {
-      setImageName(file.name.split('.').slice(0, -1).join('.'));
-    }
+
+    // ✅ Prefer product name, fallback to file name
+    const nameToUse = formData.name.trim() || file.name.split('.').slice(0, -1).join('.');
+    setImageName(nameToUse);
 
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
@@ -217,7 +246,7 @@ export default function EditProductModal({
   const removeImage = useCallback(() => {
     setImageFile(null);
     setImageName("");
-    setImagePreview(currentImageUrl || "");
+    setImagePreview("");
     setShouldDeleteCurrentImage(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [currentImageUrl]);
@@ -250,7 +279,7 @@ export default function EditProductModal({
   //   }
   // };
 
-  const uploadImage = async (): Promise<string | null> => {
+  const uploadImage = useCallback(async (): Promise<string | null> => {
     if (!imageFile) return null;
     setIsUploading(true);
 
@@ -284,7 +313,7 @@ export default function EditProductModal({
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [imageFile, imageName]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -340,7 +369,7 @@ export default function EditProductModal({
         onSuccess: () => onOpenChange(false),
       }
     );
-  }, [formData, imageFile, product, isActive, currentImageUrl, validateForm, updateMutation, onOpenChange]);
+  }, [formData, imageFile, product, isActive, currentImageUrl, shouldDeleteCurrentImage, validateForm, updateMutation, onOpenChange, uploadImage]);
 
   const handleClose = useCallback(() => {
     if (!updateMutation.isPending && !isUploading) {

@@ -65,12 +65,6 @@ export interface ProductsResponse {
   };
 }
 
-export interface ProductFilterState {
-  searchTerm: string;
-  selectedCategory: string;
-  showInactive: boolean;
-}
-
 // export interface ApiResponse<T> {
 //   success: boolean;
 //   data?: T;
@@ -153,7 +147,7 @@ export interface UpdateProductInput {
 // =============================================
 export interface ProductFilterState {
   searchTerm: string;
-  selectedCategory: string;
+  // selectedCategory: string;
   showInactive: boolean;
 }
 

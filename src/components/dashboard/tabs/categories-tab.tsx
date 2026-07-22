@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Search, AlertTriangle, Loader2, Eye, EyeOff, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, AlertTriangle, Loader2, Eye, EyeOff, Download, X } from 'lucide-react';
 import { toast } from 'sonner';
 import AddCategoryModal from '@/components/modals/add-category-modal';
 import EditCategoryModal from '@/components/modals/edit-category-modal';
@@ -20,6 +20,7 @@ import type {
   CategoryFilterState
 } from "@/types/seller/category";
 import { ApiResponse } from '@/lib/api/base-handler';
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog';
 
 export default function CategoriesTab() {
   const [filterState, setFilterState] = useState<CategoryFilterState>({
@@ -29,6 +30,13 @@ export default function CategoriesTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState<string>("");
+
+
   const queryClient = useQueryClient();
 
   // Fetch categories with type-safe response
@@ -65,34 +73,7 @@ export default function CategoriesTab() {
 
   // Extract categories and counts from the response
   const categories = categoriesResponse?.data?.categories || [];
-  const totalCategoriesCount = categoriesResponse?.data?.totalCount || 0;
-  const activeCategoriesCount = categoriesResponse?.data?.activeCount || 0;
-  const inactiveCategoriesCount = categoriesResponse?.data?.inactiveCount || 0;
-
-  // Delete category mutation - using _id
-  const deleteCategoryMutation = useMutation<ApiResponse<null>, Error, string>({
-    mutationFn: async (categoryId: string) => {
-      const response = await fetch(`/api/categories/${categoryId}`, {
-        method: "DELETE",
-      });
-
-      const result: ApiResponse<null> = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error?.message || `Failed to delete category: ${response.status}`);
-      }
-
-      return result;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category deleted successfully.");
-    },
-    onError: (error: Error) => {
-      console.error("Delete category error:", error);
-      toast.error(`Failed to delete category: ${error.message}`);
-    },
-  });
+  const totalCategoriesCount = categoriesResponse?.data?.categories.length || 0;
 
   // Toggle category status mutation - using _id
   const toggleCategoryMutation = useMutation<
@@ -120,10 +101,34 @@ export default function CategoriesTab() {
       toast.success("Category status updated successfully.");
     },
     onError: (error: Error) => {
-      console.error("Toggle category error:", error);
       toast.error(`Failed to update category: ${error.message}`);
     },
   });
+
+  // Delete category mutation - using _id
+  const deleteCategoryMutation = useMutation<ApiResponse<null>, Error, string>({
+    mutationFn: async (categoryId: string) => {
+      const response = await fetch(`/api/categories/${categoryId}`, {
+        method: "DELETE",
+      });
+
+      const result: ApiResponse<null> = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error?.message || `Failed to delete category: ${response.status}`);
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("Category deleted successfully.");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete category: ${error.message}`);
+    },
+  });
+
 
   // Memoized filter change handler
   const handleFilterChange = useCallback((key: keyof CategoryFilterState, value: string | boolean) => {
@@ -135,30 +140,22 @@ export default function CategoriesTab() {
     setShowEditModal(true);
   }, []);
 
-  const handleDeleteCategory = useCallback(
-    (categoryId: string, categoryName: string) => {
-      if (
-        window.confirm(
-          `Are you sure you want to delete "${categoryName}" category? This action cannot be undone.`
-        )
-      ) {
-        deleteCategoryMutation.mutate(categoryId);
-      }
-    },
-    [deleteCategoryMutation]
-  );
+  const handleToggleActive = useCallback((categoryId: string, currentStatus: boolean) => {
+    setTogglingId(categoryId);
+    toggleCategoryMutation.mutate(
+      { categoryId, isActive: !currentStatus },
+      { onSettled: () => setTogglingId(null) }
+    );
+  }, [toggleCategoryMutation]);
 
-  const handleToggleActive = useCallback(
-    (categoryId: string, currentStatus: boolean) => {
-      toggleCategoryMutation.mutate({ categoryId, isActive: !currentStatus });
-    },
-    [toggleCategoryMutation]
-  );
+  const handleDeleteClick = useCallback((id: string, name: string) => {
+    setDeleteConfirmId(id);
+    setDeleteConfirmName(name);
+  }, []);
 
   // Memoized filtered categories
   const filteredCategories = useMemo(() => {
     if (!Array.isArray(categories)) {
-      console.warn("categories is not an array:", categories);
       return [];
     }
 
@@ -226,7 +223,6 @@ export default function CategoriesTab() {
 
       toast.success("Categories exported successfully!");
     } catch (error) {
-      console.error("Export error:", error);
       toast.error("Failed to export categories");
     }
   }, [filteredCategories]);
@@ -264,7 +260,7 @@ export default function CategoriesTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Category Management</h2>
@@ -285,8 +281,8 @@ export default function CategoriesTab() {
       </div>
 
       {/* Search and Filter */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="pt-4 pb-5 mb-2">
+        <CardContent className="p-6 py-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">Search Categories</Label>
@@ -296,18 +292,33 @@ export default function CategoriesTab() {
                   placeholder="Name or description..."
                   value={filterState.searchTerm}
                   onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-8"
                 />
+                {filterState.searchTerm && (
+                  <button
+                    onClick={() => handleFilterChange("searchTerm", "")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Show Inactive</Label>
-              <div className="flex items-center space-x-2 mt-3">
+            <div className="flex flex-col justify-center pl-10">
+              <Label className="text-sm font-medium text-gray-700">Categories Status</Label>
+              <div className="flex items-center space-x-2 mt-1">
                 <Switch
                   checked={filterState.showInactive}
                   onCheckedChange={(checked) => handleFilterChange("showInactive", checked)}
                 />
-                <span className="text-sm text-gray-600">Include inactive categories</span>
+                <div>
+                  <span className="text-sm text-gray-600">
+                    {filterState.showInactive ? "Showing all categories" : "Showing active only"}
+                  </span>
+                  <p className="text-xs text-gray-400">
+                    {filterState.showInactive ? "Toggle to hide inactive" : "Toggle to show inactive"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -315,15 +326,15 @@ export default function CategoriesTab() {
       </Card>
 
       {/* Categories List */}
-      <Card>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3 p-6 pb-2">
+      <Card className="pt-4">
+        <CardHeader className="gap-0">
+          <div className="flex items-center gap-3 pb-0">
             <CardTitle className="text-lg font-semibold text-gray-900">Categories</CardTitle>
             <p className="text-sm text-gray-600 m-0 pt-1">
               [{filteredCategories.length} of {totalCategoriesCount} categories]
             </p>
           </div>
-        </div>
+        </CardHeader>
         <CardContent className="p-0">
           {filteredCategories.length === 0 ? (
             <div className="text-center py-12">
@@ -349,30 +360,18 @@ export default function CategoriesTab() {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Priority
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category Name</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    <th className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredCategories.map((category: Category) => (
                     <tr key={category._id} className={!category.isActive ? "bg-gray-50 opacity-75" : ""}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2.5 whitespace-nowrap">
                         <div className="flex items-center">
                           <div
                             className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${category.isActive ? "bg-blue-100" : "bg-gray-200"
@@ -390,13 +389,13 @@ export default function CategoriesTab() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-900">
                         {category.description || "No description"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-900">
                         {category.priority !== undefined ? category.priority : "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2.5 whitespace-nowrap">
                         <Badge
                           variant={category.isActive ? "default" : "secondary"}
                           className={
@@ -406,14 +405,14 @@ export default function CategoriesTab() {
                           {category.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500">
                         {new Date(category.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
                         })}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex space-x-2">
                           <Button
                             variant="ghost"
@@ -428,7 +427,7 @@ export default function CategoriesTab() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleToggleActive(category._id, category.isActive)}
-                            disabled={toggleCategoryMutation.isPending}
+                            disabled={togglingId === category._id}
                             className={
                               category.isActive
                                 ? "text-orange-500 hover:text-orange-600"
@@ -436,27 +435,22 @@ export default function CategoriesTab() {
                             }
                             title={category.isActive ? "Deactivate Category" : "Activate Category"}
                           >
-                            {toggleCategoryMutation.isPending ? (
+                            {togglingId === category._id ?
                               <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : category.isActive ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
+                              : category.isActive ?
+                                <EyeOff className="w-4 h-4" />
+                                :
+                                <Eye className="w-4 h-4" />
+                            }
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteCategory(category._id, category.name)}
-                            disabled={deleteCategoryMutation.isPending}
+                            onClick={() => handleDeleteClick(category._id, category.name)}
                             className="text-red-500 hover:text-red-600"
                             title="Delete Category"
                           >
-                            {deleteCategoryMutation.isPending ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </td>
@@ -469,8 +463,41 @@ export default function CategoriesTab() {
         </CardContent>
       </Card>
 
-      <AddCategoryModal open={showAddModal} onOpenChange={setShowAddModal} />
-      <EditCategoryModal open={showEditModal} onOpenChange={setShowEditModal} category={selectedCategory} />
+      <AddCategoryModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+      />
+
+      <EditCategoryModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal} category={selectedCategory}
+      />
+
+      <ConfirmDialog
+        open={!!deleteConfirmId}
+        onOpenChange={(open: boolean) => {
+          if (!open) {
+            setDeleteConfirmId(null);
+            setDeleteConfirmName("");
+          }
+        }}
+        title={`Delete "${deleteConfirmName}"?`}
+        description="This action cannot be undone. The category will be permanently removed."
+        icon={Trash2}
+        confirmLabel="Delete"
+        loadingLabel="Deleting..."
+        variant="destructive"
+        isLoading={!!deleteConfirmId && deleteCategoryMutation.isPending}
+        onConfirm={() => {
+          if (!deleteConfirmId) return;
+          deleteCategoryMutation.mutate(deleteConfirmId, {
+            onSettled: () => {
+              setDeleteConfirmId(null);
+              setDeleteConfirmName("");
+            },
+          });
+        }}
+      />
     </div>
   );
 }

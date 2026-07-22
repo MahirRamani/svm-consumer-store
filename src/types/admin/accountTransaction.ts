@@ -46,15 +46,16 @@ export interface CreateAccountTransactionInput {
   accountId: string;
   type: "CREDIT" | "DEBIT";
   amount: number;
-  note?: string;
+  enteredAt: Date;
   billUrl?: string | null;
-  enteredAt?: Date;
+  note: string;
 }
 
 export interface UpdateAccountTransactionInput {
   _id: string;
-  note?: string;
+  enteredAt: Date;
   billUrl?: string | null;
+  note: string;
 }
 
 export interface TransactionFormData {

@@ -118,7 +118,7 @@ export function errorResponse(
   );
 }
 
-import {inspect} from 'util';
+import { inspect } from 'util';
 // =============================================
 // Global Error Handler Wrapper
 // =============================================
@@ -129,15 +129,15 @@ export function withErrorHandler<T extends unknown[]>(
     try {
       return await handler(...args);
     } catch (error: unknown) {
-      console.error('API Error:', inspect(error, { depth: null, colors: true }));
+      // console.error('API Error:', inspect(error, { depth: null, colors: true }));
 
-        // Handle Zod validation errors
-        if (error instanceof ZodError) {
-          const details = error.issues.map(issue => ({
-            path: issue.path.join('.'),
-            message: issue.message,
-            code: issue.code
-          }));
+      // Handle Zod validation errors
+      if (error instanceof ZodError) {
+        const details = error.issues.map(issue => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+          code: issue.code
+        }));
         // if (error instanceof ZodError) {
         // const details = error.issues.reduce((acc, err) => {
         //   const path = err.path.join('.');
@@ -145,7 +145,7 @@ export function withErrorHandler<T extends unknown[]>(
         //   return acc;
         // }, {} as Record<string, string>);
 
-          const firstMessage = error.issues[0]?.message ?? "Validation failed";
+        const firstMessage = error.issues[0]?.message ?? "Validation failed";
 
         return errorResponse(
           // 'Validation failed',
@@ -178,10 +178,10 @@ export function withErrorHandler<T extends unknown[]>(
           keyPattern?: Record<string, unknown>;
           keyValue?: Record<string, unknown>;
         };
-        
+
         const field = Object.keys(duplicateError.keyPattern || {})[0] || 'field';
         const value = duplicateError.keyValue?.[field];
-        
+
         return errorResponse(
           `${field} "${value}" already exists`,
           409,
@@ -230,7 +230,7 @@ export function withErrorHandler<T extends unknown[]>(
           );
         }
       }
- const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Generic error
       return errorResponse(
