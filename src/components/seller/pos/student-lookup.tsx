@@ -41,7 +41,7 @@ export default function StudentLookup({ selectedStudent, onStudentSelect }: Stud
         
         if (result.success && result.data) {
           onStudentSelect(result.data);
-          toast.success(`${result.data.name} selected successfully`);
+          toast.success(`${result.data.name} selected successfully`, { duration: 800 });
         } else {
           toast.error("No student found with this roll number");
           onStudentSelect(null);

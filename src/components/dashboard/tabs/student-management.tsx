@@ -201,15 +201,6 @@ export default function StudentManagement() {
     return { label: "No Balance", variant: "destructive" };
   }, []);
 
-  const getInitials = useCallback((name: string): string => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
-  }, []);
-
   // =============================================
   // LOADING STATE
   // =============================================
@@ -374,14 +365,13 @@ export default function StudentManagement() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredStudents.map((student: Student) => {
                     const balanceStatus = getBalanceStatus(student.balance);
-                    const initials = getInitials(student.name);
 
                     return (
                       <tr key={student._id} className={!student.isActive ? "bg-gray-50 opacity-75" : ""}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
-                              {initials}
+                              {student.id}
                             </div>
                             <div className="ml-3">
                               <p className={`text-sm font-medium ${student.isActive ? "text-gray-900" : "text-gray-500"}`}>

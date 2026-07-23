@@ -42,7 +42,7 @@ interface ConfirmDialogProps {
 
   // Content
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   icon?: LucideIcon;
 
   // Actions
@@ -79,14 +79,12 @@ export default function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={(v) => !isLoading && onOpenChange(v)}>
       <AlertDialogContent className="sm:max-w-sm">
         <AlertDialogHeader>
-          {Icon && (
-            <div className={cn("mb-1", styles.iconClass)}>
-              <Icon className="w-6 h-6" />
-            </div>
-          )}
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogTitle className="flex items-center gap-2">
+            {Icon && <Icon className={cn("w-5 h-5", styles.iconClass)} />}
+            {title}
+          </AlertDialogTitle>
           {description && (
-            <AlertDialogDescription>{description}</AlertDialogDescription>
+            <div>{description}</div>
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>

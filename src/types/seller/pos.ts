@@ -28,9 +28,9 @@ import type { TransactionType } from '@/types'
 export interface Student {
   _id: string;
   name: string;
-  rollNumber: string;
-  standard: string;
+  rollNumber: number;
   year: string;
+  standard: number;
   mobileNo?: string;
   balance: number;
   isActive: boolean;

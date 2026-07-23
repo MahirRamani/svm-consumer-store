@@ -684,13 +684,46 @@ const handleCancel = useCallback(() => {
       />
       
       {/* Cancel Confirmation */}
-      <ConfirmDialog
+      {/* <ConfirmDialog
   open={!!cancelTarget}
   onOpenChange={(open) => !open && setCancelTarget(null)}
   title="Cancel Transaction?"
   description={cancelTarget ? `Cancel this ${cancelTarget.type === "CREDIT" ? "credit" : "debit"} of ₹${Math.abs(cancelTarget.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })} from ${fmtDate(cancelTarget.enteredAt)}? The balance will be recalculated automatically.` : ""}
   icon={Ban}
   confirmLabel="Cancel Transaction"
+  loadingLabel="Cancelling..."
+  variant="destructive"
+  isLoading={cancelMutation.isPending}
+  onConfirm={handleCancel}
+/> */}
+      <ConfirmDialog
+  open={!!cancelTarget}
+  onOpenChange={(open) => !open && setCancelTarget(null)}
+  title="Cancel Transaction?"
+  icon={Ban}
+  description={
+    cancelTarget ? (
+      <div className="space-y-2">
+        <p>
+          Cancel this{" "}
+          <span className="font-semibold text-gray-900">
+            {cancelTarget.type === "CREDIT" ? "credit" : "debit"} of{" "}
+            {fmt(cancelTarget.amount)}
+          </span>{" "}
+          from{" "}
+          <span className="font-semibold text-gray-900">
+            {fmtDate(cancelTarget.enteredAt)}
+          </span>?
+        </p>
+        <p className="text-xs text-gray-400">
+          The transaction will be soft-deleted and the account balance
+          will be recalculated automatically.
+        </p>
+      </div>
+    ) : undefined
+  }
+  confirmLabel="Cancel Transaction"
+  cancelLabel="Keep It"
   loadingLabel="Cancelling..."
   variant="destructive"
   isLoading={cancelMutation.isPending}

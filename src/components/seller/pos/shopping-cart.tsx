@@ -53,8 +53,6 @@ export default function ShoppingCart({
   const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState("");
-  const [showBottomToast, setShowBottomToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const queryClient = useQueryClient();
 
   const processTransactionMutation = useMutation<
@@ -102,12 +100,9 @@ export default function ShoppingCart({
       queryClient.invalidateQueries({ queryKey: ["fifo-stocks"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
 
-      // toast.success(`₹${totalAmount.toFixed(2)} deducted from ${selectedStudent.name}'s account`);
-      setToastMessage(`₹${totalAmount.toFixed(2)} deducted from ${selectedStudent.name}'s account`);
-      setShowBottomToast(true);
-
-      // Auto hide after 2 seconds
-      setTimeout(() => setShowBottomToast(false), 2000);
+      toast.success(`₹${totalAmount.toFixed(2)} deducted from ${selectedStudent.name}'s account`, {
+        position: "bottom-right",
+      });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -120,7 +115,7 @@ export default function ShoppingCart({
   }, [cartItems]);
 
   const canCheckout = useMemo(() => {
-    if (selectedStudent && WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber)) {
+    if (selectedStudent && WILD_ROLL_NUMBERS.includes(selectedStudent.rollNumber) && cartItems.length > 0) {
       return true;
     }
     return selectedStudent && cartItems.length > 0 && selectedStudent.balance >= total;
@@ -423,16 +418,6 @@ export default function ShoppingCart({
         onClose={handleTransactionSuccess}
       />
 
-      {showBottomToast && (
-        <div className="fixed bottom-4 right-4 z-75 animate-in slide-in-from-bottom">
-          <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

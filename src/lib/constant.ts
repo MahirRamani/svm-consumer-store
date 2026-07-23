@@ -1,3 +1,3 @@
-const WILD_ROLL_NUMBERS = ["0", "10000"]
+const WILD_ROLL_NUMBERS = [0, 1000, 10000]
 
 export { WILD_ROLL_NUMBERS }

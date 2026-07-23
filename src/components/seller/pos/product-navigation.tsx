@@ -136,13 +136,13 @@ function extractCategoryName(
 // Highlight matching text
 function highlightMatch(text: string, query: string): JSX.Element {
   if (!query.trim()) return <>{text}</>;
-  
+
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   const parts = text.split(regex);
-  
+
   return (
     <>
-      {parts.map((part, index) => 
+      {parts.map((part, index) =>
         regex.test(part) ? (
           <mark key={index} className="bg-yellow-200 text-gray-900 rounded px-0.5">
             {part}
@@ -352,9 +352,9 @@ export default function ProductNavigation({
   // =============================================
   const searchResults = useMemo(() => {
     if (!isSearchMode) return { categories: [], products: [] };
-    
+
     const term = debouncedSearchTerm.toLowerCase().trim();
-    
+
     // Search categories
     const matchedCategories = categories.filter((category) =>
       category.name.toLowerCase().includes(term)
@@ -382,7 +382,7 @@ export default function ProductNavigation({
     try {
       const response = await fetch("/api/stock/fifo/oldest-all");
       if (!response.ok) throw new Error("Failed to refresh stocks");
-      
+
       const data: ApiResponse<StockFIFOResponse> = await response.json();
       if (!data.success || !data.data) {
         throw new Error(data.error?.message || "Failed to refresh stocks");
@@ -493,9 +493,9 @@ export default function ProductNavigation({
           const currentStock = stocksArray[index].currentStock!;
           const newQuantity = currentStock.quantityLeft - quantityReduced;
           if (newQuantity <= 0) stocksArray.splice(index, 1);
-          else stocksArray[index] = { 
-            ...stocksArray[index], 
-            currentStock: { ...currentStock, quantityLeft: newQuantity } 
+          else stocksArray[index] = {
+            ...stocksArray[index],
+            currentStock: { ...currentStock, quantityLeft: newQuantity }
           };
         }
         return { ...oldData, data: { ...oldData.data, data: stocksArray } };
@@ -575,9 +575,9 @@ export default function ProductNavigation({
       }
       const quantity = quantities[product._id] || 1;
       updateStockInCache(product._id, quantity);
-      
+
       const categoryId = extractCategoryId(product.categoryId);
-      
+
       const cartItem: CartItem = {
         itemKey: `prod:${product._id}`,
         productId: product._id,
@@ -590,7 +590,7 @@ export default function ProductNavigation({
         stockTransactionId: stockInfo.stockTransactionId,
         imageURL: product.imageURL,
       };
-      
+
       onAddToCart(cartItem);
       toast.success(`${quantity} × ${product.name} added to cart`);
       setSelectedProductIds((prev) => ({ ...prev, [product._id]: false }));
@@ -606,10 +606,10 @@ export default function ProductNavigation({
         toast.error("No stock available for this product");
         return;
       }
-      
+
       const quantity = quantities[topProduct.productId] || 1;
       updateStockInCache(topProduct.productId, quantity);
-      
+
       const cartItem: CartItem = {
         itemKey: `prod:${topProduct.productId}`,
         productId: topProduct.productId,
@@ -622,7 +622,7 @@ export default function ProductNavigation({
         stockTransactionId: stockInfo.stockTransactionId,
         imageURL: topProduct.imageURL,
       };
-      
+
       onAddToCart(cartItem);
       toast.success(`${quantity} × ${topProduct.name} added to cart`);
       setSelectedProductIds((prev) => ({ ...prev, [topProduct.productId]: false }));
@@ -693,9 +693,9 @@ export default function ProductNavigation({
   const renderInCartBadge = (productId: string) => {
     const inCart = isProductInCart(productId);
     const cartQty = getCartQuantity(productId);
-    
+
     if (!inCart) return null;
-    
+
     return (
       <div className="absolute top-1.5 left-1.5 z-10">
         <Badge className="bg-blue-500 text-white text-xs px-1.5 py-0.5 flex items-center gap-1">
@@ -722,22 +722,21 @@ export default function ProductNavigation({
     return (
       <div
         key={product._id}
-        className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${
-          inCart 
-            ? "border-blue-300 bg-blue-50" 
-            : outOfStock 
-              ? "border-gray-200 opacity-60" 
-              : lowStock 
-                ? "border-orange-200" 
-                : "border-green-200"
-        }`}
+        className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${inCart
+          ? "border-blue-300 bg-blue-50"
+          : outOfStock
+            ? "border-gray-200 opacity-60"
+            : lowStock
+              ? "border-orange-200"
+              : "border-green-200"
+          }`}
       >
         {renderInCartBadge(product._id)}
 
         <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
           {product.imageURL ? (
-            <img 
-              src={product.imageURL} 
+            <img
+              src={product.imageURL}
               alt={product.name}
               className={`w-full h-full object-cover ${outOfStock ? 'grayscale' : ''}`}
               onError={(e) => {
@@ -752,11 +751,10 @@ export default function ProductNavigation({
           </div>
 
           {stockInfo && (
-            <Badge 
-              variant={lowStock ? "destructive" : "default"} 
-              className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${
-                lowStock ? "bg-orange-500" : "bg-green-500"
-              }`}
+            <Badge
+              variant={lowStock ? "destructive" : "default"}
+              className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${lowStock ? "bg-orange-500" : "bg-green-500"
+                }`}
             >
               {stockInfo.quantityLeft}
             </Badge>
@@ -777,8 +775,8 @@ export default function ProductNavigation({
           {/* View in Category Button (for search results) */}
           {showCategory && (
             <Button
-              onClick={(e) => { 
-                e.stopPropagation(); 
+              onClick={(e) => {
+                e.stopPropagation();
                 const categoryId = extractCategoryId(product.categoryId);
                 if (categoryId) navigateToCategoryFromProduct(categoryId);
               }}
@@ -806,7 +804,7 @@ export default function ProductNavigation({
           <h4 className="font-medium text-gray-900 text-sm line-clamp-1 mb-0.5">
             {isSearchMode ? highlightMatch(product.name, debouncedSearchTerm) : product.name}
           </h4>
-          
+
           {showCategory && (
             <button
               onClick={() => {
@@ -835,9 +833,9 @@ export default function ProductNavigation({
 
           {!outOfStock ? (
             !isActive ? (
-              <Button 
-                onClick={() => handleInitialAddToCart(product._id)} 
-                size="sm" 
+              <Button
+                onClick={() => handleInitialAddToCart(product._id)}
+                size="sm"
                 className="w-full h-7 text-xs bg-green-500 hover:bg-green-600"
               >
                 <ShoppingCart className="w-3 h-3 mr-1" />
@@ -846,11 +844,11 @@ export default function ProductNavigation({
             ) : (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleQuantityChange(product._id, quantity - 1, stockInfo!.quantityLeft)} 
-                    disabled={quantity <= 1} 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuantityChange(product._id, quantity - 1, stockInfo!.quantityLeft)}
+                    disabled={quantity <= 1}
                     className="h-6 w-6 p-0"
                   >
                     <Minus className="h-3 w-3" />
@@ -866,26 +864,26 @@ export default function ProductNavigation({
                       autoFocus
                     />
                   ) : (
-                    <span 
-                      onClick={() => handleQuantityClick(product._id, quantity)} 
+                    <span
+                      onClick={() => handleQuantityClick(product._id, quantity)}
                       className="w-8 text-center font-medium text-xs cursor-pointer hover:bg-gray-100 rounded py-1"
                     >
                       {quantity}
                     </span>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleQuantityChange(product._id, quantity + 1, stockInfo!.quantityLeft)} 
-                    disabled={quantity >= stockInfo!.quantityLeft} 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuantityChange(product._id, quantity + 1, stockInfo!.quantityLeft)}
+                    disabled={quantity >= stockInfo!.quantityLeft}
                     className="h-6 w-6 p-0"
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
                 </div>
-                <Button 
-                  onClick={() => handleFinalAddToCart(product)} 
-                  size="sm" 
+                <Button
+                  onClick={() => handleFinalAddToCart(product)}
+                  size="sm"
                   className="w-full h-7 text-xs bg-green-500 hover:bg-green-600"
                 >
                   <ShoppingCart className="w-3 h-3 mr-1" />
@@ -894,9 +892,9 @@ export default function ProductNavigation({
               </div>
             )
           ) : (
-            <Button 
-              disabled 
-              size="sm" 
+            <Button
+              disabled
+              size="sm"
               className="w-full h-7 text-xs"
             >
               Out of Stock
@@ -917,8 +915,8 @@ export default function ProductNavigation({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink 
-                  onClick={navigateToCategories} 
+                <BreadcrumbLink
+                  onClick={navigateToCategories}
                   className="flex items-center cursor-pointer hover:text-blue-600 text-sm font-medium"
                 >
                   <Home className="w-4 h-4 mr-1" />
@@ -985,8 +983,8 @@ export default function ProductNavigation({
                 autoComplete="off"
               />
               {searchTerm && (
-                <button 
-                  onClick={clearSearch} 
+                <button
+                  onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   <X className="w-4 h-4" />
@@ -1035,7 +1033,7 @@ export default function ProductNavigation({
               {matchedCategories.map((category) => {
                 const productCount = getProductCount(category._id);
                 const inStockCount = getProductsInStockCount(category._id);
-                
+
                 return (
                   <div
                     key={category._id}
@@ -1049,8 +1047,8 @@ export default function ProductNavigation({
                       {highlightMatch(category.name, debouncedSearchTerm)}
                     </h3>
                     <p className="text-xs text-gray-500">{productCount} products</p>
-                    <Badge 
-                      variant={inStockCount > 0 ? "default" : "secondary"} 
+                    <Badge
+                      variant={inStockCount > 0 ? "default" : "secondary"}
                       className={`text-xs mt-1 ${inStockCount > 0 ? "bg-green-500" : ""}`}
                     >
                       {inStockCount} in stock
@@ -1133,25 +1131,23 @@ export default function ProductNavigation({
             return (
               <div
                 key={topProduct.productId}
-                className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${
-                  inCart 
-                    ? "border-blue-300 bg-blue-50" 
-                    : outOfStock 
-                      ? "border-gray-200 opacity-60" 
-                      : lowStock 
-                        ? "border-orange-200" 
-                        : "border-gray-200 hover:border-orange-300"
-                }`}
+                className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${inCart
+                  ? "border-blue-300 bg-blue-50"
+                  : outOfStock
+                    ? "border-gray-200 opacity-60"
+                    : lowStock
+                      ? "border-orange-200"
+                      : "border-gray-200 hover:border-orange-300"
+                  }`}
               >
                 {renderInCartBadge(topProduct.productId)}
 
                 {!inCart && (
                   <div className="absolute top-1.5 left-1.5 z-10">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                      index < 3 
-                        ? "bg-gradient-to-br from-yellow-400 to-orange-500" 
-                        : "bg-gray-400"
-                    }`}>
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${index < 3
+                      ? "bg-gradient-to-br from-yellow-400 to-orange-500"
+                      : "bg-gray-400"
+                      }`}>
                       {index + 1}
                     </div>
                   </div>
@@ -1159,8 +1155,8 @@ export default function ProductNavigation({
 
                 <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
                   {topProduct.imageURL ? (
-                    <img 
-                      src={topProduct.imageURL} 
+                    <img
+                      src={topProduct.imageURL}
                       alt={topProduct.name}
                       className={`w-full h-full object-cover ${outOfStock ? 'grayscale' : ''}`}
                       onError={(e) => {
@@ -1175,11 +1171,10 @@ export default function ProductNavigation({
                   </div>
 
                   {stockInfo && (
-                    <Badge 
-                      variant={lowStock ? "destructive" : "default"} 
-                      className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${
-                        lowStock ? "bg-orange-500" : "bg-green-500"
-                      }`}
+                    <Badge
+                      variant={lowStock ? "destructive" : "default"}
+                      className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${lowStock ? "bg-orange-500" : "bg-green-500"
+                        }`}
                     >
                       {stockInfo.quantityLeft}
                     </Badge>
@@ -1202,9 +1197,9 @@ export default function ProductNavigation({
                   </Button>
                 </div>
 
-                <div className="p-2">
+                <div className="p-1 @container">
                   <h4 className="font-medium text-gray-900 text-xs line-clamp-1 mb-0.5">{topProduct.name}</h4>
-                  
+
                   <button
                     onClick={() => navigateToCategoryFromProduct(topProduct.categoryId)}
                     className="text-xs text-blue-500 hover:text-blue-600 hover:underline text-left mb-1"
@@ -1218,7 +1213,6 @@ export default function ProductNavigation({
 
                   <div className="flex items-center justify-between mb-1.5">
                     {stockInfo ? (
-                      // <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
                       <span className="text-sm font-bold text-green-600">₹{Number(stockInfo.sellingPrice).toFixed(0)}</span>
                     ) : (
                       <span className="text-xs text-gray-400">No price</span>
@@ -1228,22 +1222,22 @@ export default function ProductNavigation({
 
                   {!outOfStock ? (
                     !isActive ? (
-                      <Button 
-                        onClick={() => handleInitialAddToCart(topProduct.productId)} 
-                        size="sm" 
-                        className="w-full h-7 text-xs bg-orange-500 hover:bg-orange-600"
+                      <Button
+                        onClick={() => handleInitialAddToCart(topProduct.productId)}
+                        size="sm"
+                        className="w-full rounded-sm bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-1 h-7 text-xs @[80px]:flex-row @[80px]:h-7 @[60px]:h-auto @[60px]:py-1"
                       >
-                        <ShoppingCart className="w-3 h-3 mr-1" />
-                        Add to Cart
+                        <ShoppingCart className="w-3 h-3 shrink-0" />
+                        <span className="hidden @[70px]:inline text-[10px]">Add to Cart</span>
                       </Button>
                     ) : (
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-center gap-1">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleQuantityChange(topProduct.productId, quantity - 1, stockInfo!.quantityLeft)} 
-                            disabled={quantity <= 1} 
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleQuantityChange(topProduct.productId, quantity - 1, stockInfo!.quantityLeft)}
+                            disabled={quantity <= 1}
                             className="h-6 w-6 p-0"
                           >
                             <Minus className="h-3 w-3" />
@@ -1259,26 +1253,26 @@ export default function ProductNavigation({
                               autoFocus
                             />
                           ) : (
-                            <span 
-                              onClick={() => handleQuantityClick(topProduct.productId, quantity)} 
+                            <span
+                              onClick={() => handleQuantityClick(topProduct.productId, quantity)}
                               className="w-8 text-center font-medium text-xs cursor-pointer hover:bg-gray-100 rounded py-1"
                             >
                               {quantity}
                             </span>
                           )}
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleQuantityChange(topProduct.productId, quantity + 1, stockInfo!.quantityLeft)} 
-                            disabled={quantity >= stockInfo!.quantityLeft} 
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleQuantityChange(topProduct.productId, quantity + 1, stockInfo!.quantityLeft)}
+                            disabled={quantity >= stockInfo!.quantityLeft}
                             className="h-6 w-6 p-0"
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
-                        <Button 
-                          onClick={() => handleFinalAddTopProductToCart(topProduct)} 
-                          size="sm" 
+                        <Button
+                          onClick={() => handleFinalAddTopProductToCart(topProduct)}
+                          size="sm"
                           className="w-full h-7 text-xs bg-orange-500 hover:bg-orange-600"
                         >
                           <ShoppingCart className="w-3 h-3 mr-1" />
@@ -1287,9 +1281,9 @@ export default function ProductNavigation({
                       </div>
                     )
                   ) : (
-                    <Button 
-                      disabled 
-                      size="sm" 
+                    <Button
+                      disabled
+                      size="sm"
                       className="w-full h-7 text-xs"
                     >
                       Out of Stock
@@ -1316,7 +1310,7 @@ export default function ProductNavigation({
         {categories.map((category) => {
           const productCount = getProductCount(category._id);
           const inStockCount = getProductsInStockCount(category._id);
-          
+
           return (
             <div
               key={category._id}
@@ -1328,8 +1322,8 @@ export default function ProductNavigation({
               </div>
               <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
               <p className="text-xs text-gray-500">{productCount} products</p>
-              <Badge 
-                variant={inStockCount > 0 ? "default" : "secondary"} 
+              <Badge
+                variant={inStockCount > 0 ? "default" : "secondary"}
                 className={`text-xs mt-1 ${inStockCount > 0 ? "bg-green-500" : ""}`}
               >
                 {inStockCount} in stock
@@ -1390,8 +1384,8 @@ export default function ProductNavigation({
                   <div key={product._id} className="bg-white border rounded-lg overflow-hidden opacity-60">
                     <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
                       {product.imageURL ? (
-                        <img 
-                          src={product.imageURL} 
+                        <img
+                          src={product.imageURL}
                           alt={product.name}
                           className="w-full h-full object-cover grayscale"
                           onError={(e) => {
@@ -1410,11 +1404,11 @@ export default function ProductNavigation({
                           {product.size}
                         </Badge>
                       )}
-                      <Button 
-                        onClick={() => refreshStockForProduct(product._id)} 
-                        disabled={isRefreshing} 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        onClick={() => refreshStockForProduct(product._id)}
+                        disabled={isRefreshing}
+                        variant="ghost"
+                        size="sm"
                         className="absolute bottom-1.5 right-1.5 h-6 w-6 p-0 bg-white/80 hover:bg-white"
                       >
                         <RefreshCw className={`w-3 h-3 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -1469,18 +1463,18 @@ export default function ProductNavigation({
     // </div>
 
     // Change from space-y-3 to flex column with full height
-  <div className="flex flex-col h-full overflow-hidden">
-    {/* Breadcrumb - sticky/frozen at top */}
-    <div className="flex-shrink-0">
-      {renderBreadcrumb()}
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Breadcrumb - sticky/frozen at top */}
+      <div className="flex-shrink-0">
+        {renderBreadcrumb()}
+      </div>
+
+      {/* Scrollable content area */}
+      <Card className="flex-1 overflow-hidden p-0 mt-1">
+        <CardContent className="p-4 h-full overflow-y-auto">
+          {renderContent()}
+        </CardContent>
+      </Card>
     </div>
-    
-    {/* Scrollable content area */}
-    <Card className="flex-1 overflow-hidden p-0 mt-1">
-      <CardContent className="p-4 h-full overflow-y-auto">
-        {renderContent()}
-      </CardContent>
-    </Card>
-  </div>
   );
 }
