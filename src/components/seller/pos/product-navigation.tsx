@@ -1,7 +1,7 @@
 // components/admin/pos/product-navigation.tsx
 "use client";
 
-import { useState, useCallback, useMemo, useEffect, JSX } from 'react';
+import { useState, useCallback, useMemo, useEffect, JSX, memo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,6 +154,224 @@ function highlightMatch(text: string, query: string): JSX.Element {
     </>
   );
 }
+
+// =============================================
+// Sub-Component
+// =============================================
+interface TopProductCardProps {
+  topProduct: TopSellingProduct;
+  index: number;
+  stockInfo: StockInfo | undefined;
+  inCart: boolean;
+  isActive: boolean;
+  quantity: number;
+  isEditing: boolean;
+  isRefreshing: boolean;
+  editingValue: string;
+  onAddToCart: (id: string) => void;
+  onQuantityChange: (id: string, qty: number, max: number) => void;
+  onFinalAdd: (product: TopSellingProduct) => void;
+  onRefresh: (id: string) => void;
+  onNavigateCategory: (id: string) => void;
+  onQuantityClick: (id: string, qty: number) => void;
+  onQuantityBlur: (id: string, max: number) => void;
+  onQuantityKeyDown: (e: React.KeyboardEvent, id: string, max: number) => void;
+  onManualQuantityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  renderInCartBadge: (id: string) => React.ReactNode;
+  hasLowStock: boolean;
+}
+
+const TopProductCard = memo(({
+  topProduct,
+  index,
+  stockInfo,
+  inCart,
+  isActive,
+  quantity,
+  isEditing,
+  isRefreshing,
+  editingValue,
+  onAddToCart,
+  onQuantityChange,
+  onFinalAdd,
+  onRefresh,
+  onNavigateCategory,
+  onQuantityClick,
+  onQuantityBlur,
+  onQuantityKeyDown,
+  onManualQuantityChange,
+  renderInCartBadge,
+  hasLowStock,
+}: TopProductCardProps) => {
+  const outOfStock = !stockInfo || stockInfo.quantityLeft <= 0;
+
+  return (
+    <div className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${inCart ? "border-blue-300 bg-blue-50"
+      : outOfStock ? "border-gray-200 opacity-60"
+        : hasLowStock ? "border-orange-200"  // ✅ use prop not local var
+          : "border-gray-200 hover:border-orange-300"
+      }`}>
+      {renderInCartBadge(topProduct.productId)}
+
+      {!inCart && (
+        <div className="absolute top-1.5 left-1.5 z-10">
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${index < 3 ? "bg-gradient-to-br from-yellow-400 to-orange-500" : "bg-gray-400"
+            }`}>
+            {index + 1}
+          </div>
+        </div>
+      )}
+
+      <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+        {topProduct.imageURL ? (
+          <img
+            src={topProduct.imageURL}
+            alt={topProduct.name}
+            className={`w-full h-full object-cover ${outOfStock ? 'grayscale' : ''}`}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const nextSibling = e.currentTarget.nextElementSibling;
+              if (nextSibling) nextSibling.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        <div className={`flex items-center justify-center ${topProduct.imageURL ? 'hidden' : ''}`}>
+          <Package className="w-8 h-8 text-gray-300" />
+        </div>
+
+        {stockInfo && (
+          <Badge
+            variant={hasLowStock ? "destructive" : "default"}
+            className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${hasLowStock ? "bg-orange-500" : "bg-green-500"
+              }`}
+          >
+            {stockInfo.quantityLeft}
+          </Badge>
+        )}
+
+        {outOfStock && (
+          <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
+            <Badge variant="secondary" className="text-xs">Out of Stock</Badge>
+          </div>
+        )}
+
+        <Button
+          onClick={(e) => { e.stopPropagation(); onRefresh(topProduct.productId); }} // ✅ onRefresh
+          disabled={isRefreshing}
+          variant="ghost"
+          size="sm"
+          className="absolute bottom-1.5 right-1.5 h-5 w-5 p-0 bg-white/80 hover:bg-white"
+        >
+          <RefreshCw className={`w-3 h-3 ${isRefreshing ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
+
+      <div className="p-1">
+        <h4 className="font-medium text-gray-900 text-xs line-clamp-1 mb-0.5">
+          {topProduct.name}
+        </h4>
+
+        <button
+          onClick={() => onNavigateCategory(topProduct.categoryId)} // ✅ onNavigateCategory
+          className="text-xs text-blue-500 hover:text-blue-600 hover:underline text-left mb-1"
+        >
+          {topProduct.categoryName}
+        </button>
+
+        {topProduct.size && (
+          <Badge variant="outline" className="text-xs px-1 py-0 mb-1">
+            {topProduct.size}
+          </Badge>
+        )}
+
+        <div className="flex items-center justify-between mb-1.5">
+          {stockInfo ? (
+            <span className="text-sm font-bold text-green-600">
+              ₹{Number(stockInfo.sellingPrice).toFixed(0)}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400">No price</span>
+          )}
+          <span className="text-xs text-gray-400">
+            {topProduct.totalQuantitySold} sold
+          </span>
+        </div>
+
+        {!outOfStock ? (
+          !isActive ? (
+            <div className="@container">
+              <Button
+                onClick={() => onAddToCart(topProduct.productId)}
+                size="sm"
+                className="w-full rounded-sm bg-orange-500 hover:bg-orange-600 
+                  flex items-center justify-center gap-1 h-7 text-xs px-1.5"
+              >
+                <ShoppingCart className="w-3 h-3 shrink-0" />
+                <span className="hidden @[80px]:inline text-[10px]">
+                  Add to Cart
+                </span>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onQuantityChange(topProduct.productId, quantity - 1, stockInfo!.quantityLeft)} // ✅ onQuantityChange
+                  disabled={quantity <= 1}
+                  className="h-6 w-6 p-0"
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+                {isEditing ? (
+                  <Input
+                    type="text"
+                    value={editingValue}
+                    onChange={onManualQuantityChange}
+                    onBlur={() => onQuantityBlur(topProduct.productId, stockInfo!.quantityLeft)} // ✅ onQuantityBlur
+                    onKeyDown={(e) => onQuantityKeyDown(e, topProduct.productId, stockInfo!.quantityLeft)} // ✅ onQuantityKeyDown
+                    className="w-10 h-6 text-center text-xs p-0"
+                    autoFocus
+                  />
+                ) : (
+                  <span
+                    onClick={() => onQuantityClick(topProduct.productId, quantity)} // ✅ onQuantityClick
+                    className="w-8 text-center font-medium text-xs cursor-pointer hover:bg-gray-100 rounded py-1"
+                  >
+                    {quantity}
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onQuantityChange(topProduct.productId, quantity + 1, stockInfo!.quantityLeft)} // ✅ onQuantityChange
+                  disabled={quantity >= stockInfo!.quantityLeft}
+                  className="h-6 w-6 p-0"
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+              <Button
+                onClick={() => onFinalAdd(topProduct)} // ✅ onFinalAdd
+                size="sm"
+                className="w-full h-7 text-xs bg-orange-500 hover:bg-orange-600"
+              >
+                <ShoppingCart className="w-3 h-3 mr-1" />
+                Add {quantity}
+              </Button>
+            </div>
+          )
+        ) : (
+          <Button disabled size="sm" className="w-full h-7 rounded-sm text-xs">
+            Out of Stock
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+});
+
 
 // =============================================
 // Component
@@ -823,7 +1041,6 @@ export default function ProductNavigation({
 
           <div className="flex items-center justify-between mb-1.5">
             {stockInfo ? (
-              // <span className="text-sm font-bold text-green-600">₹{stockInfo.sellingPrice}</span>
               <span className="text-sm font-bold text-green-600">₹{Number(stockInfo.sellingPrice).toFixed(0)}</span>
             ) : (
               <span className="text-xs text-gray-400">No price</span>
@@ -838,7 +1055,7 @@ export default function ProductNavigation({
                 size="sm"
                 className="w-full h-7 text-xs bg-green-500 hover:bg-green-600"
               >
-                <ShoppingCart className="w-3 h-3 mr-1" />
+                <ShoppingCart className="w-3 h-3 shrink-0" />
                 Add to Cart
               </Button>
             ) : (
@@ -886,7 +1103,7 @@ export default function ProductNavigation({
                   size="sm"
                   className="w-full h-7 text-xs bg-green-500 hover:bg-green-600"
                 >
-                  <ShoppingCart className="w-3 h-3 mr-1" />
+                  <ShoppingCart className="w-3 h-3 shrink-0" />
                   Add {quantity}
                 </Button>
               </div>
@@ -909,9 +1126,9 @@ export default function ProductNavigation({
   // Render Breadcrumb with Search
   // =============================================
   const renderBreadcrumb = () => (
-    <Card className="mb-1 p-4">
+    <Card className="mb-1 p-2">
       <CardContent className="py-0 px-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -939,8 +1156,13 @@ export default function ProductNavigation({
                   <BreadcrumbSeparator><ChevronRight className="w-4 h-4" /></BreadcrumbSeparator>
                   <BreadcrumbItem>
                     <BreadcrumbPage className="flex items-center font-semibold text-sm">
-                      <Search className="w-4 h-4 mr-1" />
-                      Search: "{debouncedSearchTerm}" ({searchResults.categories.length + searchResults.products.length} results)
+                      <Search className="w-4 h-4 mr-1 shrink-0" />
+                      <span className="truncate max-w-[200px]">
+                        "{debouncedSearchTerm}"
+                      </span>
+                      <span className="hidden sm:inline ml-1 text-gray-500 text-xs font-normal whitespace-nowrap">
+                        [ {searchResults.categories.length} categories + {searchResults.products.length} products ({searchResults.categories.length + searchResults.products.length} results) ]
+                      </span>
                     </BreadcrumbPage>
                   </BreadcrumbItem>
                 </>
@@ -979,7 +1201,7 @@ export default function ProductNavigation({
                 value={searchTerm}
                 onChange={handleSearchInputChange}
                 onKeyDown={handleSearchKeyDown}
-                className="pl-9 pr-8 h-9 text-sm w-72"
+                className="pl-9 pr-8 h-9 text-sm w-40 sm:w-56 md:w-72"
                 autoComplete="off"
               />
               {searchTerm && (
@@ -1029,7 +1251,7 @@ export default function ProductNavigation({
               <Layers className="w-5 h-5 text-blue-600" />
               Categories ({matchedCategories.length})
             </h3>
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            <div className="grid grid-cols-1 min-[350px]:grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
               {matchedCategories.map((category) => {
                 const productCount = getProductCount(category._id);
                 const inStockCount = getProductsInStockCount(category._id);
@@ -1040,8 +1262,8 @@ export default function ProductNavigation({
                     onClick={() => navigateToProducts(category)}
                     className="cursor-pointer bg-white border-2 border-blue-200 rounded-lg p-3 hover:shadow-md hover:border-blue-400 transition-all text-center"
                   >
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-                      <Package className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                      <Package className="w-6 h-6 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
                     <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
                       {highlightMatch(category.name, debouncedSearchTerm)}
@@ -1117,180 +1339,35 @@ export default function ProductNavigation({
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-1">
+        <div className="grid grid-cols-1 min-[350px]:grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-1">
           {topSellingProducts.map((topProduct, index) => {
             const stockInfo = productStocks.get(topProduct.productId);
             const outOfStock = !stockInfo || stockInfo.quantityLeft <= 0;
-            const lowStock = hasLowStockForTopProduct(topProduct);
-            const inCart = isProductInCart(topProduct.productId);
-            const isRefreshing = refreshingStocks.has(topProduct.productId);
-            const isActive = selectedProductIds[topProduct.productId] ?? false;
-            const quantity = quantities[topProduct.productId] || 1;
-            const isEditing = editingProductId === topProduct.productId;
 
             return (
-              <div
+              <TopProductCard
                 key={topProduct.productId}
-                className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${inCart
-                  ? "border-blue-300 bg-blue-50"
-                  : outOfStock
-                    ? "border-gray-200 opacity-60"
-                    : lowStock
-                      ? "border-orange-200"
-                      : "border-gray-200 hover:border-orange-300"
-                  }`}
-              >
-                {renderInCartBadge(topProduct.productId)}
-
-                {!inCart && (
-                  <div className="absolute top-1.5 left-1.5 z-10">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${index < 3
-                      ? "bg-gradient-to-br from-yellow-400 to-orange-500"
-                      : "bg-gray-400"
-                      }`}>
-                      {index + 1}
-                    </div>
-                  </div>
-                )}
-
-                <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
-                  {topProduct.imageURL ? (
-                    <img
-                      src={topProduct.imageURL}
-                      alt={topProduct.name}
-                      className={`w-full h-full object-cover ${outOfStock ? 'grayscale' : ''}`}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const nextSibling = e.currentTarget.nextElementSibling;
-                        if (nextSibling) nextSibling.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`flex items-center justify-center ${topProduct.imageURL ? 'hidden' : ''}`}>
-                    <Package className="w-8 h-8 text-gray-300" />
-                  </div>
-
-                  {stockInfo && (
-                    <Badge
-                      variant={lowStock ? "destructive" : "default"}
-                      className={`absolute top-1.5 right-1.5 text-xs px-1.5 py-0.5 ${lowStock ? "bg-orange-500" : "bg-green-500"
-                        }`}
-                    >
-                      {stockInfo.quantityLeft}
-                    </Badge>
-                  )}
-
-                  {outOfStock && (
-                    <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
-                      <Badge variant="secondary" className="text-xs">Out of Stock</Badge>
-                    </div>
-                  )}
-
-                  <Button
-                    onClick={(e) => { e.stopPropagation(); refreshStockForProduct(topProduct.productId); }}
-                    disabled={isRefreshing}
-                    variant="ghost"
-                    size="sm"
-                    className="absolute bottom-1.5 right-1.5 h-5 w-5 p-0 bg-white/80 hover:bg-white"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isRefreshing ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
-
-                <div className="p-1 @container">
-                  <h4 className="font-medium text-gray-900 text-xs line-clamp-1 mb-0.5">{topProduct.name}</h4>
-
-                  <button
-                    onClick={() => navigateToCategoryFromProduct(topProduct.categoryId)}
-                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline text-left mb-1"
-                  >
-                    {topProduct.categoryName}
-                  </button>
-
-                  {topProduct.size && (
-                    <Badge variant="outline" className="text-xs px-1 py-0 mb-1">{topProduct.size}</Badge>
-                  )}
-
-                  <div className="flex items-center justify-between mb-1.5">
-                    {stockInfo ? (
-                      <span className="text-sm font-bold text-green-600">₹{Number(stockInfo.sellingPrice).toFixed(0)}</span>
-                    ) : (
-                      <span className="text-xs text-gray-400">No price</span>
-                    )}
-                    <span className="text-xs text-gray-400">{topProduct.totalQuantitySold} sold</span>
-                  </div>
-
-                  {!outOfStock ? (
-                    !isActive ? (
-                      <Button
-                        onClick={() => handleInitialAddToCart(topProduct.productId)}
-                        size="sm"
-                        className="w-full rounded-sm bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-1 h-7 text-xs @[80px]:flex-row @[80px]:h-7 @[60px]:h-auto @[60px]:py-1"
-                      >
-                        <ShoppingCart className="w-3 h-3 shrink-0" />
-                        <span className="hidden @[70px]:inline text-[10px]">Add to Cart</span>
-                      </Button>
-                    ) : (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleQuantityChange(topProduct.productId, quantity - 1, stockInfo!.quantityLeft)}
-                            disabled={quantity <= 1}
-                            className="h-6 w-6 p-0"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          {isEditing ? (
-                            <Input
-                              type="text"
-                              value={editingValue}
-                              onChange={handleManualQuantityChange}
-                              onBlur={() => handleQuantityBlur(topProduct.productId, stockInfo!.quantityLeft)}
-                              onKeyDown={(e) => handleQuantityKeyDown(e, topProduct.productId, stockInfo!.quantityLeft)}
-                              className="w-10 h-6 text-center text-xs p-0"
-                              autoFocus
-                            />
-                          ) : (
-                            <span
-                              onClick={() => handleQuantityClick(topProduct.productId, quantity)}
-                              className="w-8 text-center font-medium text-xs cursor-pointer hover:bg-gray-100 rounded py-1"
-                            >
-                              {quantity}
-                            </span>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleQuantityChange(topProduct.productId, quantity + 1, stockInfo!.quantityLeft)}
-                            disabled={quantity >= stockInfo!.quantityLeft}
-                            className="h-6 w-6 p-0"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <Button
-                          onClick={() => handleFinalAddTopProductToCart(topProduct)}
-                          size="sm"
-                          className="w-full h-7 text-xs bg-orange-500 hover:bg-orange-600"
-                        >
-                          <ShoppingCart className="w-3 h-3 mr-1" />
-                          Add {quantity}
-                        </Button>
-                      </div>
-                    )
-                  ) : (
-                    <Button
-                      disabled
-                      size="sm"
-                      className="w-full h-7 text-xs"
-                    >
-                      Out of Stock
-                    </Button>
-                  )}
-                </div>
-              </div>
+                topProduct={topProduct}
+                index={index}
+                stockInfo={stockInfo}
+                inCart={isProductInCart(topProduct.productId)}
+                isActive={selectedProductIds[topProduct.productId] ?? false}
+                quantity={quantities[topProduct.productId] || 1}
+                isEditing={editingProductId === topProduct.productId}
+                isRefreshing={refreshingStocks.has(topProduct.productId)}
+                editingValue={editingValue}
+                hasLowStock={hasLowStockForTopProduct(topProduct)}
+                onAddToCart={handleInitialAddToCart}
+                onQuantityChange={handleQuantityChange}
+                onFinalAdd={handleFinalAddTopProductToCart}
+                onRefresh={refreshStockForProduct}
+                onNavigateCategory={navigateToCategoryFromProduct}
+                onQuantityClick={handleQuantityClick}
+                onQuantityBlur={handleQuantityBlur}
+                onQuantityKeyDown={handleQuantityKeyDown}
+                onManualQuantityChange={handleManualQuantityChange}
+                renderInCartBadge={renderInCartBadge}
+              />
             );
           })}
         </div>
@@ -1306,22 +1383,50 @@ export default function ProductNavigation({
       <div className="mb-3">
         <h2 className="text-xl font-bold text-gray-900">Category</h2>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+      <div className="grid grid-cols-1 min-[350px]:grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
         {categories.map((category) => {
           const productCount = getProductCount(category._id);
           const inStockCount = getProductsInStockCount(category._id);
 
           return (
+            // <div
+            //   key={category._id}
+            //   onClick={() => navigateToProducts(category)}
+            //   className="cursor-pointer bg-white border rounded-lg p-3 hover:shadow-md hover:border-blue-300 transition-all text-center"
+            // >
+            //   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+            //     <Package className="w-6 h-6 text-blue-600" />
+            //   </div>
+            //   <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
+            //   <p className="text-xs text-gray-500">{productCount} products</p>
+            //   <Badge
+            //     variant={inStockCount > 0 ? "default" : "secondary"}
+            //     className={`text-xs mt-1 ${inStockCount > 0 ? "bg-green-500" : ""}`}
+            //   >
+            //     {inStockCount} in stock
+            //   </Badge>
+            // </div>
             <div
               key={category._id}
               onClick={() => navigateToProducts(category)}
-              className="cursor-pointer bg-white border rounded-lg p-3 hover:shadow-md hover:border-blue-300 transition-all text-center"
+              className="cursor-pointer bg-white border rounded-lg p-2 sm:p-3 hover:shadow-md hover:border-blue-300 transition-all text-center overflow-hidden" // 👈 overflow-hidden + responsive padding
             >
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-                <Package className="w-6 h-6 text-blue-600" />
+              {/* Responsive icon */}
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-1 sm:mb-2">
+                <Package className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
               </div>
-              <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
-              <p className="text-xs text-gray-500">{productCount} products</p>
+
+              {/* Truncate name */}
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm line-clamp-1 truncate">
+                {category.name}
+              </h3>
+
+              {/* Hide on very small */}
+              <p className="text-xs text-gray-500 hidden min-[350px]:block">
+                {productCount} products
+              </p>
+
+              {/* Responsive badge */}
               <Badge
                 variant={inStockCount > 0 ? "default" : "secondary"}
                 className={`text-xs mt-1 ${inStockCount > 0 ? "bg-green-500" : ""}`}
@@ -1453,15 +1558,6 @@ export default function ProductNavigation({
   };
 
   return (
-    // <div className="space-y-3">
-    //   {renderBreadcrumb()}
-    //   <Card className="p-0">
-    //     <CardContent className="p-4 min-h-[600px]">
-    //       {renderContent()}
-    //     </CardContent>
-    //   </Card>
-    // </div>
-
     // Change from space-y-3 to flex column with full height
     <div className="flex flex-col h-full overflow-hidden">
       {/* Breadcrumb - sticky/frozen at top */}

@@ -103,14 +103,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Tabs Navigation - persists across tab changes */}
       <nav className="bg-white border-b sticky top-0 z-10">
-        <div className="px-6 flex space-x-8 overflow-x-auto">
+        <div className="px-4 flex space-x-8 overflow-x-auto">
           {accessibleTabs.map((tab) => {
             const isActive = pathname === `/admin/dashboard/${tab.id}`;
             return (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-3 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap transition-colors ${isActive
+                className={`py-2.5 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap transition-colors ${isActive
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-blue-600'
                   }`}
@@ -123,7 +123,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </nav>
 
       {/* Tab Content - this changes */}
-      <main className="p-3">{children}</main>
+      <main className="p-2.5 px-3">{children}</main>
     </div>
   );
 }

@@ -226,9 +226,9 @@ export default function ShoppingCart({
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col min-h-10">
+        <CardContent className="flex-1 flex flex-col min-h-0">
           {/* Scrollable cart items section */}
-          <div className="flex-1 overflow-y-auto mb-4 min-h-30">
+          <div className="flex-1 overflow-y-auto mb-4 min-h-0">
             <div className="space-y-3">
               {cartItems.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">

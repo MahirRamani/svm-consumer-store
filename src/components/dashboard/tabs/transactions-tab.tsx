@@ -11,10 +11,6 @@ import { Button } from '@/components/ui/button';
 import {
   Search,
   Download,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Loader2,
   Calendar,
   X,
@@ -25,10 +21,11 @@ import RevertTransactionModal, {
   type RevertTransaction,
   type RevertTransactionItem,
 } from "@/components/modals/revert-transaction-modal";
-import type { Transaction, TransactionItem, TransactionsResponse, PaginationMetadata, TransactionType } from '@/types';
+import type { Transaction, TransactionItem, TransactionsResponse, TransactionType } from '@/types';
+import { PaginationControls } from '@/components/pagination/pagination-controls';
 
 type DateRangeType = "today" | "week" | "month" | "custom" | "all";
-type StatusType = "all" | "Completed" | "Pending" | "Cancelled";
+type StatusType = "Completed" | "Pending" | "Cancelled" | "all";
 
 interface FilterState {
   statusFilter: StatusType;
@@ -39,7 +36,55 @@ interface FilterState {
   pageSize: number;
 }
 
-// Skeleton Component for Table Loading
+const getYesterday = () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
+};
+
+const getUTCBoundaries = (
+  dateRange: string,
+  startDate: string,
+  endDate: string
+): { startDate: string; endDate: string } | null => {
+  const now = new Date();
+
+  switch (dateRange) {
+    case "today": {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    case "week": {
+      const start = new Date(now);
+      start.setDate(now.getDate() - now.getDay());
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    case "month": {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      end.setHours(23, 59, 59, 999);
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    case "custom": {
+      if (!startDate || !endDate) return null;
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+    default:
+      return null;
+  }
+};
+
 const TableSkeleton = ({ rows = 5 }: { rows?: number }) => (
   <tbody className="bg-white divide-y divide-gray-200">
     {Array.from({ length: rows }).map((_, index) => (
@@ -83,7 +128,6 @@ const TableSkeleton = ({ rows = 5 }: { rows?: number }) => (
 );
 
 export default function TransactionsTab() {
-  // Separate search input state from committed search
   const [searchInput, setSearchInput] = useState("");
   const [committedSearch, setCommittedSearch] = useState("");
 
@@ -121,55 +165,6 @@ export default function TransactionsTab() {
   }, []);
 
   // Add this helper
-  const getYesterday = () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split("T")[0]; // "2026-03-06" for date input
-  };
-
-  // Add this helper above your component
-  const getUTCBoundaries = (
-    dateRange: string,
-    startDate: string,
-    endDate: string
-  ): { startDate: string; endDate: string } | null => {
-    const now = new Date();
-
-    switch (dateRange) {
-      case "today": {
-        const start = new Date(now);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(now);
-        end.setHours(23, 59, 59, 999);
-        return { startDate: start.toISOString(), endDate: end.toISOString() };
-      }
-      case "week": {
-        const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay());
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(now);
-        end.setHours(23, 59, 59, 999);
-        return { startDate: start.toISOString(), endDate: end.toISOString() };
-      }
-      case "month": {
-        const start = new Date(now.getFullYear(), now.getMonth(), 1);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        end.setHours(23, 59, 59, 999);
-        return { startDate: start.toISOString(), endDate: end.toISOString() };
-      }
-      case "custom": {
-        if (!startDate || !endDate) return null;
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        return { startDate: start.toISOString(), endDate: end.toISOString() };
-      }
-      default:
-        return null;
-    }
-  };
   // Updated useQuery — only change is in queryFn params building
   const { data: response, isLoading, isFetching } = useQuery<TransactionsResponse>({
     queryKey: [
@@ -212,17 +207,8 @@ export default function TransactionsTab() {
     placeholderData: (previousData) => previousData,
   });
 
-  
   const transactions = response?.data || [];
   const pagination = response?.pagination;
-
-  // const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-  //   setFilters((prev) => ({
-  //     ...prev,
-  //     [key]: value,
-  //     ...(key !== "currentPage" && key !== "pageSize" ? { currentPage: 1 } : {}),
-  //   }));
-  // }, []);
 
   const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => {
@@ -257,29 +243,6 @@ export default function TransactionsTab() {
     });
   }, []);
 
-  const handlePageChange = useCallback((newPage: number) => {
-    setFilters((prev) => ({ ...prev, currentPage: newPage }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const handlePageSizeChange = useCallback((newSize: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      pageSize: parseInt(newSize),
-      currentPage: 1,
-    }));
-  }, []);
-
-  const parseTransactionItems = useCallback((itemsJson: string): TransactionItem[] => {
-    try {
-      const parsed = JSON.parse(itemsJson || "[]");
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.error("Failed to parse transaction items:", error);
-      return [];
-    }
-  }, []);
-
   const getStatusBadgeVariant = useCallback(
     (status: string): "default" | "secondary" | "destructive" => {
       switch (status.toLowerCase()) {
@@ -311,20 +274,12 @@ export default function TransactionsTab() {
     });
   }, []);
 
+  //NOTE: We have to use Swedish locale ('sv') to get "YYYY-MM-DD" date format
+  const TODAY = new Date().toLocaleDateString('sv', { timeZone: 'Asia/Kolkata' });
+
   // Handle revert button click - properly typed with transformation
   const handleRevertClick = useCallback((apiTransaction: Transaction) => {
-    // Parse items if they're in string format
-    let apiItems: TransactionItem[];
-
-    if (Array.isArray(apiTransaction.items)) {
-      apiItems = apiTransaction.items;
-    } else if (typeof apiTransaction.items === "string") {
-      apiItems = parseTransactionItems(apiTransaction.items);
-    } else if (apiTransaction.items) {
-      apiItems = parseTransactionItems(JSON.stringify(apiTransaction.items));
-    } else {
-      apiItems = [];
-    }
+    const apiItems: TransactionItem[] = apiTransaction.items || [];
 
     // Transform API items to modal format
     const revertItems: RevertTransactionItem[] = apiItems.map(item => ({
@@ -337,7 +292,7 @@ export default function TransactionsTab() {
       name: item.name,
       // size: item.size,
     }));
-    
+
     // Create properly formatted transaction object for the modal
     const formattedTransaction: RevertTransaction = {
       _id: apiTransaction._id,
@@ -354,7 +309,7 @@ export default function TransactionsTab() {
 
     setSelectedTransaction(formattedTransaction);
     setShowRevertModal(true);
-  }, [parseTransactionItems]);
+  }, []);
 
   const canRevert = useCallback((transaction: Transaction): boolean => {
     const type = transaction.type as TransactionType;
@@ -387,13 +342,8 @@ export default function TransactionsTab() {
       const rows: string[] = [];
 
       transactions.forEach((transaction) => {
-        const items = Array.isArray(transaction.items)
-          ? transaction.items
-          : parseTransactionItems(
-            typeof transaction.items === "string"
-              ? transaction.items
-              : JSON.stringify(transaction.items || [])
-          );
+        const items = transaction.items || [];
+
         const transactionDate = new Date(transaction.createdAt);
         const dateStr = transactionDate.toLocaleDateString("en-GB", {
           day: "2-digit",
@@ -401,10 +351,9 @@ export default function TransactionsTab() {
           year: "numeric",
         });
         const timeStr = transactionDate.toLocaleTimeString();
-
         const txnId = `TXN${transaction._id.toString().padStart(6, "0")}`;
         const studentName = transaction.student?.name || "Unknown";
-        const rollNumber = transaction.student?.rollNumber || "N/A";
+        const rollNumber = transaction.student?.rollNumber ?? "N/A";
         const totalAmount = Number(transaction.totalAmount).toFixed(2);
         const status = transaction.status;
         const type = transaction.type || "N/A";
@@ -459,103 +408,13 @@ export default function TransactionsTab() {
     } finally {
       setIsExporting(false);
     }
-  }, [transactions, parseTransactionItems]);
-
-  const PaginationControls = useCallback(() => {
-    if (!pagination) return null;
-
-    const { totalPages, totalCount, startIndex, endIndex, hasNextPage, hasPreviousPage } = pagination;
-
-    const currentPage = filters.currentPage;
-
-    const getPageNumbers = (): number[] => {
-      const maxVisible = 5;
-      const pages: number[] = [];
-
-      if (totalPages <= maxVisible) {
-        for (let i = 1; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else if (currentPage <= 3) {
-        for (let i = 1; i <= maxVisible; i++) {
-          pages.push(i);
-        }
-      } else if (currentPage >= totalPages - 2) {
-        for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-          pages.push(i);
-        }
-      }
-
-      return pages;
-    };
-
-    return (
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700">
-            Showing {startIndex} to {endIndex} of {totalCount} results
-          </span>
-          <Select value={filters.pageSize.toString()} onValueChange={handlePageSizeChange}>
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-gray-700">per page</span>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(1)} disabled={!hasPreviousPage}>
-            <ChevronsLeft className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={!hasPreviousPage}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-
-          <div className="flex items-center space-x-1">
-            {getPageNumbers().map((pageNumber) => (
-              <Button
-                key={pageNumber}
-                variant={currentPage === pageNumber ? "default" : "outline"}
-                size="sm"
-                onClick={() => handlePageChange(pageNumber)}
-                className="w-8 h-8"
-              >
-                {pageNumber}
-              </Button>
-            ))}
-          </div>
-
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={!hasNextPage}>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handlePageChange(totalPages)} disabled={!hasNextPage}>
-            <ChevronsRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  }, [pagination, filters.currentPage, filters.pageSize, handlePageChange, handlePageSizeChange]);
+  }, [transactions]);
 
   // Show skeleton on initial load
-  const showSkeleton = isLoading || isFetching;
+  const showSkeleton = isLoading;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
         <Button onClick={handleExport} variant="outline" disabled={isExporting || transactions.length === 0}>
@@ -574,17 +433,17 @@ export default function TransactionsTab() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="py-3.5">
+        <CardContent className="px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search with Button */}
-            <div>
+            <div className="md:col-span-1">
               <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
-                    placeholder="Student name or roll number..."
+                    placeholder="Roll Number or Student Name"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
@@ -601,6 +460,7 @@ export default function TransactionsTab() {
                   )}
                 </div>
                 <Button
+                  aria-label="Search"
                   onClick={handleSearch}
                   disabled={isFetching}
                   size="icon"
@@ -620,74 +480,68 @@ export default function TransactionsTab() {
               )}
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Status</Label>
-              <Select value={filters.statusFilter} onValueChange={(value: StatusType) => updateFilter("statusFilter", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-4">
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Date Range</Label>
-              <Select value={filters.dateRange} onValueChange={(value: DateRangeType) => updateFilter("dateRange", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                  <SelectItem value="all">All Time</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">Status</Label>
+                <Select value={filters.statusFilter} onValueChange={(value: StatusType) => updateFilter("statusFilter", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {filters.dateRange === "custom" && (
-              <div className="md:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">Date Range</Label>
+                <Select value={filters.dateRange} onValueChange={(value: DateRangeType) => updateFilter("dateRange", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {filters.dateRange === "custom" && (
+                <>
                   <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Start Date
-                    </Label>
-                    <Input
-                      type="date"
-                      value={filters.startDate}
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
+                    //NOTE: Input uses "YYYY-MM-DD" date format
+                    <Input type="date" value={filters.startDate}
                       onChange={(e) => updateFilter("startDate", e.target.value)}
-                      max={filters.endDate || undefined}
+                      max={filters.endDate || TODAY}
                     />
                   </div>
                   <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      End Date
-                    </Label>
-                    <Input
-                      type="date"
-                      value={filters.endDate}
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">End Date</Label>
+                    <Input type="date" value={filters.endDate}
                       onChange={(e) => updateFilter("endDate", e.target.value)}
                       min={filters.startDate || undefined}
+                      max={TODAY}
                     />
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Transactions Table */}
-      <Card>
-        <CardHeader>
+      <Card className="pt-3.5 pb-0 gap-0">
+        <CardHeader className="py-0">
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
             Recent Transactions
             {pagination && (
@@ -703,15 +557,15 @@ export default function TransactionsTab() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Details</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                  <th className="px-6 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Details</th>
+                  <th className="px-6 py-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th className="px-6 py-1.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                  <th className="px-6 py-1.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                  <th className="px-6 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
 
@@ -728,44 +582,37 @@ export default function TransactionsTab() {
                     </tr>
                   ) : (
                     transactions.map((transaction) => {
-                      const items = Array.isArray(transaction.items)
-                        ? transaction.items
-                        : parseTransactionItems(
-                          typeof transaction.items === "string"
-                            ? transaction.items
-                            : JSON.stringify(transaction.items || [])
-                        );
-
+                      const items = transaction.items || [];
                       if (items.length === 0) {
                         return (
                           <tr key={transaction._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 py-2.5 whitespace-nowrap">
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
-                                <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
+                                <p className="text-sm text-gray-500">{transaction.student?.rollNumber ?? "N/A"}</p>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">No items</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">-</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">-</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right">
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500">No items</td>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 text-center">-</td>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 text-right">-</td>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm font-semibold text-green-600 text-right">
                               ₹{Number(transaction.totalAmount).toFixed(2)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500">
                               <div>
                                 <p>{formatDate(transaction.createdAt)}</p>
                                 <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center">
                               <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
                                 {transaction.status}
                               </Badge>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center">
                               <Badge variant="outline">{transaction.type || "N/A"}</Badge>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -784,30 +631,30 @@ export default function TransactionsTab() {
                       return items.map((item, index) => (
                         <tr key={`${transaction._id}-${index}`} className="hover:bg-gray-50">
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap" rowSpan={items.length}>
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{transaction.student?.name || "Unknown"}</p>
-                                <p className="text-sm text-gray-500">{transaction.student?.rollNumber || "N/A"}</p>
+                                <p className="text-sm text-gray-500">{transaction.student?.rollNumber ?? "N/A"}</p>
                               </div>
                             </td>
                           )}
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name || "Unknown Item"}</td>
+                          <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-900">{item.name || "Unknown Item"}</td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
+                          <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                          <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-700 text-right">
                             ₹{Number(item.price).toFixed(2)}
                           </td>
 
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm font-semibold text-green-600 text-right" rowSpan={items.length}>
                               ₹{Number(transaction.totalAmount).toFixed(2)}
                             </td>
                           )}
 
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500" rowSpan={items.length}>
                               <div>
                                 <p>{formatDate(transaction.createdAt)}</p>
                                 <p className="text-xs text-gray-400">{formatTime(transaction.createdAt)}</p>
@@ -816,7 +663,7 @@ export default function TransactionsTab() {
                           )}
 
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center" rowSpan={items.length}>
                               <Badge variant={getStatusBadgeVariant(transaction.status)} className={transaction.status === "Completed" ? "bg-green-500" : ""}>
                                 {transaction.status}
                               </Badge>
@@ -824,13 +671,13 @@ export default function TransactionsTab() {
                           )}
 
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center" rowSpan={items.length}>
                               <Badge variant="outline">{transaction.type || "N/A"}</Badge>
                             </td>
                           )}
 
                           {index === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-center" rowSpan={items.length}>
+                            <td className="px-6 py-2.5 whitespace-nowrap text-center" rowSpan={items.length}>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -853,7 +700,15 @@ export default function TransactionsTab() {
           </div>
 
           {/* Pagination Controls */}
-          <PaginationControls />
+          <PaginationControls
+            pagination={pagination}
+            currentPage={filters.currentPage}
+            pageSize={filters.pageSize}
+            onPageChange={(page) => updateFilter("currentPage", page)}
+            onPageSizeChange={(size) => {
+              updateFilter("pageSize", size as FilterState["pageSize"]);
+            }}
+          />
         </CardContent>
       </Card>
 

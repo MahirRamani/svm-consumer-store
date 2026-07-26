@@ -41,6 +41,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /* Custom */
+  --breakpoint-xs: 480px;
 }
 
 :root {
@@ -120,3 +122,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Reverse Working - globals.css */
+
+/* ::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0);
+  border-radius: 999px;
+} */
+
+/* ✅ Hover on the scrollable element — show thumb */
+/* *:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+} */
+
+/* ✅ Hover on the thumb itself — slightly darker */
+/* *:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+} */

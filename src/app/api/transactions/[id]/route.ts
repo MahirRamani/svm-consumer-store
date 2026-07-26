@@ -775,7 +775,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
 
     // Calculate pagination info
-    const startIndex = skip + 1;
+    const startIndex = totalCount === 0 ? 0 : skip + 1;
     const endIndex = Math.min(skip + limit, totalCount);
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;

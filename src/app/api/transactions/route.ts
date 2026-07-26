@@ -646,8 +646,8 @@ interface AggregatedTransaction {
   totalAmount: number;
   student?: {
     name: string;
-    id: string;
-    rollNumber: string;
+    id: number;
+    rollNumber: number;
   };
   items: TransactionItem[];
 }
@@ -667,9 +667,10 @@ interface FormattedTransaction {
   _id: string;
   student: {
     name: string;
-    rollNumber: string;
+    id: number | null;
+    rollNumber: number | null;
   };
-  items: string;
+  items: ProcessedItem[];
   totalAmount: string;
   status: string;
   reason?: string;
@@ -919,19 +920,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     let searchFilter: Record<string, unknown> = {};
     if (search) {
       const trimmedSearch = search.trim(); // ✅ trim whitespace
-
-      // const students = await Student.find({
-      //   $or: [
-      //     { name: { $regex: trimmedSearch, $options: "i" } },
-      //     { rollNumber: { $regex: trimmedSearch, $options: "i" } },
-      //   ],
-      // }).select("_id");
+      const rollNumberAsInt = parseInt(trimmedSearch); // ✅ parse for Int comparison
+      const isValidRollNumber = !isNaN(rollNumberAsInt);
 
       const students = await Student.find({
         $or: [
           { name: { $regex: trimmedSearch, $options: "i" } },           // ✅ partial match for name
-          { rollNumber: trimmedSearch },                                  // ✅ exact match for rollNumber
-          { rollNumber: { $regex: `^${trimmedSearch}$`, $options: "i" } } // ✅ case-insensitive exact
+          ...(isValidRollNumber ? [{ rollNumber: rollNumberAsInt }] : []) // ✅ case-insensitive exact
         ],
       }).select("_id");
 
@@ -1018,81 +1013,144 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     ]);
 
     // Fetch detailed information for items
+    // const transactionsWithItemDetails: FormattedTransaction[] = await Promise.all(
+    //   transactions.map(async (transaction) => {
+    //     // //NOTE - Enough to handle Full Revert
+    //     // const itemsWithNames: ProcessedItem[] = await Promise.all(
+    //     //   (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
+    //     //     let name = "Unknown Item";
+    //     //     let size: string | undefined;
+
+    //     //     // Get name from Product (which is now the base item)
+    //     //     if (item.productId) {
+    //     //       const product = await Product.findById(item.productId).select("name size");
+    //     //       if (product) {
+    //     //         name = product.name;
+    //     //         size = product.size;
+    //     //       }
+    //     //     } else if (item.categoryId) {
+    //     //       // Fallback to Category
+    //     //       const category = await Category.findById(item.categoryId).select("name");
+    //     //       if (category) {
+    //     //         name = category.name;
+    //     //       }
+    //     //     }
+
+    //     //     return {
+    //     //       name,
+    //     //       size,
+    //     //       quantity: item.quantity,
+    //     //       price: item.price.toString(),
+    //     //       totalPrice: item.totalPrice.toString()
+    //     //     };
+    //     //   })
+    //     // );
+
+    //     // //NOTE - to handle Partial and Full both Revert
+    //     const itemsWithNames: ProcessedItem[] = await Promise.all(
+    //       (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
+    //         let name = "Unknown Item";
+    //         let size: string | undefined;
+
+    //         // Get name from Product (which is now the base item)
+    //         if (item.productId) {
+    //           const product = await Product.findById(item.productId).select("name size");
+    //           if (product) {
+    //             name = product.name;
+    //             size = product.size;
+    //           }
+    //         } else if (item.categoryId) {
+    //           // Fallback to Category
+    //           const category = await Category.findById(item.categoryId).select("name");
+    //           if (category) {
+    //             name = category.name;
+    //           }
+    //         }
+
+    //         return {
+    //           categoryId: item.categoryId?.toString(),
+    //           productId: item.productId?.toString(),
+    //           stockTransactionId: item.stockTransactionId?.toString(),
+    //           name,
+    //           size,
+    //           quantity: item.quantity,
+    //           price: item.price,
+    //           totalPrice: item.totalPrice
+    //         };
+    //       })
+    //     );
+
+    //     return {
+    //       _id: transaction._id.toString(),
+    //       student: {
+    //         name: transaction.student?.name || "Unknown",
+    //         id: transaction.student?.id.toString(),
+    //         rollNumber: transaction.student?.rollNumber || "N/A"
+    //       },
+    //       items: JSON.stringify(itemsWithNames),
+    //       totalAmount: transaction.totalAmount.toString(),
+    //       status: transaction.status,
+    //       type: transaction.type,
+    //       performedBy: transaction.performedBy?.username ?? null,
+    //       reason: transaction?.reason,
+    //       createdAt: transaction.createdAt
+    //     };
+    //   })
+    // );
+
+    // ✅ Step 1: Collect all IDs BEFORE the map — add this block here
+    const productIds = transactions
+      .flatMap(t => (t.items || []).map(i => i.productId).filter(Boolean));
+    const categoryIds = transactions
+      .flatMap(t => (t.items || []).map(i => i.categoryId).filter(Boolean));
+
+    const [products, categories] = await Promise.all([
+      Product.find({ _id: { $in: productIds } }).select("name size"),
+      Category.find({ _id: { $in: categoryIds } }).select("name"),
+    ]);
+
+    const productMap = Object.fromEntries(products.map(p => [p._id.toString(), p]));
+    const categoryMap = Object.fromEntries(categories.map(c => [c._id.toString(), c]));
+
+    // ✅ Step 2: Replace the existing Promise.all map below
     const transactionsWithItemDetails: FormattedTransaction[] = await Promise.all(
       transactions.map(async (transaction) => {
-        // //NOTE - Enough to handle Full Revert
-        // const itemsWithNames: ProcessedItem[] = await Promise.all(
-        //   (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
-        //     let name = "Unknown Item";
-        //     let size: string | undefined;
+        const itemsWithNames: ProcessedItem[] = (transaction.items || []).map((item): ProcessedItem => {
+          let name = "Unknown Item";
+          let size: string | undefined;
 
-        //     // Get name from Product (which is now the base item)
-        //     if (item.productId) {
-        //       const product = await Product.findById(item.productId).select("name size");
-        //       if (product) {
-        //         name = product.name;
-        //         size = product.size;
-        //       }
-        //     } else if (item.categoryId) {
-        //       // Fallback to Category
-        //       const category = await Category.findById(item.categoryId).select("name");
-        //       if (category) {
-        //         name = category.name;
-        //       }
-        //     }
-
-        //     return {
-        //       name,
-        //       size,
-        //       quantity: item.quantity,
-        //       price: item.price.toString(),
-        //       totalPrice: item.totalPrice.toString()
-        //     };
-        //   })
-        // );
-
-        // //NOTE - to handle Partial and Full both Revert
-        const itemsWithNames: ProcessedItem[] = await Promise.all(
-          (transaction.items || []).map(async (item): Promise<ProcessedItem> => {
-            let name = "Unknown Item";
-            let size: string | undefined;
-
-            // Get name from Product (which is now the base item)
-            if (item.productId) {
-              const product = await Product.findById(item.productId).select("name size");
-              if (product) {
-                name = product.name;
-                size = product.size;
-              }
-            } else if (item.categoryId) {
-              // Fallback to Category
-              const category = await Category.findById(item.categoryId).select("name");
-              if (category) {
-                name = category.name;
-              }
+          // ✅ No DB calls — just map lookups now
+          if (item.productId) {
+            const product = productMap[item.productId.toString()];
+            if (product) {
+              name = product.name;
+              size = product.size;
             }
+          } else if (item.categoryId) {
+            const category = categoryMap[item.categoryId.toString()];
+            if (category) name = category.name;
+          }
 
-            return {
-              categoryId: item.categoryId?.toString(),
-              productId: item.productId?.toString(),
-              stockTransactionId: item.stockTransactionId?.toString(),
-              name,
-              size,
-              quantity: item.quantity,
-              price: item.price,
-              totalPrice: item.totalPrice
-            };
-          })
-        );
+          return {
+            categoryId: item.categoryId?.toString(),
+            productId: item.productId?.toString(),
+            stockTransactionId: item.stockTransactionId?.toString(),
+            name,
+            size,
+            quantity: item.quantity,
+            price: item.price,
+            totalPrice: item.totalPrice,
+          };
+        });
 
         return {
           _id: transaction._id.toString(),
           student: {
             name: transaction.student?.name || "Unknown",
-            id: transaction.student?.id.toString(),
-            rollNumber: transaction.student?.rollNumber || "N/A"
+            id: transaction.student?.id ?? null,           // ✅ keep as number | null, not toString()
+            rollNumber: transaction.student?.rollNumber ?? null  // ✅ keep as number | null
           },
-          items: JSON.stringify(itemsWithNames),
+          items: itemsWithNames,
           totalAmount: transaction.totalAmount.toString(),
           status: transaction.status,
           type: transaction.type,
@@ -1102,9 +1160,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         };
       })
     );
-
     // Calculate pagination info
-    const startIndex = skip + 1;
+    const startIndex = totalCount === 0 ? 0 : skip + 1;
     const endIndex = Math.min(skip + limit, totalCount);
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;
