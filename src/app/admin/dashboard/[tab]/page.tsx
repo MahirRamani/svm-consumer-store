@@ -12,20 +12,20 @@ import { Button } from '@/components/ui/button';
 export default function TabPage() {
   const params = useParams();
   const router = useRouter();
-  const { allowedTabs, loading } = useUserPermissions();
-  const accessibleTabs = getAccessibleTabs(allowedTabs);
+  const { userAllowedTabs, loading } = useUserPermissions();
+  const accessibleTabs = getAccessibleTabs(userAllowedTabs);
 
   const tabId = params.tab as TabId;
 
   // Redirect if user doesn't have access to this tab
   useEffect(() => {
-    if (!loading && !hasTabAccess(tabId, allowedTabs)) {
+    if (!loading && !hasTabAccess(tabId, userAllowedTabs)) {
       // Redirect to first accessible tab
       if (accessibleTabs.length > 0) {
         router.replace(`/admin/dashboard/${accessibleTabs[0].id}`);
       }
     }
-  }, [loading, tabId, allowedTabs, accessibleTabs, router]);
+  }, [loading, tabId, userAllowedTabs, accessibleTabs, router]);
 
   // Loading while checking permissions
   if (loading) {

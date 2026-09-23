@@ -107,7 +107,7 @@ export function AssignIdsTab({ students, studentsLoading, onMutated, onClose }: 
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <div className="px-3 py-3 border-b border-gray-50 flex-shrink-0">
+      <div className="px-3 py-3 border-b border-gray-50 shrink-0">
         <p className="text-sm text-gray-500">
           Enter a numeric ID for each student. Press{" "}
           <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">Enter</kbd> or click away to save.
@@ -167,7 +167,7 @@ export function AssignIdsTab({ students, studentsLoading, onMutated, onClose }: 
                     <td className="px-4 py-2.5 font-mono text-sm font-semibold text-gray-600 truncate">
                       {student.rollNumber}
                     </td>
-                    <td className="px-4 py-2.5 font-medium text-gray-900 whitespace-normal break-words">
+                    <td className="px-4 py-2.5 font-medium text-gray-900 whitespace-normal wrap-break-word">
                       {student.name}
                     </td>
                     <td className="px-4 py-2.5">
@@ -231,7 +231,7 @@ export function AssignIdsTab({ students, studentsLoading, onMutated, onClose }: 
         )}
       </div>
 
-      <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
+      <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between shrink-0">
         <p className="text-xs text-gray-400">
           Numbers only · <kbd className="px-1 py-0.5 bg-gray-100 rounded font-mono text-xs">Esc</kbd> to cancel
         </p>

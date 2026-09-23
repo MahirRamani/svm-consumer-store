@@ -134,61 +134,11 @@ export default function StockTransactionsManagement() {
     }
   }, []);
 
-  // const handleExportTransactions = useCallback(() => {
-  //   try {
-  //     const headers = [
-  //       "Date",
-  //       "Product",
-  //       "Category",
-  //       "Type",
-  //       "Initial Qty",
-  //       "Qty Left",
-  //       "Buying Price",
-  //       "Selling Price",
-  //       "Reason",
-  //       "Created By",
-  //     ];
-
-  //     // const rows = filteredTransactions.map((txn) => [
-  //     const rows = transactions.map((txn) => [
-  //       new Date(txn.purchaseDate || txn.date || txn.createdAt).toLocaleDateString(),
-  //       `"${txn.productId?.name || 'Unknown'}${txn.productId?.size ? ` (${txn.productId.size})` : ""}"`,
-  //       `"${txn.categoryId?.name || 'N/A'}"`,
-  //       txn.stockType,
-  //       txn.initialQuantity,
-  //       txn.quantityLeft,
-  //       txn.buyingPrice ? convertToNumber(txn.buyingPrice).toFixed(2) : "N/A",
-  //       convertToNumber(txn.sellingPrice).toFixed(2),
-  //       `"${txn.reason || ""}"`,
-  //       `"${txn.createdBy?.username || 'N/A'}"`,
-  //     ].join(","));
-
-  //     const csvContent = [headers.join(","), ...rows].join("\n");
-
-  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.download = `stock-transactions-${new Date().toISOString().split("T")[0]}.csv`;
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-
-  //     toast.success("Transactions exported successfully!");
-  //   } catch (error) {
-  //     console.error("Export error:", error);
-  //     toast.error("Failed to export transactions");
-  //   }
-  // }, [filteredTransactions, convertToNumber]);
-
   const handleExportTransactions = useCallback(async () => {
     setIsExporting(true);
     try {
       // ── Fetch ALL matching records (no pagination limit) ───────────────────
       const params = new URLSearchParams({
-        page: "1",
-        limit: "99999",   // effectively "all" — adjust if your API caps this
         sortBy,
         sortOrder,
         export: "true",    // optional: lets the backend skip pagination entirely
@@ -202,6 +152,10 @@ export default function StockTransactionsManagement() {
       const exportData = await response.json();
       const allTransactions: StockTransaction[] =
         exportData?.data?.transactions ?? exportData?.transactions ?? [];
+
+      if (exportData?.data?.pagination?.totalCount > allTransactions.length) {
+        toast.warning(`Exported the first ${allTransactions.length} of ${exportData.data.pagination.totalCount} rows.`);
+      }
 
       if (allTransactions.length === 0) {
         toast.info("No transactions to export.");
@@ -312,7 +266,7 @@ export default function StockTransactionsManagement() {
   // RENDER
   // =============================================
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -347,11 +301,11 @@ export default function StockTransactionsManagement() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Card className="py-3">
+        <CardContent className="px-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Search */}
-            <div>
+            <div className="md:col-span-1">
               <Label className="block text-sm font-medium text-gray-700 mb-2">Search</Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -465,14 +419,17 @@ export default function StockTransactionsManagement() {
       </Card>
 
       {/* Transactions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            Transactions
+      <Card className="pt-3 pb-0 gap-0">
+        <CardHeader className="py-0">
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
+            Stocks Transactions
             {pagination && (
               <span className="ml-2 text-sm font-normal text-gray-500">
                 ({pagination.totalCount} total)
               </span>
+            )}
+            {isFetching && !isLoading && (
+              <Loader2 className="w-4 h-4 animate-spin ml-2 text-blue-500" />
             )}
           </CardTitle>
         </CardHeader>

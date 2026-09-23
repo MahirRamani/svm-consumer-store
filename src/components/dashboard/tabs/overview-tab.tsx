@@ -5,11 +5,11 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Package, 
-  IndianRupee, 
-  TrendingUp, 
-  AlertTriangle, 
+import {
+  Package,
+  IndianRupee,
+  TrendingUp,
+  AlertTriangle,
   ShoppingCart,
   TrendingDown,
   BarChart3,
@@ -21,12 +21,12 @@ import CategoryAnalyticsChart from '@/components/charts/category-analytics-chart
 import LowStockModal from '@/components/modals/low-stock-modal'
 import TodaysSalesModal from '@/components/modals/todays-sales-modal'
 import LowBalanceModal from '@/components/modals/low-balance-students-modal'
-import type { 
+import type {
   DashboardStatsResponse,
   AdminDashboardStats,
-  Category, 
+  Category,
   Product,
-  AnalyticsView 
+  AnalyticsView
 } from "@/types/dashboard/overview"
 import { ApiResponse } from '@/lib/api/base-handler'
 
@@ -68,8 +68,8 @@ export default function OverviewTab() {
   const { data: productsResponse } = useQuery<ApiResponse<{ products: Product[] }>>({
     queryKey: ["products", selectedCategory],
     queryFn: async () => {
-      const url = selectedCategory === "all" 
-        ? "/api/products" 
+      const url = selectedCategory === "all"
+        ? "/api/products"
         : `/api/products?categoryId=${selectedCategory}`
       const response = await fetch(url)
       if (!response.ok) throw new Error("Failed to fetch products")
@@ -100,8 +100,8 @@ export default function OverviewTab() {
   }
 
   const adminStats = isAdmin ? (stats as AdminDashboardStats) : null
-  
-  const profitChangePercent = adminStats?.yesterdayProfit 
+
+  const profitChangePercent = adminStats?.yesterdayProfit
     ? ((adminStats.todaysProfit - adminStats.yesterdayProfit) / adminStats.yesterdayProfit * 100).toFixed(1)
     : "0"
 
@@ -140,7 +140,7 @@ export default function OverviewTab() {
         )}
 
         {/* Low Stock Subproducts Card */}
-        <Card 
+        <Card
           className="hover:shadow-lg transition-shadow cursor-pointer"
           onClick={() => setShowLowStockModal(true)}
         >
@@ -162,7 +162,7 @@ export default function OverviewTab() {
         </Card>
 
         {/* Low Balance Students Card */}
-        <Card 
+        <Card
           className="hover:shadow-lg transition-shadow cursor-pointer"
           onClick={() => setShowLowBalanceModal(true)}
         >
@@ -206,7 +206,7 @@ export default function OverviewTab() {
 
         {/* Today's Sold Products Card (Admin Only) */}
         {isAdmin && adminStats && (
-          <Card 
+          <Card
             className="hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setShowTodaysSalesModal(true)}
           >
@@ -255,7 +255,7 @@ export default function OverviewTab() {
           {/* Profit/Loss Chart with Today's Profit Tile */}
           <div className="flex gap-4">
             {/* Today's Profit Square Tile */}
-            <Card className="w-40 h-40 flex-shrink-0">
+            <Card className="w-40 h-40 shrink-0">
               <CardContent className="p-4 h-full flex flex-col justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-600">Today's Profit</p>
@@ -283,7 +283,7 @@ export default function OverviewTab() {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Profit/Loss Chart */}
             <Card className="flex-1">
               <CardHeader className="pb-3">
@@ -330,7 +330,7 @@ export default function OverviewTab() {
               </div>
             </CardHeader>
             <CardContent className="h-[140px]">
-              <CategoryAnalyticsChart 
+              <CategoryAnalyticsChart
                 view={analyticsView}
                 categoryId={selectedCategory}
                 productId={selectedProduct}
@@ -341,12 +341,12 @@ export default function OverviewTab() {
       )}
 
       {/* Modals */}
-      <LowStockModal 
-        open={showLowStockModal} 
-        onOpenChange={setShowLowStockModal} 
-        products={stats.lowStockProducts || []} 
+      <LowStockModal
+        open={showLowStockModal}
+        onOpenChange={setShowLowStockModal}
+        products={stats.lowStockProducts || []}
       />
-      
+
       <LowBalanceModal
         open={showLowBalanceModal}
         onOpenChange={setShowLowBalanceModal}

@@ -82,8 +82,8 @@ export default function EditCategoryModal({ open, onOpenChange, category }: Edit
           if (num < 0) {
             return "Priority must be a positive number";
           }
-          if (num > 999999) {
-            return "Priority must be less than 1,000,000";
+          if (num > 100) {
+            return "Priority must be less than or equal to 100";
           }
         }
         break;
@@ -207,7 +207,7 @@ export default function EditCategoryModal({ open, onOpenChange, category }: Edit
               onChange={(e) => handleChange("description", e.target.value)}
               onBlur={() => handleBlur("description")}
               placeholder="Enter category description (optional)"
-              className={`min-h-[80px] ${errors.description && touched.description ? "border-destructive" : ""}`}
+              className={`min-h-20 ${errors.description && touched.description ? "border-destructive" : ""}`}
             />
             {errors.description && touched.description && (
               <p className="text-sm text-destructive">{errors.description}</p>

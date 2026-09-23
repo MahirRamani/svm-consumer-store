@@ -457,7 +457,7 @@ export default function EditStockTransactionModal({
               {formData.initialQuantity && formData.quantityLeft &&
                 Number(formData.quantityLeft) > Number(formData.initialQuantity) && (
                   <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                     <div className="text-sm text-amber-800">
                       <p className="font-medium">Warning</p>
                       <p>Quantity left ({formData.quantityLeft}) exceeds initial quantity ({formData.initialQuantity})</p>

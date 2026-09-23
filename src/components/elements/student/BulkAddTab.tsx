@@ -194,7 +194,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
     if (addPhase === "preview") {
         return (
             <div className="flex flex-col h-full min-h-0">
-                <div className="px-6 py-4 border-b border-amber-100 bg-amber-50 flex-shrink-0">
+                <div className="px-6 py-4 border-b border-amber-100 bg-amber-50 shrink-0">
                     <div className="flex items-center gap-2">
                         <AlertCircle className="w-5 h-5 text-amber-500" />
                         <p className="font-semibold text-gray-800">
@@ -240,7 +240,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                     </table>
                 </div>
 
-                <div className="px-6 py-3 border-t border-gray-100 flex justify-between items-center flex-shrink-0">
+                <div className="px-6 py-3 border-t border-gray-100 flex justify-between items-center shrink-0">
                     <Button
                         variant="outline"
                         size="sm"
@@ -298,7 +298,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
     // ── Edit phase ────────────────────────────────────────────────────────────
     return (
         <div className="flex flex-col h-full min-h-0">
-            <div className="px-6 py-3 border-b border-gray-100 bg-gray-50/50 flex-shrink-0 space-y-2">
+            <div className="px-6 py-3 border-b border-gray-100 bg-gray-50/50 shrink-0 space-y-2">
                 <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                         {activeYear ? (
@@ -318,7 +318,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                             <code className="bg-gray-100 px-1 rounded">Standard</code>. ID is optional. Year is set automatically.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                         <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={downloadTemplate}>
                             <Download className="w-3.5 h-3.5" /> Template
                         </Button>
@@ -355,7 +355,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                 {addMutation.isError && (
                     <div className="rounded-md border border-red-200 bg-red-50">
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-red-200">
-                            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                             {/* <span className="text-sm font-medium text-red-700">
                                 {addMutation.error instanceof Error ? addMutation.error.message : "Something went wrong"}
                             </span> */}
@@ -365,7 +365,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                                     .map((errPiece, index) => {
                                         const trimmedErr = errPiece.trim();
                                         return trimmedErr ? (
-                                            <span key={index} className="block break-words whitespace-pre-wrap">
+                                            <span key={index} className="block wrap-break-word whitespace-pre-wrap">
                                                 {trimmedErr}
                                             </span>
                                         ) : null;
@@ -477,7 +477,7 @@ export function BulkAddTab({ activeYear, onStudentsCreated }: Props) {
                 </table>
             </div>
 
-            <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between shrink-0">
                 <span className="text-xs text-gray-400">
                     {readyCount} / {addRows.length} row{addRows.length !== 1 ? "s" : ""} ready
                     {addRows.length !== readyCount && <span className="ml-1 text-amber-500">— fill all required fields</span>}

@@ -34,4 +34,4 @@ const endYearHandler = async (_req: Request, _authContext: AuthContext) => {
   );
 };
 
-export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(endYearHandler));// import mongoose from 'mongoose';
+export const POST = withErrorHandler(withRole(['SUPERUSER', 'ADMIN'])(endYearHandler));

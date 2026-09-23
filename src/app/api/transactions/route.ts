@@ -584,7 +584,6 @@ const createTransactionHandler = async (req: Request) => {
 export const POST = withErrorHandler(createTransactionHandler);
 
 // app/api/transactions/route.ts (add this GET handler)
-// import { Product } from '@/models';
 import { Category } from '@/models';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';
@@ -697,158 +696,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const searchParams = request.nextUrl.searchParams;
 
-    // const search = searchParams.get("search") || "";
-    // const status = searchParams.get("status") || "all";
-    // const dateRange = searchParams.get("dateRange") || "all";
-    // const startDate = searchParams.get("startDate");
-    // const endDate = searchParams.get("endDate");
-    // const page = parseInt(searchParams.get("page") || "1");
-    // const limit = parseInt(searchParams.get("limit") || "10");
-
-    // // Build filter query
-    // const filter: TransactionFilter = {
-    //   type: "Purchase"
-    // };
-
-    // // Status filter
-    // if (status !== "all") {
-    //   const statusMap: StatusMap = {
-    //     completed: "Completed",
-    //     failed: "Cancelled",
-    //     refunded: "Cancelled",
-    //   };
-    //   filter.status = statusMap[status] || status;
-    // }
-
-    // // Date range filter
-    // const now = new Date();
-    // let dateFilter: DateFilter = {};
-
-    // switch (dateRange) {
-    //   case "today": {
-    //     const todayStart = new Date(now);
-    //     todayStart.setHours(0, 0, 0, 0);
-    //     const todayEnd = new Date(now);
-    //     todayEnd.setHours(23, 59, 59, 999);
-    //     dateFilter = { createdAt: { $gte: todayStart, $lte: todayEnd } };
-    //     break;
-    //   }
-
-    //   case "week": {
-    //     const weekStart = new Date(now);
-    //     weekStart.setDate(now.getDate() - now.getDay());
-    //     weekStart.setHours(0, 0, 0, 0);
-    //     dateFilter = { createdAt: { $gte: weekStart } };
-    //     break;
-    //   }
-
-    //   case "month": {
-    //     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    //     monthStart.setHours(0, 0, 0, 0);
-    //     dateFilter = { createdAt: { $gte: monthStart } };
-    //     break;
-    //   }
-
-    //   case "custom": {
-    //     if (startDate && endDate) {
-    //       const start = new Date(startDate);
-    //       start.setHours(0, 0, 0, 0);
-    //       const end = new Date(endDate);
-    //       end.setHours(23, 59, 59, 999);
-    //       dateFilter = { createdAt: { $gte: start, $lte: end } };
-    //     }
-    //     break;
-    //   }
-
-    //   default:
-    //     break;
-    // }
-
-    // if (Object.keys(dateFilter).length > 0) {
-    //   Object.assign(filter, dateFilter);
-    // }
-
-    // // Search filter
-    // let searchFilter: SearchFilter = {};
-    // if (search) {
-    //   const students = await Student.find({
-    //     $or: [
-    //       { name: { $regex: search, $options: "i" } },
-    //       { rollNumber: { $regex: search, $options: "i" } }
-    //     ]
-    //   }).select("_id");
-
-    //   const studentIds = students.map(s => s._id as mongoose.Types.ObjectId);
-
-    //   // Build search conditions array
-    //   const searchConditions: Array<Record<string, unknown>> = [];
-
-    //   // Add student search if we found matching students
-    //   if (studentIds.length > 0) {
-    //     searchConditions.push({ studentId: { $in: studentIds } });
-    //   }
-
-    //   // Only search by _id if it's a valid ObjectId (24 hex characters)
-    //   if (mongoose.Types.ObjectId.isValid(search) && search.length === 24) {
-    //     searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
-    //   }
-
-    //   // Only apply search filter if we have conditions
-    //   if (searchConditions.length > 0) {
-    //     searchFilter = { $or: searchConditions };
-    //   }
-    // }
-
-    // // Combine all filters
-    // const finalFilter = {
-    //   ...filter,
-    //   ...(Object.keys(searchFilter).length > 0 ? searchFilter : {})
-    // };
-
-    // // Calculate pagination
-    // const skip = (page - 1) * limit;
-    // const totalCount = await Transaction.countDocuments(finalFilter);
-    // const totalPages = Math.ceil(totalCount / limit);
-
-    // // Fetch transactions with populated data
-    // const transactions = await Transaction.aggregate<AggregatedTransaction>([
-    //   { $match: finalFilter },
-    //   { $sort: { createdAt: -1 } },
-    //   { $skip: skip },
-    //   { $limit: limit },
-
-    //   // Lookup student data
-    //   {
-    //     $lookup: {
-    //       from: "students",
-    //       localField: "studentId",
-    //       foreignField: "_id",
-    //       as: "student"
-    //     }
-    //   },
-    //   { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
-
-    //   // Process items array
-    //   {
-    //     $addFields: {
-    //       itemsWithDetails: {
-    //         $map: {
-    //           input: { $ifNull: ["$items", []] },
-    //           as: "item",
-    //           in: {
-    //             categoryId: "$$item.categoryId",
-    //             productId: "$$item.productId",
-    //             stockTransactionId: "$$item.stockTransactionId",
-    //             quantity: "$$item.quantity",
-    //             price: "$$item.price",
-    //             totalPrice: "$$item.totalPrice"
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // ]);
-
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "all";
     const startDate = searchParams.get("startDate"); // Already UTC ISO string from client
@@ -884,38 +731,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       };
     }
 
-    // // Search filter
-    // let searchFilter: SearchFilter = {};
-    // if (search) {
-    //   const students = await Student.find({
-    //     $or: [
-    //       { name: { $regex: search, $options: "i" } },
-    //       { rollNumber: { $regex: search, $options: "i" } },
-    //     ],
-    //   }).select("_id");
-
-    //   const studentIds = students.map((s) => s._id as mongoose.Types.ObjectId);
-    //   const searchConditions: Array<Record<string, unknown>> = [];
-
-    //   if (studentIds.length > 0) {
-    //     searchConditions.push({ studentId: { $in: studentIds } });
-    //   }
-
-    //   if (mongoose.Types.ObjectId.isValid(search) && search.length === 24) {
-    //     searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
-    //   }
-
-    //   if (searchConditions.length > 0) {
-    //     searchFilter = { $or: searchConditions };
-    //   }
-    // }
-
-    // const finalFilter = {
-    //   ...filter,
-    //   ...(Object.keys(searchFilter).length > 0 ? searchFilter : {}),
-    // };
-
-    // Search filter
+    // Search
     // let searchFilter: SearchFilter = {};
     let searchFilter: Record<string, unknown> = {};
     if (search) {
@@ -925,7 +741,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       const students = await Student.find({
         $or: [
-          { name: { $regex: trimmedSearch, $options: "i" } },           // ✅ partial match for name
+          { name: { $regex: trimmedSearch, $options:"i" } },           // ✅ partial match for name
           ...(isValidRollNumber ? [{ rollNumber: rollNumberAsInt }] : []) // ✅ case-insensitive exact
         ],
       }).select("_id");

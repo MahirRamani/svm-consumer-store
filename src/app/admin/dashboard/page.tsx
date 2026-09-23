@@ -9,8 +9,8 @@ import { getAccessibleTabs } from '@/lib/config/tabs-registry';
 
 export default function DashboardRedirect() {
   const router = useRouter();
-  const { allowedTabs, loading } = useUserPermissions();
-  const accessibleTabs = getAccessibleTabs(allowedTabs);
+  const { userAllowedTabs, loading } = useUserPermissions();
+  const accessibleTabs = getAccessibleTabs(userAllowedTabs);
 
   useEffect(() => {
     if (!loading && accessibleTabs.length > 0) {

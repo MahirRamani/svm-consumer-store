@@ -208,7 +208,7 @@ export default function RevertTransactionModal({
           <>
             {/* Warning Alert */}
             <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
                 <p className="font-medium">Warning: This action cannot be undone</p>
                 <p className="mt-1">
@@ -265,8 +265,8 @@ export default function RevertTransactionModal({
                     type="button"
                     onClick={() => handleRevertTypeChange('Full')}
                     className={`p-4 border-2 rounded-lg text-left transition-all ${revertType === 'Full'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <p className="font-medium text-gray-900">Full Revert</p>
@@ -278,8 +278,8 @@ export default function RevertTransactionModal({
                     type="button"
                     onClick={() => handleRevertTypeChange('Partial')}
                     className={`p-4 border-2 rounded-lg text-left transition-all ${revertType === 'Partial'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <p className="font-medium text-gray-900">Partial Revert</p>

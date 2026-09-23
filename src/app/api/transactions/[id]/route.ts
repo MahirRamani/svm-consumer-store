@@ -455,7 +455,6 @@ const createTransactionHandler = async (req: Request) => {
 export const POST = withErrorHandler(createTransactionHandler);
 
 // app/api/transactions/route.ts (add this GET handler)
-// import { Product } from '@/models';
 import { Category } from '@/models';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/config/db';

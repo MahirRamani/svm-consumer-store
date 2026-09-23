@@ -46,7 +46,7 @@ const TableSkeleton = ({ rows = 5, isMaster = false }: { rows?: number; isMaster
       <tr key={i} className="animate-pulse">
         <td className="px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 bg-gray-100 rounded-lg flex-shrink-0" />
+            <div className="h-8 w-8 bg-gray-100 rounded-lg shrink-0" />
             <div className="space-y-1.5">
               <div className="h-3.5 bg-gray-100 rounded w-28" />
               <div className="h-3 bg-gray-100 rounded w-20" />
@@ -315,7 +315,7 @@ export default function AccountsTab({ onSelectAccount }: AccountsTabProps) {
                         {/* Name */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${account.isActive ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
+                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${account.isActive ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
                               }`}>
                               {account.name.charAt(0).toUpperCase()}
                             </div>

@@ -11,6 +11,7 @@ import {
 import type { FilterQuery, Types } from 'mongoose';
 import { Category, Product } from '@/models';
 import { IStockTransaction } from '@/models/StockTransaction';
+import { MAX_EXPORT_ROWS } from '@/lib/constant';
 
 // =============================================
 // GET - List Stock Transactions
@@ -21,6 +22,7 @@ const getStockTransactionsHandler = async (req: Request) => {
 
   const query = validateQuery(req, getStockTransactionsQuerySchema);
   const { page, limit, sortBy, sortOrder, productId, categoryId, stockType, search } = query;
+  const isExport = query.export;
 
   const filter: FilterQuery<IStockTransaction> = {};
 
@@ -45,19 +47,29 @@ const getStockTransactionsHandler = async (req: Request) => {
     [sortBy]: sortOrder === 'desc' ? -1 : 1,
   };
 
+  let findQuery = StockTransaction.find(filter)
+    .sort(sort)
+    .populate('createdBy', 'username')
+    .populate('productId', 'name size imageURL')
+    .populate('categoryId', 'name')
+    .lean();
+
+  if (isExport) {
+    findQuery = findQuery.limit(MAX_EXPORT_ROWS);
+  } else {
+    findQuery = findQuery.skip((page - 1) * limit).limit(limit);
+  }
+
   const [transactions, totalCount] = await Promise.all([
-    StockTransaction.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .populate('createdBy', 'username')
-      .populate('productId', 'name size imageURL')
-      .populate('categoryId', 'name')
-      .lean(),
+    findQuery,
     StockTransaction.countDocuments(filter),
   ]);
 
-  return paginatedResponse('transactions', transactions, { page, limit, totalCount });
+  return paginatedResponse('transactions', transactions, {
+    page: isExport ? 1 : page,
+    limit: isExport ? transactions.length : limit,
+    totalCount
+  });
 };
 
 // =============================================

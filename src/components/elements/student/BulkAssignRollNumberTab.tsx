@@ -221,50 +221,50 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
   // );
 
   const handleAssignRolls = useCallback(
-  (dryRun: boolean) => {
-    if (!students) return;
+    (dryRun: boolean) => {
+      if (!students) return;
 
-    // Only students where user explicitly entered a new roll or standard
-    const changedStudents = students.filter((s) => {
-      const row = yearRows[s._id];
-      return row?.newRollNumber?.trim() || row?.newStandard?.trim();
-      });
-
-    if (changedStudents.length === 0) return;
-
-    const errors: Record<string, YearRowErrors> = {};
-
-    const filledRolls = changedStudents
-      .map((s) => yearRows[s._id]?.newRollNumber?.trim())
-      .filter(Boolean) as string[];
-
-    const dups = filledRolls.filter((r, i) => filledRolls.indexOf(r) !== i);
-
-    if (dups.length > 0) {
-      changedStudents.forEach((s) => {
-        if (dups.includes(yearRows[s._id]?.newRollNumber?.trim())) {
-          errors[s._id] = { ...errors[s._id], newRollNumber: "Duplicate in batch" };
-        }
-      });
-      setYearRowErrors(errors);
-      return;
-    }
-
-    assignRollsMutation.mutate({
-      dryRun,
-      students: changedStudents.map((s) => {
+      // Only students where user explicitly entered a new roll or standard
+      const changedStudents = students.filter((s) => {
         const row = yearRows[s._id];
-        return {
-          studentMongoId: s._id,                                              // ← from loaded list
-          ...(row?.newRollNumber?.trim() ? { rollNumber: Number(row.newRollNumber.trim()) } : {}),
-          ...(row?.newStandard?.trim()   ? { standard:  Number(row.newStandard.trim())   } : {}),
-        };
-      }),
-    });
-  },
-  [students, yearRows, assignRollsMutation]
+        return row?.newRollNumber?.trim() || row?.newStandard?.trim();
+      });
+
+      if (changedStudents.length === 0) return;
+
+      const errors: Record<string, YearRowErrors> = {};
+
+      const filledRolls = changedStudents
+        .map((s) => yearRows[s._id]?.newRollNumber?.trim())
+        .filter(Boolean) as string[];
+
+      const dups = filledRolls.filter((r, i) => filledRolls.indexOf(r) !== i);
+
+      if (dups.length > 0) {
+        changedStudents.forEach((s) => {
+          if (dups.includes(yearRows[s._id]?.newRollNumber?.trim())) {
+            errors[s._id] = { ...errors[s._id], newRollNumber: "Duplicate in batch" };
+          }
+        });
+        setYearRowErrors(errors);
+        return;
+      }
+
+      assignRollsMutation.mutate({
+        dryRun,
+        students: changedStudents.map((s) => {
+          const row = yearRows[s._id];
+          return {
+            studentMongoId: s._id,                                              // ← from loaded list
+            ...(row?.newRollNumber?.trim() ? { rollNumber: Number(row.newRollNumber.trim()) } : {}),
+            ...(row?.newStandard?.trim() ? { standard: Number(row.newStandard.trim()) } : {}),
+          };
+        }),
+      });
+    },
+    [students, yearRows, assignRollsMutation]
   );
-  
+
   const totalCount = students?.length ?? 0;
   const rollFilledCount = useMemo(
     () => Object.values(yearRows).filter((r) => r.newRollNumber?.trim()).length,
@@ -285,7 +285,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Header toolbar */}
-      <div className="px-3 py-3 border-b border-gray-100 bg-gray-50/50 flex-shrink-0 space-y-2">
+      <div className="px-3 py-3 border-b border-gray-100 bg-gray-50/50 shrink-0 space-y-2">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             {yearLoading ? (
@@ -307,7 +307,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
               <code className="bg-gray-100 px-1 rounded">Standard</code>. Blank roll = keeps current.
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={downloadTemplate} disabled={!students?.length}>
               <Download className="w-3.5 h-3.5" /> Template
             </Button>
@@ -349,7 +349,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-xs flex-shrink-0"
+                className="gap-1.5 text-xs shrink-0"
                 onClick={() => {
                   setSwapMode(true);
                   setSwapSelection([]);
@@ -359,7 +359,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
                 <ArrowLeftRight className="w-3.5 h-3.5" /> Swap Rolls
               </Button>
             ) : (
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <span
                   className={`text-xs font-medium px-2 py-1 rounded-full ${swapSelection.length === 0 ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"
                     }`}
@@ -381,7 +381,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
             )}
 
             {rollSearch && (
-              <span className="text-xs text-gray-400 flex-shrink-0">
+              <span className="text-xs text-gray-400 shrink-0">
                 {filteredStudents.length} / {students.length}
               </span>
             )}
@@ -392,7 +392,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
           <div>
             {excelStatus.error ? (
               <p className="text-xs text-red-500 flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {excelStatus.error}
               </p>
             ) : (
@@ -573,7 +573,7 @@ export function AssignRollsTab({ students, studentsLoading, activeYear, yearLoad
 
       {/* Footer */}
       {rollsPhase === "edit" && (
-        <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between shrink-0">
           <span className="text-xs text-gray-400">
             {rollFilledCount} / {totalCount} roll numbers filled
           </span>

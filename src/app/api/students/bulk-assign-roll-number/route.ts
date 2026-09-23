@@ -413,7 +413,6 @@ const assignRollsHandler = async (req: Request, authContext: AuthContext) => {
 
     if (isBulkWriteError) {
       const bulkErr = err as { writeErrors: Array<unknown> };
-      console.log('writeErrors:', JSON.stringify(bulkErr.writeErrors, null, 2));
 
       const conflicts = bulkErr.writeErrors
         .filter((e: any) => e.code === 11000)

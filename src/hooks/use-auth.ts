@@ -11,8 +11,6 @@ export function useAuth() {
     user: session?.user ? {
       id: session.user.id!,
       username: session.user.username,
-      email: session.user.email,
-      name: session.user.name,
       image: session.user.image,
       role: session.user.role,
       allowedTabs: session.user.allowedTabs,
@@ -32,8 +30,6 @@ export type UseAuthReturn = {
   user: {
     id: string;
     username?: string;
-    email?: string | null;
-    name?: string | null;
     image?: string | null;
     role?: AppRole;
     allowedTabs?: string[];

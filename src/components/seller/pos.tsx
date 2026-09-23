@@ -86,17 +86,16 @@ export default function PosPage() {
 
   return (
     // Add h-screen and overflow-hidden to lock viewport
-    <div className="h-screen overflow-hidden p-0 m-0">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 h-full">
+    <div className="h-screen overflow-hidden p-0 m-0 overflow-y-auto lg:overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 h-full">
         {/* Left Side - Add flex, h-full, overflow-hidden */}
-        <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
+        <div className="lg:col-span-3 flex h-auto lg:h-full overflow-hidden">
           <ProductNavigation onAddToCart={handleAddToCart} cartItems={cartItems} resetTrigger={navigationResetTrigger} />
         </div>
 
         {/* Right Side - Add flex, h-full, overflow-hidden */}
-        {/* Right Side - Add flex, h-full, overflow-hidden */}
-        <div className="lg:col-span-1 flex flex-col h-full overflow-hidden space-y-2">
-          {/* Student Lookup - stays fixed with flex-shrink-0 */}
+        <div className="lg:col-span-1 flex flex-col h-auto lg:h-full overflow-hidden space-y-2">
+          {/* Student Lookup - stays fixed with shrink-0 */}
           <div className="shrink-0">
             <StudentLookup
               selectedStudent={selectedStudent}
@@ -105,7 +104,7 @@ export default function PosPage() {
           </div>
 
           {/* Shopping Cart - takes remaining space, scrolls internally */}
-          <div className="flex-1 overflow-auto min-h-50">
+          <div className="flex-1 overflow-auto min-h-0">
             <ShoppingCart
               selectedStudent={selectedStudent}
               cartItems={cartItems}

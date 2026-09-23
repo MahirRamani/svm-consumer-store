@@ -47,6 +47,7 @@ export const getStockTransactionsQuerySchema = z.object({
   productId: objectIdSchema.optional(), // Changed from subProductId
   categoryId: objectIdSchema.optional(),
   stockType: z.enum(['Buy', 'Sell', 'Adjustment']).optional(),
+  export: z.stringbool().optional().default(false),
 });
 
 export type CreateStockTransactionDto = z.infer<typeof createStockTransactionSchema>;

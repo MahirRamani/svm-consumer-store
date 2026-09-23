@@ -33,21 +33,21 @@ function getDashboardForRole(role: string): string {
 function isValidCallbackForRole(callbackUrl: string, role: string): boolean {
   // SUPERUSER can access all routes
   if (role === 'SUPERUSER') return true;
-  
+
   // Check if callback matches user's role
-  if (callbackUrl.startsWith('/seller') && (role === 'SELLER'|| role === 'SUPERUSER')) return true;
+  if (callbackUrl.startsWith('/seller') && (role === 'SELLER' || role === 'SUPERUSER')) return true;
   if (callbackUrl.startsWith('/admin') && (role === 'ADMIN' || role === 'SUPERUSER')) return true;
   if (callbackUrl.startsWith('/accountant') && (role === 'ACCOUNTANT' || role === 'SUPERUSER')) return true;
   if (callbackUrl.startsWith('/user') && role === 'SUPERUSER') return true;
-  
+
   // If callback is a non-role-specific route, allow it
-  if (!callbackUrl.startsWith('/seller') && 
-      !callbackUrl.startsWith('/admin') && 
-      !callbackUrl.startsWith('/accountant') && 
-      !callbackUrl.startsWith('/user')) {
+  if (!callbackUrl.startsWith('/seller') &&
+    !callbackUrl.startsWith('/admin') &&
+    !callbackUrl.startsWith('/accountant') &&
+    !callbackUrl.startsWith('/user')) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -68,7 +68,7 @@ function LoginForm() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    
+
     try {
       const result = await signIn('credentials', {
         username: formData.username,
@@ -83,16 +83,16 @@ function LoginForm() {
         // Fetch session to get user role
         const sessionResponse = await fetch('/api/auth/session');
         const session = await sessionResponse.json();
-        
+
         if (session?.user?.role) {
           // Get the correct dashboard for user's role
           const userDashboard = getDashboardForRole(session.user.role);
-          
+
           // Use callbackUrl only if it's valid for this user's role
           const redirectTo = callbackUrl && isValidCallbackForRole(callbackUrl, session.user.role)
             ? callbackUrl
             : userDashboard;
-          
+
           router.push(redirectTo);
           router.refresh();
         } else {
@@ -107,17 +107,17 @@ function LoginForm() {
       setIsLoading(false);
     }
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (error) setError(null);
   };
-  
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - GIF/Image Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-600 via-purple-600 to-pink-500 items-center justify-center p-12 relative overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute inset-0 bg-black/10" />
         <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />

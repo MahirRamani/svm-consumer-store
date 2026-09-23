@@ -215,14 +215,14 @@ const TopProductCard = memo(({
 
       {!inCart && (
         <div className="absolute top-1.5 left-1.5 z-10">
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${index < 3 ? "bg-gradient-to-br from-yellow-400 to-orange-500" : "bg-gray-400"
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${index < 3 ? "bg-linear-to-br from-yellow-400 to-orange-500" : "bg-gray-400"
             }`}>
             {index + 1}
           </div>
         </div>
       )}
 
-      <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+      <div className="relative h-24 bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
         {topProduct.imageURL ? (
           <img
             src={topProduct.imageURL}
@@ -951,7 +951,7 @@ export default function ProductNavigation({
       >
         {renderInCartBadge(product._id)}
 
-        <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="relative h-24 bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
           {product.imageURL ? (
             <img
               src={product.imageURL}
@@ -1126,8 +1126,8 @@ export default function ProductNavigation({
   // Render Breadcrumb with Search
   // =============================================
   const renderBreadcrumb = () => (
-    <Card className="mb-1 p-2">
-      <CardContent className="py-0 px-4">
+    <Card className="p-2">
+      <CardContent className="">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
           <Breadcrumb>
             <BreadcrumbList>
@@ -1304,7 +1304,7 @@ export default function ProductNavigation({
   const renderTopSellingProducts = () => {
     if (topSellingLoading) {
       return (
-        <div className="mt-6">
+        <div className="mt-3">
           <div className="flex items-center gap-2 mb-3">
             <Flame className="w-5 h-5 text-orange-500" />
             <h3 className="text-lg font-bold text-gray-900">Top Selling Products</h3>
@@ -1322,10 +1322,10 @@ export default function ProductNavigation({
     }
 
     return (
-      <div className="mt-6">
+      <div className="mt-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-orange-400 to-red-500 flex items-center justify-center">
               <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -1380,8 +1380,8 @@ export default function ProductNavigation({
   // =============================================
   const renderCategories = () => (
     <div>
-      <div className="mb-3">
-        <h2 className="text-xl font-bold text-gray-900">Category</h2>
+      <div className="mb-1">
+        <h2 className="text-lg font-semibold text-gray-900">Category</h2>
       </div>
       <div className="grid grid-cols-1 min-[350px]:grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
         {categories.map((category) => {
@@ -1443,6 +1443,7 @@ export default function ProductNavigation({
           <p className="text-gray-600">No categories found</p>
         </div>
       )}
+      <div className="mt-2 border-t"></div>
 
       {renderTopSellingProducts()}
     </div>
@@ -1487,7 +1488,7 @@ export default function ProductNavigation({
                 const isRefreshing = refreshingStocks.has(product._id);
                 return (
                   <div key={product._id} className="bg-white border rounded-lg overflow-hidden opacity-60">
-                    <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
+                    <div className="relative h-28 bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
                       {product.imageURL ? (
                         <img
                           src={product.imageURL}
@@ -1561,13 +1562,13 @@ export default function ProductNavigation({
     // Change from space-y-3 to flex column with full height
     <div className="flex flex-col h-full overflow-hidden">
       {/* Breadcrumb - sticky/frozen at top */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {renderBreadcrumb()}
       </div>
 
       {/* Scrollable content area */}
-      <Card className="flex-1 overflow-hidden p-0 mt-1">
-        <CardContent className="p-4 h-full overflow-y-auto">
+      <Card className="flex-1 overflow-hidden p-0">
+        <CardContent className="p-3 h-full overflow-y-auto">
           {renderContent()}
         </CardContent>
       </Card>

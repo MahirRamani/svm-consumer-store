@@ -69,7 +69,7 @@ export default function BulkStudentUpdateModal({ open, onOpenChange }: Props) {
           without each tab needing its own reset logic.
         */}
         <Tabs key={open ? "open" : "closed"} defaultValue="bulk-add" className="flex flex-col flex-1 min-h-0 gap-0">
-          <div className="px-3 pt-2 pb-0 border-b border-gray-100 flex-shrink-0">
+          <div className="px-3 pt-2 pb-0 border-b border-gray-100 shrink-0">
             <DialogTitle className="text-lg font-semibold mb-3">Student Management</DialogTitle>
             <TabsList>
               <TabsTrigger value="bulk-add" className="gap-1.5 text-sm">

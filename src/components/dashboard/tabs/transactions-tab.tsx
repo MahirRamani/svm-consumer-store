@@ -12,7 +12,6 @@ import {
   Search,
   Download,
   Loader2,
-  Calendar,
   X,
   RotateCcw,
 } from "lucide-react";
@@ -433,7 +432,7 @@ export default function TransactionsTab() {
       </div>
 
       {/* Filters */}
-      <Card className="py-3.5">
+      <Card className="py-3">
         <CardContent className="px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search with Button */}
@@ -514,10 +513,10 @@ export default function TransactionsTab() {
               </div>
 
               {filters.dateRange === "custom" && (
+                //NOTE: Input uses "YYYY-MM-DD" date format
                 <>
                   <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
-                    //NOTE: Input uses "YYYY-MM-DD" date format
                     <Input type="date" value={filters.startDate}
                       onChange={(e) => updateFilter("startDate", e.target.value)}
                       max={filters.endDate || TODAY}
@@ -540,12 +539,14 @@ export default function TransactionsTab() {
       </Card>
 
       {/* Transactions Table */}
-      <Card className="pt-3.5 pb-0 gap-0">
+      <Card className="pt-3 pb-0 gap-0">
         <CardHeader className="py-0">
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
             Recent Transactions
             {pagination && (
-              <span className="ml-2 text-sm font-normal text-gray-500">({pagination.totalCount} total)</span>
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                ({pagination.totalCount} total)
+              </span>
             )}
             {isFetching && !isLoading && (
               <Loader2 className="w-4 h-4 animate-spin ml-2 text-blue-500" />

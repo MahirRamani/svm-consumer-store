@@ -326,7 +326,7 @@ export default function AddStockEntryModal({
           </div>
 
           {/* Profit Analysis */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+          <div className="bg-linear-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
             <h3 className="font-semibold text-gray-900 mb-3">Profit Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white p-3 rounded-lg shadow-sm">

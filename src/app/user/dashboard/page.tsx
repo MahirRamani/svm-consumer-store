@@ -11,12 +11,12 @@ import { getAccessibleTabs, hasTabAccess, type TabId } from '@/lib/config/tabs-r
 import { signOut } from 'next-auth/react';
 
 export default function Dashboard() {
-  const { allowedTabs, loading, error } = useUserPermissions();
+  const { userAllowedTabs, loading, error } = useUserPermissions();
   const [activeTab, setActiveTab] = useState<TabId | null>(null);
   const router = useRouter();
 
   // Get tabs user can access
-  const accessibleTabs = getAccessibleTabs(allowedTabs);
+  const accessibleTabs = getAccessibleTabs(userAllowedTabs);
 
   // Set first accessible tab as active
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   // Handle tab change
   const handleTabChange = (tabId: TabId) => {
-    if (hasTabAccess(tabId, allowedTabs)) {
+    if (hasTabAccess(tabId, userAllowedTabs)) {
       setActiveTab(tabId);
     }
   };
@@ -125,11 +125,10 @@ export default function Dashboard() {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-3 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap transition-colors ${
-                  isActive
+                className={`py-3 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap transition-colors ${isActive
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 {/* <Icon className="w-4 h-4" /> */}
                 <span>{tab.label}</span>

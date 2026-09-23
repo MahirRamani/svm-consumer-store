@@ -67,8 +67,8 @@ export default function AddCategoryModal({ open, onOpenChange }: AddCategoryModa
           if (num < 0) {
             return "Priority must be a positive number";
           }
-          if (num > 999999) {
-            return "Priority must be less than 1,000,000";
+          if (num > 1000) {
+            return "Priority must be less than or equal to 1,001";
           }
         }
         break;

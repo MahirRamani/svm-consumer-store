@@ -202,7 +202,7 @@ function SortableHeader<K extends string>({
     >
       <div className={`flex items-center gap-1.5 ${alignClass}`}>
         <span>{label}</span>
-        <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-indigo-400" : "text-gray-300"}`} />
+        <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-indigo-400" : "text-gray-300"}`} />
       </div>
     </th>
   );
@@ -221,7 +221,7 @@ interface StatChipProps {
 
 const StatChip = ({ icon, label, value, accent = "#6366f1" }: StatChipProps) => (
   <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-100 bg-white shadow-sm min-w-0">
-    <div className="rounded-lg p-1.5 flex-shrink-0" style={{ background: `${accent}18` }}>
+    <div className="rounded-lg p-1.5 shrink-0" style={{ background: `${accent}18` }}>
       <span style={{ color: accent }} className="block [&>svg]:w-4 [&>svg]:h-4">{icon}</span>
     </div>
     <div className="min-w-0">
@@ -839,7 +839,7 @@ export default function InventoryReportDashboard() {
             </div>
 
             {/* Right: compact stat chips */}
-            <div className="flex flex-row xl:flex-col gap-2 flex-shrink-0">
+            <div className="flex flex-row xl:flex-col gap-2 shrink-0">
               {isLoading ? (
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Loader2 className="w-4 h-4 animate-spin" /> Loading…
@@ -924,7 +924,7 @@ export default function InventoryReportDashboard() {
                             <td className="px-6 py-3.5 font-medium text-gray-900">
                               <div className="flex items-center gap-2">
                                 <ChevronDown
-                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                  className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
                                     }`}
                                 />
                                 {row.productName}
@@ -1038,7 +1038,7 @@ export default function InventoryReportDashboard() {
                             <td className="px-6 py-3.5 font-medium text-gray-900">
                               <div className="flex items-center gap-2">
                                 <ChevronDown
-                                  className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                  className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
                                     }`}
                                 />
                                 {row.productName}

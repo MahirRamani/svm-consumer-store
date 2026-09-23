@@ -1,10 +1,11 @@
 // hooks/use-user-permissions.ts
 import { useState, useEffect } from 'react';
 import type { TabId } from '@/lib/config/tabs-registry';
+import { UserRole } from '@/types';
 
 interface UserPermissionsResponse {
-  allowedTabs: TabId[];
-  userRole: 'ADMIN' | 'SELLER' | string;
+  userAllowedTabs: TabId[];
+  userRole: UserRole;
   loading: boolean;
   error: Error | null;
 }
@@ -14,9 +15,8 @@ interface UserPermissionsResponse {
  * Fetches user info from /api/users/me endpoint
  */
 export function useUserPermissions(): UserPermissionsResponse {
-  const [allowedTabs, setAllowedTabs] = useState<TabId[]>([]);
-  // const [userRole, setUserRole] = useState<'ADMIN' | 'SELLER' | string>('');
-  const [userRole, setUserRole] = useState<string>('');
+  const [userAllowedTabs, setUserAllowedTabs] = useState<TabId[]>([]);
+  const [userRole, setUserRole] = useState<UserRole>({} as UserRole);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -37,14 +37,14 @@ export function useUserPermissions(): UserPermissionsResponse {
         
         // Handle your API response structure
         // Based on your successResponse format: { success: true, data: {...} }
-        const userData = result.data || result;
+        const user = result.data || result;
         
         // Extract role and allowed tabs
-        const role = userData.role || '';
-        const tabs = userData.allowedTabs || [];
+        const role = user.role || '';
+        const tabs = user.allowedTabs || [];
         
         setUserRole(role);
-        setAllowedTabs(tabs);
+        setUserAllowedTabs(tabs);
       } catch (err) {
         console.error('Error fetching user permissions:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -57,7 +57,7 @@ export function useUserPermissions(): UserPermissionsResponse {
   }, []);
 
   return {
-    allowedTabs,
+    userAllowedTabs,
     userRole,
     loading,
     error,

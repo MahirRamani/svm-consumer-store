@@ -128,7 +128,7 @@ export default function UserList({ users, isLoading = false }: UserListProps) {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="pl-6 w-[160px]">Username</TableHead>
+                  <TableHead className="pl-6 w-40">Username</TableHead>
                   <TableHead className="w-[130px]">Role</TableHead>
                   <TableHead>Permissions</TableHead>
                   <TableHead className="pr-6 w-[100px] text-right">Actions</TableHead>

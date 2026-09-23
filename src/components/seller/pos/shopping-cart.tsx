@@ -1,13 +1,12 @@
-// components/admin/pos/shopping-cart.tsx
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart as ShoppingCartIcon, Plus, Minus, Trash2, CreditCard, Loader2 } from 'lucide-react';
+import { ShoppingCartIcon , Plus, Minus, Trash2, CreditCard, Loader2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import SuccessModal from '@/components/modals/success-modal';
 import ConfirmationModal from '@/components/modals/confirmation-modal';
@@ -38,6 +37,107 @@ interface CreateTransactionPayload {
   items: TransactionItem[];
   performedBy: ObjectId;
 }
+
+interface CartItemRowProps {
+  item: CartItem;
+  isEditing: boolean;
+  editingValue: string;
+  onUpdateQuantity: (id: string, qty: number) => void;
+  onRemoveItem: (id: string) => void;
+  onQuantityClick: (item: CartItem) => void;
+  onQuantityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onQuantityBlur: (item: CartItem) => void;
+  onQuantityKeyPress: (e: React.KeyboardEvent, item: CartItem) => void;
+}
+
+const CartItemRow = memo(({
+  item,
+  isEditing,
+  editingValue,
+  onUpdateQuantity,
+  onRemoveItem,
+  onQuantityClick,
+  onQuantityChange,
+  onQuantityBlur,
+  onQuantityKeyPress,
+}: CartItemRowProps) => {
+  const itemId = item.productId;
+
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {item.imageURL ? (
+          <img
+            src={item.imageURL}
+            alt={item.name}
+            className="w-10 h-10 rounded object-cover shrink-0"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        ) : (
+          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center shrink-0">
+            <Package className="w-5 h-5 text-gray-400" /> // ✅ fixed icon
+          </div>
+        )}
+        <div className="min-w-0">
+          <h4 className="font-medium text-sm text-gray-900 truncate">{item.name}</h4>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-gray-500">₹{item.price.toFixed(2)} each</p>
+            {item.size && (
+              <Badge variant="outline" className="text-xs px-1 py-0">{item.size}</Badge>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline" size="sm"
+          onClick={() => onUpdateQuantity(itemId, item.quantity - 1)}
+          disabled={item.quantity <= 1}
+          className="w-6 h-6 p-0"
+        >
+          <Minus className="w-3 h-3" />
+        </Button>
+
+        {isEditing ? (
+          <Input
+            type="text"
+            value={editingValue}
+            onChange={onQuantityChange}
+            onBlur={() => onQuantityBlur(item)}
+            onKeyDown={(e) => onQuantityKeyPress(e, item)}
+            className="w-12 h-6 text-center text-sm p-1"
+            autoFocus
+          />
+        ) : (
+          <span
+            className="text-sm font-medium w-8 text-center cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5"
+            onClick={() => onQuantityClick(item)}
+            title="Click to edit quantity"
+          >
+            {item.quantity}
+          </span>
+        )}
+
+        <Button
+          variant="outline" size="sm"
+          onClick={() => onUpdateQuantity(itemId, item.quantity + 1)}
+          disabled={item.quantity >= item.stock}
+          className="w-6 h-6 p-0"
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+        <Button
+          variant="ghost" size="sm"
+          onClick={() => onRemoveItem(itemId)}
+          className="text-red-500 hover:text-red-600 w-6 h-6 p-0 ml-2"
+        >
+          <Trash2 className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+});
+
 
 export default function ShoppingCart({
   selectedStudent,
@@ -237,94 +337,20 @@ export default function ShoppingCart({
                   <p className="text-sm">Add products to get started</p>
                 </div>
               ) : (
-                cartItems.map((item) => {
-                  const itemId = getItemId(item);
-                  const isEditing = editingItemId === itemId;
-
-                  return (
-                    <div
-                      key={itemId}
-                      className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {item.imageURL ? (
-                          <img
-                            src={item.imageURL}
-                            alt={item.name}
-                            className="w-10 h-10 rounded object-cover shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center shrink-0">
-                            <ShoppingCartIcon className="w-5 h-5 text-gray-400" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <h4 className="font-medium text-sm text-gray-900 truncate">{item.name}</h4>
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs text-gray-500">₹{item.price.toFixed(2)} each</p>
-                            {item.size && (
-                              <Badge variant="outline" className="text-xs px-1 py-0">
-                                {item.size}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onUpdateQuantity(itemId, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                          className="w-6 h-6 p-0"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-
-                        {isEditing ? (
-                          <Input
-                            type="text"
-                            value={editingValue}
-                            onChange={handleQuantityChange}
-                            onBlur={() => handleQuantityBlur(item)}
-                            onKeyDown={(e) => handleQuantityKeyPress(e, item)}
-                            className="w-12 h-6 text-center text-sm p-1"
-                            autoFocus
-                          />
-                        ) : (
-                          <span
-                            className="text-sm font-medium w-8 text-center cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5"
-                            onClick={() => handleQuantityClick(item)}
-                            title="Click to edit quantity"
-                          >
-                            {item.quantity}
-                          </span>
-                        )}
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onUpdateQuantity(itemId, item.quantity + 1)}
-                          disabled={item.quantity >= item.stock}
-                          className="w-6 h-6 p-0"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onRemoveItem(itemId)}
-                          className="text-red-500 hover:text-red-600 w-6 h-6 p-0 ml-2"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })
+                cartItems.map((item) => (
+                  <CartItemRow
+                    key={item.productId}
+                    item={item}
+                    isEditing={editingItemId === item.productId}
+                    editingValue={editingValue}
+                    onUpdateQuantity={onUpdateQuantity}
+                    onRemoveItem={onRemoveItem}
+                    onQuantityClick={handleQuantityClick}
+                    onQuantityChange={handleQuantityChange}
+                    onQuantityBlur={handleQuantityBlur}
+                    onQuantityKeyPress={handleQuantityKeyPress}
+                  />
+                ))
               )}
             </div>
           </div>

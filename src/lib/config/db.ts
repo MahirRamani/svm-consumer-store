@@ -53,7 +53,7 @@ async function dbConnect() {
 
 export default dbConnect;
 
-
+//NOTE - 
 // // import mongoose from 'mongoose'
 
 // // const MONGODB_URI = process.env.MONGODB_URI

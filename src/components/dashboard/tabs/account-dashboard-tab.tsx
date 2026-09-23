@@ -31,7 +31,7 @@ function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
 
           return (
             <span key={i} className="flex items-center gap-1">
-              {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />}
+              {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />}
 
               {item.active ? (
                 // Current page — not clickable, full color

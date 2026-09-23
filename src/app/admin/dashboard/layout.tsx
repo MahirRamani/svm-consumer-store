@@ -5,15 +5,15 @@ import { Store, Bell, LogOut, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUserPermissions } from '@/hooks/use-user-permissions';
-import { getAccessibleTabs, hasTabAccess } from '@/lib/config/tabs-registry';
+import { getAccessibleTabs, hasTabAccess, TabId } from '@/lib/config/tabs-registry';
 import { signOut } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { allowedTabs, loading, error } = useUserPermissions();
+  const { userRole, userAllowedTabs, loading, error } = useUserPermissions();
   const pathname = usePathname();
   const router = useRouter();
-  const accessibleTabs = getAccessibleTabs(allowedTabs);
+  const accessibleTabs = getAccessibleTabs(userAllowedTabs);
 
   const handleLogout = async () => {
     await signOut({
@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleTabChange = (tabId: string) => {
-    if (hasTabAccess(tabId as any, allowedTabs)) {
+    if (hasTabAccess(tabId as TabId, userAllowedTabs)) {
       router.push(`/admin/dashboard/${tabId}`);
     }
   };
@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No Access</AlertTitle>
           <AlertDescription>
-            You don&apos;t have permission to access any tabs. Contact your administrator.
+            You don&apos;t have jjpermission to access any tabs. Contact your administrator.
           </AlertDescription>
           <Button onClick={handleLogout} className="mt-4" size="sm">
             Logout
@@ -78,13 +78,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-gray-50">
       {/* Header - persists across tab changes */}
       <header className="bg-white shadow-sm border-b">
-        <div className="px-4 py-3 flex items-center justify-between">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="bg-blue-500 text-white w-10 h-10 rounded-lg flex items-center justify-center">
               <Store className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-xl font-bold text-gray-900">{ } Dashboard</h1>
               <p className="text-sm text-gray-600">Consumer Store Management</p>
             </div>
           </div>

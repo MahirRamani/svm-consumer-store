@@ -70,8 +70,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Build filter query
     const filter: StockReportFilter = {};
 
-    // Product filter (takes precedence over category)
-    if (productId && productId !== "all") {
+    // Product (takes precedence over category)
+    if (productId && productId !=="all") {
       filter.productId = new mongoose.Types.ObjectId(productId);
     }
     // NEW: Category filter (only if no specific product is selected)

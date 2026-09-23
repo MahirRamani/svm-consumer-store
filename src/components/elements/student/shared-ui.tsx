@@ -50,7 +50,7 @@ export function ErrorBlock({ message }: { message: string }) {
   return (
     <div className="mt-2 rounded-md border border-red-200 bg-red-50">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-red-200">
-        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+        <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
         <span className="text-sm font-medium text-red-700">
           {errors.length} conflict{errors.length !== 1 ? "s" : ""} found - {sentence}
         </span>
@@ -127,7 +127,7 @@ export function ReportView({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className={`px-6 py-4 border-b flex-shrink-0 ${mode === "preview" ? "bg-amber-50 border-amber-100" : "border-gray-100"}`}>
+      <div className={`px-6 py-4 border-b shrink-0 ${mode === "preview" ? "bg-amber-50 border-amber-100" : "border-gray-100"}`}>
         <div className="flex items-center gap-2">
           {mode === "preview" ? (
             <AlertCircle className="w-5 h-5 text-amber-500" />
@@ -178,7 +178,7 @@ export function ReportView({
         ))}
       </div>
 
-      <div className="px-6 py-3 border-t border-gray-100 flex-shrink-0 flex justify-between items-center">
+      <div className="px-6 py-3 border-t border-gray-100 shrink-0 flex justify-between items-center">
         {mode === "preview" ? (
           <>
             <Button variant="outline" size="sm" onClick={onBack} disabled={isConfirming}>
