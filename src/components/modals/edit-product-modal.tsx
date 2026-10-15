@@ -299,7 +299,7 @@ export default function EditProductModal({
         fd.append("publicId", publicId);
       }
 
-      const response = await fetch("/api/products/upload-image", {
+      const response = await fetch("/api/products/upload-file", {
         method: isReplacing ? "PUT" : "POST",
         body: fd,
       });
@@ -337,7 +337,7 @@ export default function EditProductModal({
         .replace(/\.[^/.]+$/, "")
         .replace(/^v\d+\//, "");
 
-      await fetch("/api/products/upload-image", {
+      await fetch("/api/products/upload-file", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ publicId }),
