@@ -29,13 +29,13 @@ import type {
   Product,
   ProductFormData,
   ProductFormErrors,
-  ImageUploadResponse,
 } from "@/lib/types/product";
 import type {
   Category,
   CategoriesResponse
 } from "@/types/seller/category";
 import { ApiResponse } from '@/lib/api/base-handler';
+import { uploadFile, updateFile } from '@/lib/utils/upload-file';
 
 interface EditProductModalProps {
   open: boolean;
@@ -279,41 +279,70 @@ export default function EditProductModal({
   //   }
   // };
 
+  // const uploadImage = useCallback(async (): Promise<string | null> => {
+  //   if (!imageFile) return null;
+  //   setIsUploading(true);
+
+  //   try {
+  //     const fd = new FormData();
+  //     fd.append("image", imageFile);
+  //     if (imageName.trim()) fd.append("imageName", imageName.trim());
+
+  //     // If replacing an existing image, use PUT with the existing publicId
+  //     const isReplacing = !!currentImageUrl;
+  //     if (isReplacing) {
+  //       // Cloudinary public_id is the URL path between /upload/ and the extension
+  //       const publicId = currentImageUrl
+  //         .split("/upload/")[1]         // "v123/folder/name.jpg"
+  //         .replace(/\.[^/.]+$/, "")     // "v123/folder/name"
+  //         .replace(/^v\d+\//, "");      // "folder/name"
+  //       fd.append("publicId", publicId);
+  //     }
+
+  //     const response = await fetch("/api/upload-file", {
+  //       method: isReplacing ? "PUT" : "POST",
+  //       body: fd,
+  //     });
+
+  //     const result: ImageUploadResponse = await response.json();
+  //     if (!result.success) throw new Error(result.error || "Upload failed");
+  //     return result.data!.secure_url;
+  //   } catch (error) {
+  //     toast.error(error instanceof Error ? error.message : "Upload failed");
+  //     throw error;
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // }, [imageFile, imageName]);
+
+  const getPublicId = (url: string) =>
+    url.split("/upload/")[1]
+      ?.replace(/\.[^/.]+$/, "")
+      .replace(/^v\d+\//, "") ?? "";
+
   const uploadImage = useCallback(async (): Promise<string | null> => {
     if (!imageFile) return null;
     setIsUploading(true);
-
     try {
-      const fd = new FormData();
-      fd.append("image", imageFile);
-      if (imageName.trim()) fd.append("imageName", imageName.trim());
-
-      // If replacing an existing image, use PUT with the existing publicId
-      const isReplacing = !!currentImageUrl;
-      if (isReplacing) {
-        // Cloudinary public_id is the URL path between /upload/ and the extension
-        const publicId = currentImageUrl
-          .split("/upload/")[1]         // "v123/folder/name.jpg"
-          .replace(/\.[^/.]+$/, "")     // "v123/folder/name"
-          .replace(/^v\d+\//, "");      // "folder/name"
-        fd.append("publicId", publicId);
-      }
-
-      const response = await fetch("/api/upload-file", {
-        method: isReplacing ? "PUT" : "POST",
-        body: fd,
-      });
-
-      const result: ImageUploadResponse = await response.json();
-      if (!result.success) throw new Error(result.error || "Upload failed");
-      return result.data!.secure_url;
+      const result = currentImageUrl
+        ? await updateFile({
+          file: imageFile,
+          context: 'product',
+          publicId: getPublicId(currentImageUrl),
+        })
+        : await uploadFile({
+          file: imageFile,
+          context: 'product',
+          fileName: imageName,
+        });
+      return result.secure_url;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
       throw error;
     } finally {
       setIsUploading(false);
     }
-  }, [imageFile, imageName]);
+  }, [imageFile, imageName, currentImageUrl]); // currentImageUrl was missing
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

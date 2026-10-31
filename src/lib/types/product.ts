@@ -130,21 +130,6 @@ export interface ProductFormErrors {
 }
 
 // =============================================
-// Image Upload Types
-// =============================================
-export interface ImageUploadResponse {
-  success: boolean;
-  data?: {
-    secure_url: string;
-    public_id: string;
-    width: number;
-    height: number;
-    format: string;
-  };
-  error?: string;
-}
-
-// =============================================
 // Utility Types
 // =============================================
 export type ProductSortField = 'name' | 'priority' | 'createdAt' | 'size';

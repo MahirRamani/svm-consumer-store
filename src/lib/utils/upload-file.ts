@@ -70,6 +70,36 @@ export const uploadFile = async ({
 };
 
 // ============================================================
+// UPDATE
+// ============================================================
+export const updateFile = async ({
+  file,
+  context,
+  publicId,
+}: {
+  file: File;
+  context: UploadContext;
+  publicId: string;
+}): Promise<UploadResult> => {
+  const fd = new globalThis.FormData();
+  fd.append("file", file);
+  fd.append("context", context);
+  fd.append("publicId", publicId);
+
+  const response = await fetch("/api/upload-file", {
+    method: "PUT",
+    body: fd,
+  });
+
+  const result = await response.json();
+  if (!response.ok || !result.success || !result.data) {
+    throw new Error(result.error || "Update failed");
+  }
+
+  return result.data;
+};
+
+// ============================================================
 // DELETE
 // ============================================================
 export const deleteFile = async (

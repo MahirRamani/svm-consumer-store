@@ -26,7 +26,6 @@ import { useCreateProduct } from '@/hooks/use-product-mutations';
 import type {
   ProductFormData,
   ProductFormErrors,
-  ImageUploadResponse,
 } from "@/lib/types/product";
 import type {
   Category,
@@ -380,26 +379,26 @@ export default function AddProductModal({
   // }, [formData, imageFile, validateForm, createMutation, onOpenChange, uploadImage]);
 
   const uploadImage = useCallback(async (): Promise<{
-  secure_url: string;
-  public_id: string;
-} | null> => {
-  if (!imageFile) return null;
-  setIsUploading(true);
-  try {
-    const result = await uploadFile({
-      file: imageFile,
-      context: 'product',
-      fileName: imageName,
-    });
-    return result; // returns { secure_url, public_id, ... }
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : "Upload failed");
-    throw error;
-  } finally {
-    setIsUploading(false);
-  }
+    secure_url: string;
+    public_id: string;
+  } | null> => {
+    if (!imageFile) return null;
+    setIsUploading(true);
+    try {
+      const result = await uploadFile({
+        file: imageFile,
+        context: 'product',
+        fileName: imageName,
+      });
+      return result; // returns { secure_url, public_id, ... }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
   }, [imageFile, imageName]);
-  
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
